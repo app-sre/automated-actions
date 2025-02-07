@@ -21,3 +21,9 @@ build:
 .PHONY: dev-env
 dev-env:
 	uv sync
+
+.PHONY: generate-client
+generate-client:
+	@./app.sh & echo $$! > app.pid
+	openapi-python-client generate --url http://localhost:8080/docs/openapi.json --meta none --output-path automated_actions_client/automated_actions_client --overwrite
+	@kill `cat app.pid` && rm app.pid

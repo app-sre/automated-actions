@@ -39,6 +39,9 @@ Run the tests suite via:
 make tests
 ```
 
+[Api docs](http://localhost:8080/redoc)
+[Swagger](http://localhost:8080/doc)
+
 ## License
 
 This project is licensed under the terms of the [Apache 2.0 license](/LICENSE).

@@ -1,7 +1,7 @@
 [project]
-name = "automated-actions"
+name = "automated-actions-cli"
 version = "0.1.0"
-description = "Automated Actions Server"
+description = "Automated Actions Client"
 authors = [
     # Feel free to add or change authors
     { name = "AppSRE", email = "sd-app-sre@redhat.com" },
@@ -10,58 +10,38 @@ license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.12.0"
 dependencies = [
-    "celery[sqs]>=5.4.0",
-    "fastapi>=0.115.8",
-    "prometheus-fastapi-instrumentator>=7.0.2",
-    "pydantic>=2.10.6",
+    "automated-actions-client",
     "pydantic-settings>=2.7.1",
-    "uvicorn>=0.34.0",
+    "rich>=13.9.4",
+    "typer>=0.15.1",
 ]
+
 
 [tool.uv.sources]
 automated-actions-client = { workspace = true }
-automated-actions-cli = { workspace = true }
-
-[tool.uv.workspace]
-members = ["automated_actions_client", "automated_actions_cli"]
 
 [project.urls]
 homepage = "https://github.com/app-sre/automated-actions"
 repository = "https://github.com/app-sre/automated-actions"
 documentation = "https://github.com/app-sre/automated-actions"
 
-[dependency-groups]
-dev = [
-    # Development dependencies
-    "ruff ~=0.9",
-    "mypy ~=1.13",
-    "pytest ~=8.2.0",
-    "pytest-cov ~=6.0.0",
-    "openapi-python-client>=0.23.1",
-    "automated-actions-client",
-    "automated-actions-cli",
-]
+[project.scripts]
+automated-actions = 'automated_actions_cli.__main__:app'
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
-only-include = ["automated_actions"]
+only-include = ["automated_actions_cli"]
 
 [tool.hatch.build.targets.wheel]
-only-include = ["automated_actions"]
+only-include = ["automated_actions_cli"]
 
 # Ruff configuration
 [tool.ruff]
 line-length = 88
-src = ["automated_actions"]
-extend-exclude = [
-    # exclude some common cache and tmp directories
-    ".local",
-    ".cache",
-    "tmp",
-]
+src = ["automated_actions_cli"]
 fix = true
 
 [tool.ruff.lint]
@@ -106,15 +86,16 @@ ignore = [
     "COM819",
     "ISC001",
 ]
+
 [tool.ruff.format]
 preview = true
 
 [tool.ruff.lint.isort]
-known-first-party = ["automated_actions"]
+known-first-party = ["automated_actions_cli"]
 
 # Mypy configuration
 [tool.mypy]
-files = ["automated_actions", "tests"]
+files = ["automated_actions_cli", "tests"]
 enable_error_code = ["truthy-bool", "redundant-expr"]
 no_implicit_optional = true
 check_untyped_defs = true
@@ -126,7 +107,7 @@ disallow_incomplete_defs = true
 [[tool.mypy.overrides]]
 # Below are all of the packages that don't implement stub packages. Mypy will throw an error if we don't ignore the
 # missing imports. See: https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
-module = ["celery.*"]
+module = ["todo"]
 ignore_missing_imports = true
 
 # Coverage configuration
