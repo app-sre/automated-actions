@@ -47,4 +47,4 @@ RUN make test
 #
 FROM base AS prod
 COPY --from=builder /opt/app-root /opt/app-root
-ENTRYPOINT [ "automated_actions" ]
+ENTRYPOINT [ "./app.sh" ]

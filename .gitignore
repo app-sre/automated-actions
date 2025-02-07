@@ -136,3 +136,6 @@ cython_debug/
 
 # temp dirs
 tmp/
+
+# local dev settings
+settings.conf
