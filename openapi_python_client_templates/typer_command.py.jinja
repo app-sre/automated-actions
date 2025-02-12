@@ -1,0 +1,74 @@
+from typing import Annotated
+from rich import print as rich_print
+
+import typer
+app = typer.Typer()
+
+
+{% if parsed_responses %}
+@app.command(help="{{ endpoint.description }}")
+
+def {{endpoint.name}}(
+    ctx: typer.Context,
+
+{# required fields from path and query_params #}
+{% for parameter in endpoint.path_parameters + endpoint.query_parameters if parameter.required %}
+    {{ parameter.python_name }}: Annotated[{{parameter.get_type_string(no_optional=True, quoted=True)}},
+        typer.Option(help="""
+            {{parameter.description or ''}}
+            {% if parameter.example %}
+                Example: {{parameter.example}}
+            {% endif %}
+        """) ],
+{% endfor %}
+
+{# required fields from body #}
+{% for body in endpoint.bodies %}
+    {% for model in openapi.models if model.class_info.name == body.prop.get_type_string() %}
+        {% for prop in model.required_properties %}
+            {{ prop.name }}: Annotated[{{ prop.get_type_string(no_optional=True, quoted=True) }}, typer.Option(help="{{ prop.description or '' }}")],
+        {% endfor %}
+    {% endfor %}
+{% endfor %}
+
+{# optional fields from body #}
+{% for body in endpoint.bodies %}
+    {% for model in openapi.models if model.class_info.name == body.prop.get_type_string() %}
+        {% for prop in model.optional_properties %}
+            {{ prop.name }}: Annotated[{{ prop.get_type_string(no_optional=True, quoted=True) }}, typer.Option(help="{{ prop.description or '' }}") ] {% if prop.default %} ={{prop.default.python_code}}{% endif %},
+        {% endfor %}
+    {% endfor %}
+{% endfor %}
+
+
+{# optional fields from path and query_params #}
+{% for parameter in endpoint.path_parameters + endpoint.query_parameters if not parameter.required %}
+    {{ parameter.python_name }}: Annotated[{{parameter.get_type_string(no_optional=True, quoted=True)}},
+    typer.Option(help="""
+        {{parameter.description or ''}}
+    """) ]  ={{parameter.default}},
+{% endfor %}
+
+) -> None:
+    rich_print(sync(
+        {% for parameter in endpoint.path_parameters %}
+            {{ parameter.python_name }}={{ parameter.python_name }},
+        {% endfor %}
+
+        {% for parameter in endpoint.query_parameters %}
+            {{ parameter.python_name }}={{ parameter.python_name }},
+        {% endfor %}
+
+        {% for body in endpoint.bodies %}
+            {% for model in openapi.models if model.class_info.name == body.prop.get_type_string() %}
+                body= {{ model.class_info.name }}(
+                    {% for prop in model.required_properties + model.optional_properties %}
+                        {{ prop.name }}={{ prop.name }},
+                    {% endfor %}
+                ),
+            {% endfor %}
+        {% endfor %}
+
+        client=ctx.obj["client"]
+    ))
+{% endif %}

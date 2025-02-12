@@ -21,7 +21,7 @@ UVICORN_OPTS="${UVICORN_OPTS} --port ${APP_PORT}"
 # this also ensures prometheus metrics are working
 CELERY_OPTS="${AA_CELERY_OPTS:- --pool solo}"
 
-if [ -n "${AA_DEBUG}" ]; then
+if [[ "${AA_DEBUG}" == "1" ]]; then
     UVICORN_OPTS="${UVICORN_OPTS} --reload"
 fi
 

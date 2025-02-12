@@ -1,0 +1,10 @@
+
+{% for endpoint in endpoint_collection.endpoints %}
+from . import {{ python_identifier(endpoint.name) }}
+{% endfor %}
+
+__all__ = [
+{% for endpoint in endpoint_collection.endpoints %}
+"{{python_identifier(endpoint.name)}}",
+{% endfor %}
+]
