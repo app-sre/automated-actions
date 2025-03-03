@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from pydantic_settings import BaseSettings
 
 
@@ -23,15 +21,11 @@ class Settings(BaseSettings):
     retries: int | None = None
     retry_delay: int = 10
 
-    # cache config
+    # db config
     dynamodb_url: str = "http://localhost:4566"
     dynamodb_aws_region: str = "us-east-1"
     dynamodb_aws_access_key_id: str = "localstack"
     dynamodb_aws_secret_access_key: str = "localstack"  # noqa: S105
-    cache_table_name: str = "gjb"
-    cache_ttl: int = int(timedelta(hours=2).total_seconds())
-    limits_table_name: str = "limits"
-    issues_per_project_limit: int = 10
 
     # worker metrics config
     worker_metrics_port: int = 8000

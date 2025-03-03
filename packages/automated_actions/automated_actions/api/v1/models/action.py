@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class Action(BaseModel):
+class ActionSchemaOut(BaseModel):
     id: str

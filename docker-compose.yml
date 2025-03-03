@@ -1,0 +1,65 @@
+services:
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - SERVICES=${SERVICES:-sqs,dynamodb}
+      - PERSISTENCE=${PERSISTENCE:-0}
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./.localstack_volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ./localstack:/etc/localstack/init/ready.d
+    # networks:
+    #   - qontract-development
+
+  # gjb:
+  #   restart: always
+  #   env_file:
+  #     - settings.conf
+  #   environment:
+  #     - GJB_BROKER_URL=sqs://localstack:4566
+  #     - GJB_SQS_URL=http://localstack:4566/000000000000/app-interface
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: prod
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - localstack
+  #   volumes:
+  #     - ./glitchtip_jira_bridge:/opt/app-root/src/glitchtip_jira_bridge
+  #   networks:
+  #     - qontract-development
+
+  # worker:
+  #   restart: always
+  #   env_file:
+  #     - settings.conf
+  #   environment:
+  #     - GJB_START_MODE=worker
+  #     - GJB_BROKER_URL=sqs://localstack:4566
+  #     - GJB_SQS_URL=http://localstack:4566/000000000000/app-interface
+  #     - GJB_DYNAMODB_URL=http://localstack:4566
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: prod
+  #   ports:
+  #     - "8001:8001"
+  #   depends_on:
+  #     - localstack
+  #   volumes:
+  #     - ./glitchtip_jira_bridge:/opt/app-root/src/glitchtip_jira_bridge
+  #   networks:
+  #     - qontract-development
+
+# networks:
+#   qontract-development:
+#     external: true
+#     name: qontract-development

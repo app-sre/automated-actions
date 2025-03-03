@@ -15,6 +15,7 @@ dependencies = [
     "prometheus-fastapi-instrumentator>=7.0.2",
     "pydantic>=2.10.6",
     "pydantic-settings>=2.7.1",
+    "pynamodb>=6.0.2",
     "uvicorn>=0.34.0",
 ]
 
@@ -70,6 +71,7 @@ ignore = [
     "D103",    # Missing docstring in public function
     "D104",    # Missing docstring in public package
     "D105",    # Missing docstring in magic method
+    "D106",    # Missing docstring in nested public class
     "D107",    # Missing docstring in __init__
     "D203",    # 1 blank line required before class docstring
     "D211",    # No blank lines allowed before class docstring

@@ -53,7 +53,7 @@ def main(
         rich_print(f"Screen recording: {screen_capture_file}")
         # strip $0 and screen_capture_file option
         args = sys.argv[3:]
-        console.print(f"$ qd {' '.join(args)}")
+        console.print(f"$ automated-actions {' '.join(args)}")
         # title = command sub_command
         title = " ".join(args[0:2])
         atexit.register(

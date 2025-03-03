@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from automated_actions.api import router
+from automated_actions.api.models.base import ALL_TABLES
 from automated_actions.config import settings
 from automated_actions.dependencies import api_key_auth
 
@@ -58,6 +59,10 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:  # noqa: RUF029
     """Startup and shutdown events."""
     logging.config.dictConfig(logging_config)
     log.info("Starting Automated Actions")
+    for table in ALL_TABLES:
+        # create pynamodb tables
+        if not table.exists():
+            table.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
     yield
     log.info("Shutting down Automated Actions")
 
