@@ -6,29 +6,31 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
-from ...models.user_schema_out import UserSchemaOut
+from ...models.task_schema_out import TaskSchemaOut
+from ...models.task_status import TaskStatus
 from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
-    pk: str,
     *,
-    q: None | Unset | str = UNSET,
+    status: None | TaskStatus | Unset = TaskStatus.RUNNING,
 ) -> dict[str, Any]:
     params: dict[str, Any] = {}
 
-    json_q: None | Unset | str
-    if isinstance(q, Unset):
-        json_q = UNSET
+    json_status: None | Unset | str
+    if isinstance(status, Unset):
+        json_status = UNSET
+    elif isinstance(status, TaskStatus):
+        json_status = status.value
     else:
-        json_q = q
-    params["q"] = json_q
+        json_status = status
+    params["status"] = json_status
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": f"/api/v1/foobar/{pk}",
+        "url": "/api/v1/tasks",
         "params": params,
     }
 
@@ -37,9 +39,14 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> HTTPValidationError | UserSchemaOut | None:
+) -> HTTPValidationError | list["TaskSchemaOut"] | None:
     if response.status_code == 200:
-        response_200 = UserSchemaOut.from_dict(response.json())
+        response_200 = []
+        _response_200 = response.json()
+        for response_200_item_data in _response_200:
+            response_200_item = TaskSchemaOut.from_dict(response_200_item_data)
+
+            response_200.append(response_200_item)
 
         return response_200
     if response.status_code == 422:
@@ -54,7 +61,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | UserSchemaOut]:
+) -> Response[HTTPValidationError | list["TaskSchemaOut"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -64,30 +71,27 @@ def _build_response(
 
 
 def sync_detailed(
-    pk: str,
     *,
     client: AuthenticatedClient | Client,
-    q: None | Unset | str = UNSET,
-) -> Response[HTTPValidationError | UserSchemaOut]:
-    """Run Foobar
+    status: None | TaskStatus | Unset = TaskStatus.RUNNING,
+) -> Response[HTTPValidationError | list["TaskSchemaOut"]]:
+    """Task List
 
-     Run a foobar action
+     List all user tasks.
 
     Args:
-        pk (str):
-        q (Union[None, Unset, str]):
+        status (Union[None, TaskStatus, Unset]):  Default: TaskStatus.RUNNING.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, UserSchemaOut]]
+        Response[Union[HTTPValidationError, list['TaskSchemaOut']]]
     """
 
     kwargs = _get_kwargs(
-        pk=pk,
-        q=q,
+        status=status,
     )
 
     with client as _client:
@@ -99,59 +103,53 @@ def sync_detailed(
 
 
 def sync(
-    pk: str,
     *,
     client: AuthenticatedClient | Client,
-    q: None | Unset | str = UNSET,
-) -> HTTPValidationError | UserSchemaOut | None:
-    """Run Foobar
+    status: None | TaskStatus | Unset = TaskStatus.RUNNING,
+) -> HTTPValidationError | list["TaskSchemaOut"] | None:
+    """Task List
 
-     Run a foobar action
+     List all user tasks.
 
     Args:
-        pk (str):
-        q (Union[None, Unset, str]):
+        status (Union[None, TaskStatus, Unset]):  Default: TaskStatus.RUNNING.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, UserSchemaOut]
+        Union[HTTPValidationError, list['TaskSchemaOut']]
     """
 
     return sync_detailed(
-        pk=pk,
         client=client,
-        q=q,
+        status=status,
     ).parsed
 
 
 async def asyncio_detailed(
-    pk: str,
     *,
     client: AuthenticatedClient | Client,
-    q: None | Unset | str = UNSET,
-) -> Response[HTTPValidationError | UserSchemaOut]:
-    """Run Foobar
+    status: None | TaskStatus | Unset = TaskStatus.RUNNING,
+) -> Response[HTTPValidationError | list["TaskSchemaOut"]]:
+    """Task List
 
-     Run a foobar action
+     List all user tasks.
 
     Args:
-        pk (str):
-        q (Union[None, Unset, str]):
+        status (Union[None, TaskStatus, Unset]):  Default: TaskStatus.RUNNING.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, UserSchemaOut]]
+        Response[Union[HTTPValidationError, list['TaskSchemaOut']]]
     """
 
     kwargs = _get_kwargs(
-        pk=pk,
-        q=q,
+        status=status,
     )
 
     async with client as _client:
@@ -163,32 +161,29 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    pk: str,
     *,
     client: AuthenticatedClient | Client,
-    q: None | Unset | str = UNSET,
-) -> HTTPValidationError | UserSchemaOut | None:
-    """Run Foobar
+    status: None | TaskStatus | Unset = TaskStatus.RUNNING,
+) -> HTTPValidationError | list["TaskSchemaOut"] | None:
+    """Task List
 
-     Run a foobar action
+     List all user tasks.
 
     Args:
-        pk (str):
-        q (Union[None, Unset, str]):
+        status (Union[None, TaskStatus, Unset]):  Default: TaskStatus.RUNNING.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, UserSchemaOut]
+        Union[HTTPValidationError, list['TaskSchemaOut']]
     """
 
     return (
         await asyncio_detailed(
-            pk=pk,
             client=client,
-            q=q,
+            status=status,
         )
     ).parsed
 
@@ -201,24 +196,16 @@ from rich import print as rich_print
 app = typer.Typer()
 
 
-@app.command(help="Run a foobar action")
-def foobar(
+@app.command(help="List all user tasks.")
+def task_list(
     ctx: typer.Context,
-    pk: Annotated[
-        str,
-        typer.Option(
-            help="""
-            
-        """
-        ),
-    ],
-    q: Annotated[
-        None | str,
+    status: Annotated[
+        None | TaskStatus,
         typer.Option(
             help="""
         
     """
         ),
-    ] = None,
+    ] = TaskStatus.RUNNING,
 ) -> None:
-    rich_print(sync(pk=pk, q=q, client=ctx.obj["client"]))
+    rich_print(sync(status=status, client=ctx.obj["client"]))

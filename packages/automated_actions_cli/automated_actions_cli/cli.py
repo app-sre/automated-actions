@@ -1,23 +1,28 @@
 import atexit
+import contextlib
 import importlib
 import logging
 import sys
+from http.cookiejar import MozillaCookieJar
 from importlib.metadata import version
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
+import httpx
 import typer
 from automated_actions_client import Client
+from automated_actions_client.api.v1.me import sync as api_v1_me
+from httpx_gssapi import OPTIONAL, HTTPSPNEGOAuth
 from rich import print as rich_print
 from rich.console import Console
-from rich.logging import RichHandler
 
 from automated_actions_cli.commands import test
 from automated_actions_cli.config import config
 
-app = typer.Typer()
+app = typer.Typer(pretty_exceptions_show_locals=False)
 app.add_typer(test.app, name="env", help="test related commands.")
 
+logger = logging.getLogger(__name__)
 
 console = Console(record=True)
 
@@ -26,6 +31,32 @@ def version_callback(*, value: bool) -> None:
     if value:
         rich_print(f"Version: {version('automated-actions-cli')}")
         raise typer.Exit
+
+
+class ClientWithCookieJar(Client):
+    def get_httpx_client(self) -> httpx.Client:
+        """Get the underlying httpx.Client, constructing a new one if not previously set"""
+        if self._client is None:
+            self._cookiejar = MozillaCookieJar(filename=config.cookies_file)
+            with contextlib.suppress(FileNotFoundError):
+                self._cookiejar.load()
+
+            self._client = httpx.Client(
+                base_url=self._base_url,
+                cookies=self._cookiejar,
+                headers=self._headers,
+                timeout=self._timeout,
+                verify=self._verify_ssl,
+                follow_redirects=self._follow_redirects,
+                **self._httpx_args,
+            )
+        return self._client
+
+    def __exit__(self, *args: object, **kwargs: Any) -> None:
+        # persist cookies
+        self._cookiejar.save()
+        super().__exit__(*args, **kwargs)
+        self._client = None
 
 
 @app.callback(no_args_is_help=True)
@@ -41,14 +72,21 @@ def main(
     logging.basicConfig(
         level="DEBUG" if config.debug or debug else "INFO",
         format="%(name)-20s: %(message)s",
-        datefmt="[%X]",
-        handlers=[RichHandler()],
     )
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     ctx.obj = {
-        "client": Client(
-            base_url="http://localhost:8080", raise_on_unexpected_status=True
+        "client": ClientWithCookieJar(
+            base_url=str(config.url),
+            raise_on_unexpected_status=True,
+            follow_redirects=True,
+            httpx_args={
+                "auth": HTTPSPNEGOAuth(mutual_authentication=OPTIONAL),
+            },
         )
     }
+    # enforce the user to login
+    api_v1_me(client=ctx.obj["client"])
+
     if screen_capture_file is not None:
         rich_print(f"Screen recording: {screen_capture_file}")
         # strip $0 and screen_capture_file option

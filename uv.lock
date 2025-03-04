@@ -46,6 +46,15 @@ wheels = [
 ]
 
 [[package]]
+name = "appdirs"
+version = "1.4.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41", size = 13470 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3b/00/2344469e2084fb287c2e0b57b72910309874c3245463acd6cf5e3db69324/appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128", size = 9566 },
+]
+
+[[package]]
 name = "attrs"
 version = "25.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -61,9 +70,12 @@ source = { editable = "packages/automated_actions" }
 dependencies = [
     { name = "celery", extra = ["sqs"] },
     { name = "fastapi" },
+    { name = "httpx" },
+    { name = "itsdangerous" },
     { name = "prometheus-fastapi-instrumentator" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "pyjwt" },
     { name = "pynamodb" },
     { name = "uvicorn" },
 ]
@@ -81,9 +93,12 @@ dev = [
 requires-dist = [
     { name = "celery", extras = ["sqs"], specifier = ">=5.4.0" },
     { name = "fastapi", specifier = ">=0.115.8" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "itsdangerous", specifier = ">=2.2.0" },
     { name = "prometheus-fastapi-instrumentator", specifier = ">=7.0.2" },
     { name = "pydantic", specifier = ">=2.10.6" },
     { name = "pydantic-settings", specifier = ">=2.7.1" },
+    { name = "pyjwt", specifier = ">=2.10.1" },
     { name = "pynamodb", specifier = ">=6.0.2" },
     { name = "uvicorn", specifier = ">=0.34.0" },
 ]
@@ -102,7 +117,9 @@ name = "automated-actions-cli"
 version = "0.1.0"
 source = { editable = "packages/automated_actions_cli" }
 dependencies = [
+    { name = "appdirs" },
     { name = "automated-actions-client" },
+    { name = "httpx-gssapi" },
     { name = "pydantic-settings" },
     { name = "rich" },
     { name = "typer" },
@@ -118,7 +135,9 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "appdirs", specifier = ">=1.4.4" },
     { name = "automated-actions-client", editable = "packages/automated_actions_client" },
+    { name = "httpx-gssapi", specifier = ">=0.4" },
     { name = "pydantic-settings", specifier = ">=2.7.1" },
     { name = "rich", specifier = ">=13.9.4" },
     { name = "typer", specifier = ">=0.15.1" },
@@ -446,6 +465,8 @@ sdist = { url = "https://files.pythonhosted.org/packages/04/2f/fcffb772a00e658f6
 wheels = [
     { url = "https://files.pythonhosted.org/packages/98/f1/76477c66aa9f2abc9ab53f936e9085402d6697db93834437e5ee651e5106/gssapi-1.9.0-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:b66a98827fbd2864bf8993677a039d7ba4a127ca0d2d9ed73e0ef4f1baa7fd7f", size = 698148 },
     { url = "https://files.pythonhosted.org/packages/96/34/b737e2a46efc63c6a6ad3baf0f3a8484d7698e673874b060a7d52abfa7b4/gssapi-1.9.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:2bddd1cc0c9859c5e0fd96d4d88eb67bd498fdbba45b14cdccfe10bfd329479f", size = 681597 },
+    { url = "https://files.pythonhosted.org/packages/71/4b/4cbb8b6bc34ed02591e05af48bd4722facb99b10defc321e3b177114dbeb/gssapi-1.9.0-cp312-cp312-win32.whl", hash = "sha256:10134db0cf01bd7d162acb445762dbcc58b5c772a613e17c46cf8ad956c4dfec", size = 770295 },
+    { url = "https://files.pythonhosted.org/packages/c1/73/33a65e9d6c5ea43cdb1ee184b201678adaf3a7bbb4f7a1c7a80195c884ac/gssapi-1.9.0-cp312-cp312-win_amd64.whl", hash = "sha256:e28c7d45da68b7e36ed3fb3326744bfe39649f16e8eecd7b003b082206039c76", size = 867625 },
 ]
 
 [[package]]
@@ -483,6 +504,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/b1/df/48c586a5fe32a0f01324ee087459e112ebb7224f646c0b5023f5e79e9956/httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc", size = 141406 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad", size = 73517 },
+]
+
+[[package]]
+name = "httpx-gssapi"
+version = "0.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "gssapi" },
+    { name = "httpx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/01/9d/c38bfc48c367196f01f83a816d0898c2b486a6b7ff7d0efd81c18055633d/httpx_gssapi-0.4.tar.gz", hash = "sha256:8c9a4fa526484c1323c0a4436ef1198f34c0f1d6dde0973ea38f960d51e16ef0", size = 36237 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a2/47/6bd7237627c9f2a28ef7562318c9336753f61faaf27bfaf8122cb98a3cdc/httpx_gssapi-0.4-py3-none-any.whl", hash = "sha256:ea390c62015d3b58e594936af75b3fbf6421e53e334d587db76623f2f07c93e8", size = 11848 },
 ]
 
 [[package]]
@@ -526,6 +560,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/9c/69/ca3abe63b1a7296ff2b8cb173e69283abf5f235268c393b48fe355918aba/iterfzf-1.4.0.54.3-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:6c32312ce5599d84600d920b0db8986cf10b20e4b9fdb2aee5df6b67cc646d27", size = 1545488 },
     { url = "https://files.pythonhosted.org/packages/81/9c/c94bf804b1c18024810ee3ebc4528faec4cedef18824776b9f3a37ad13fa/iterfzf-1.4.0.54.3-py3-none-win_amd64.whl", hash = "sha256:8385d45359d6c392b10095d179f0b2857f64b33eba55e1b6a34eb5d82320377f", size = 1763502 },
     { url = "https://files.pythonhosted.org/packages/6c/24/42c53c9df027b630e54276e03d54d0ab80b4ecf425b9f74e1591765e54a6/iterfzf-1.4.0.54.3-py3-none-win_arm64.whl", hash = "sha256:bf78d55832e172fe7bce451f3b68becde28412a192f7161ca7bd2313bd5e842f", size = 1626719 },
+]
+
+[[package]]
+name = "itsdangerous"
+version = "2.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9c/cb/8ac0172223afbccb63986cc25049b154ecfb5e85932587206f42317be31d/itsdangerous-2.2.0.tar.gz", hash = "sha256:e0050c0b7da1eea53ffaf149c0cfbb5c6e2e2b69c4bef22c81fa6eb73e5f6173", size = 54410 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/04/96/92447566d16df59b2a776c0fb82dbc4d9e07cd95062562af01e408583fc4/itsdangerous-2.2.0-py3-none-any.whl", hash = "sha256:c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef", size = 16234 },
 ]
 
 [[package]]
@@ -822,6 +865,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/7c/2d/c3338d48ea6cc0feb8446d8e6937e1408088a72a39937982cc6111d17f84/pygments-2.19.1.tar.gz", hash = "sha256:61c16d2a8576dc0649d9f39e089b5f02bcd27fba10d8fb4dcc28173f7a45151f", size = 4968581 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8a/0b/9fcc47d19c48b59121088dd6da2488a49d5f72dacf8262e2790a1d2c7d15/pygments-2.19.1-py3-none-any.whl", hash = "sha256:9ea1544ad55cecf4b8242fab6dd35a93bbce657034b0611ee383099054ab6d8c", size = 1225293 },
+]
+
+[[package]]
+name = "pyjwt"
+version = "2.10.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/46/bd74733ff231675599650d3e47f361794b22ef3e3770998dda30d3b63726/pyjwt-2.10.1.tar.gz", hash = "sha256:3cc5772eb20009233caf06e9d8a0577824723b44e6648ee0a2aedb6cf9381953", size = 87785 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/61/ad/689f02752eeec26aed679477e80e632ef1b682313be70793d798c1d5fc8f/PyJWT-2.10.1-py3-none-any.whl", hash = "sha256:dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb", size = 22997 },
 ]
 
 [[package]]

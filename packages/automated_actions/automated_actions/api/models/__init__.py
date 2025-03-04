@@ -1,3 +1,18 @@
-from .base import Table
+from pynamodb.models import Model
 
-__all__ = ["Table"]
+from ._base import Table
+from ._task import Task, TaskSchemaIn, TaskSchemaOut, TaskStatus
+from ._user import User, UserSchemaOut
+
+ALL_TABLES: list[type[Model]] = [User, Task]
+
+__all__ = [
+    "ALL_TABLES",
+    "Table",
+    "Task",
+    "TaskSchemaIn",
+    "TaskSchemaOut",
+    "TaskStatus",
+    "User",
+    "UserSchemaOut",
+]

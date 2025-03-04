@@ -10,7 +10,9 @@ license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.12.0"
 dependencies = [
+    "appdirs>=1.4.4",
     "automated-actions-client",
+    "httpx-gssapi>=0.4",
     "pydantic-settings>=2.7.1",
     "rich>=13.9.4",
     "typer>=0.15.1",
@@ -57,6 +59,7 @@ fix = true
 preview = true
 select = ["ALL"]
 ignore = [
+    "ANN401",  # allow ANY
     "CPY",     # Missing copyright header
     "D100",    # Missing docstring in public module
     "D101",    # Missing docstring in public class
@@ -105,12 +108,19 @@ known-first-party = ["automated_actions_cli"]
 [tool.mypy]
 files = ["automated_actions_cli"]
 enable_error_code = ["truthy-bool", "redundant-expr"]
+plugins = ["pydantic.mypy"]
 no_implicit_optional = true
 check_untyped_defs = true
 warn_unused_ignores = true
 show_error_codes = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+# Below are all of the packages that don't implement stub packages. Mypy will throw an error if we don't ignore the
+# missing imports. See: https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+module = ["appdirs.*", "httpx_gssapi.*"]
+ignore_missing_imports = true
 
 # Coverage configuration
 [tool.coverage.run]

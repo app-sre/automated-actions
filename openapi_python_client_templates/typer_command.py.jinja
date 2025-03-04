@@ -46,7 +46,7 @@ def {{endpoint.name}}(
     {{ parameter.python_name }}: Annotated[{{parameter.get_type_string(no_optional=True, quoted=True)}},
     typer.Option(help="""
         {{parameter.description or ''}}
-    """) ]  ={{parameter.default}},
+    """) ]  = {% if parameter.default %}{{parameter.default.python_code}}{% else %}None{% endif %},
 {% endfor %}
 
 ) -> None:

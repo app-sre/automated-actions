@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     dynamodb_aws_access_key_id: str = "localstack"
     dynamodb_aws_secret_access_key: str = "localstack"  # noqa: S105
 
+    # OIDC config
+    oidc_issuer: str = "https://auth.redhat.com/auth/realms/EmployeeIDP"
+    oidc_client_id: str
+    oidc_client_secret: str
+    session_secret: str
+    app_interface_role_prefix: str = "ai-"
+
     # worker metrics config
     worker_metrics_port: int = 8000
 

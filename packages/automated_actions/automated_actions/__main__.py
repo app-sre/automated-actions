@@ -6,15 +6,17 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from importlib.metadata import version
 
-from fastapi import APIRouter, Depends, FastAPI, Request, status
+from fastapi import APIRouter, FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
-
+from fastapi.exception_handlers import (
+    http_exception_handler,
+    request_validation_exception_handler,
+)
 from automated_actions.api import router
-from automated_actions.api.models.base import ALL_TABLES
+from automated_actions.api.models import ALL_TABLES
 from automated_actions.config import settings
-from automated_actions.dependencies import api_key_auth
 
 HOSTNAME = socket.gethostname()
 default_router = APIRouter()
@@ -36,6 +38,10 @@ logging_config = {
         },
     },
     "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "automated-actions": {
         "handlers": ["console"],
         "level": "DEBUG" if settings.debug else "INFO",
     },
@@ -67,7 +73,6 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:  # noqa: RUF029
     log.info("Shutting down Automated Actions")
 
 
-dependencies = [] if settings.debug else [Depends(api_key_auth)]
 app = FastAPI(
     title="Automated Actions",
     description="Run automated actions",
@@ -79,7 +84,7 @@ app = FastAPI(
 )
 # no auth for healthz check
 app.include_router(default_router)
-app.include_router(router, prefix="/api", dependencies=dependencies)
+app.include_router(router, prefix="/api")
 instrumentator = Instrumentator(
     excluded_handlers=[
         "/metrics",

@@ -6,30 +6,16 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
-from ...models.user_schema_out import UserSchemaOut
-from ...types import UNSET, Response, Unset
+from ...models.task_schema_out import TaskSchemaOut
+from ...types import Response
 
 
 def _get_kwargs(
     pk: str,
-    *,
-    q: None | Unset | str = UNSET,
 ) -> dict[str, Any]:
-    params: dict[str, Any] = {}
-
-    json_q: None | Unset | str
-    if isinstance(q, Unset):
-        json_q = UNSET
-    else:
-        json_q = q
-    params["q"] = json_q
-
-    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
     _kwargs: dict[str, Any] = {
-        "method": "get",
-        "url": f"/api/v1/foobar/{pk}",
-        "params": params,
+        "method": "post",
+        "url": f"/api/v1/tasks/{pk}",
     }
 
     return _kwargs
@@ -37,11 +23,11 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> HTTPValidationError | UserSchemaOut | None:
-    if response.status_code == 200:
-        response_200 = UserSchemaOut.from_dict(response.json())
+) -> HTTPValidationError | TaskSchemaOut | None:
+    if response.status_code == 202:
+        response_202 = TaskSchemaOut.from_dict(response.json())
 
-        return response_200
+        return response_202
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -54,7 +40,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | UserSchemaOut]:
+) -> Response[HTTPValidationError | TaskSchemaOut]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -67,27 +53,24 @@ def sync_detailed(
     pk: str,
     *,
     client: AuthenticatedClient | Client,
-    q: None | Unset | str = UNSET,
-) -> Response[HTTPValidationError | UserSchemaOut]:
-    """Run Foobar
+) -> Response[HTTPValidationError | TaskSchemaOut]:
+    """Task Cancel
 
-     Run a foobar action
+     Cancel an action.
 
     Args:
         pk (str):
-        q (Union[None, Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, UserSchemaOut]]
+        Response[Union[HTTPValidationError, TaskSchemaOut]]
     """
 
     kwargs = _get_kwargs(
         pk=pk,
-        q=q,
     )
 
     with client as _client:
@@ -102,28 +85,25 @@ def sync(
     pk: str,
     *,
     client: AuthenticatedClient | Client,
-    q: None | Unset | str = UNSET,
-) -> HTTPValidationError | UserSchemaOut | None:
-    """Run Foobar
+) -> HTTPValidationError | TaskSchemaOut | None:
+    """Task Cancel
 
-     Run a foobar action
+     Cancel an action.
 
     Args:
         pk (str):
-        q (Union[None, Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, UserSchemaOut]
+        Union[HTTPValidationError, TaskSchemaOut]
     """
 
     return sync_detailed(
         pk=pk,
         client=client,
-        q=q,
     ).parsed
 
 
@@ -131,27 +111,24 @@ async def asyncio_detailed(
     pk: str,
     *,
     client: AuthenticatedClient | Client,
-    q: None | Unset | str = UNSET,
-) -> Response[HTTPValidationError | UserSchemaOut]:
-    """Run Foobar
+) -> Response[HTTPValidationError | TaskSchemaOut]:
+    """Task Cancel
 
-     Run a foobar action
+     Cancel an action.
 
     Args:
         pk (str):
-        q (Union[None, Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, UserSchemaOut]]
+        Response[Union[HTTPValidationError, TaskSchemaOut]]
     """
 
     kwargs = _get_kwargs(
         pk=pk,
-        q=q,
     )
 
     async with client as _client:
@@ -166,29 +143,26 @@ async def asyncio(
     pk: str,
     *,
     client: AuthenticatedClient | Client,
-    q: None | Unset | str = UNSET,
-) -> HTTPValidationError | UserSchemaOut | None:
-    """Run Foobar
+) -> HTTPValidationError | TaskSchemaOut | None:
+    """Task Cancel
 
-     Run a foobar action
+     Cancel an action.
 
     Args:
         pk (str):
-        q (Union[None, Unset, str]):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, UserSchemaOut]
+        Union[HTTPValidationError, TaskSchemaOut]
     """
 
     return (
         await asyncio_detailed(
             pk=pk,
             client=client,
-            q=q,
         )
     ).parsed
 
@@ -201,8 +175,8 @@ from rich import print as rich_print
 app = typer.Typer()
 
 
-@app.command(help="Run a foobar action")
-def foobar(
+@app.command(help="Cancel an action.")
+def task_cancel(
     ctx: typer.Context,
     pk: Annotated[
         str,
@@ -212,13 +186,5 @@ def foobar(
         """
         ),
     ],
-    q: Annotated[
-        None | str,
-        typer.Option(
-            help="""
-        
-    """
-        ),
-    ] = None,
 ) -> None:
-    rich_print(sync(pk=pk, q=q, client=ctx.obj["client"]))
+    rich_print(sync(pk=pk, client=ctx.obj["client"]))

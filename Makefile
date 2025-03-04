@@ -39,9 +39,11 @@ kill-uvicorn:
 generate-client: kill-uvicorn
 	@./app.sh &
 	@sleep 3
+	@rm -rf packages/automated_actions_client/automated_actions_client
 	openapi-python-client generate \
 		--url http://localhost:8080/docs/openapi.json \
 		--meta none --output-path packages/automated_actions_client/automated_actions_client \
 		--custom-template-path=openapi_python_client_templates \
 		--overwrite
+	@touch packages/automated_actions_client/automated_actions_client/py.typed
 	@make kill-uvicorn
