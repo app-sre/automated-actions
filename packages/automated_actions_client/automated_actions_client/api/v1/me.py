@@ -131,7 +131,6 @@ async def asyncio(
 
 
 import typer
-from rich import print as rich_print
 
 app = typer.Typer()
 
@@ -140,4 +139,6 @@ app = typer.Typer()
 def me(
     ctx: typer.Context,
 ) -> None:
-    rich_print(sync(client=ctx.obj["client"]))
+    result = sync(client=ctx.obj["client"])
+    if "console" in ctx.obj:
+        ctx.obj["console"].print(result)

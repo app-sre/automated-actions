@@ -191,7 +191,6 @@ async def asyncio(
 from typing import Annotated
 
 import typer
-from rich import print as rich_print
 
 app = typer.Typer()
 
@@ -199,13 +198,8 @@ app = typer.Typer()
 @app.command(help="List all user tasks.")
 def task_list(
     ctx: typer.Context,
-    status: Annotated[
-        None | TaskStatus,
-        typer.Option(
-            help="""
-        
-    """
-        ),
-    ] = TaskStatus.RUNNING,
+    status: Annotated[None | TaskStatus, typer.Option(help="")] = TaskStatus.RUNNING,
 ) -> None:
-    rich_print(sync(status=status, client=ctx.obj["client"]))
+    result = sync(status=status, client=ctx.obj["client"])
+    if "console" in ctx.obj:
+        ctx.obj["console"].print(result)

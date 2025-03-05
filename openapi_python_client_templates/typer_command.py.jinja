@@ -1,5 +1,4 @@
 from typing import Annotated
-from rich import print as rich_print
 
 import typer
 app = typer.Typer()
@@ -14,12 +13,7 @@ def {{endpoint.name | replace("-", "_") }}(
 {# required fields from path and query_params #}
 {% for parameter in endpoint.path_parameters + endpoint.query_parameters if parameter.required %}
     {{ parameter.python_name }}: Annotated[{{parameter.get_type_string(no_optional=True, quoted=True)}},
-        typer.Option(help="""
-            {{parameter.description or ''}}
-            {% if parameter.example %}
-                Example: {{parameter.example}}
-            {% endif %}
-        """) ],
+        typer.Option(help="{{parameter.description or ''}}", show_default=False)],
 {% endfor %}
 
 {# required fields from body #}
@@ -44,13 +38,11 @@ def {{endpoint.name | replace("-", "_") }}(
 {# optional fields from path and query_params #}
 {% for parameter in endpoint.path_parameters + endpoint.query_parameters if not parameter.required %}
     {{ parameter.python_name }}: Annotated[{{parameter.get_type_string(no_optional=True, quoted=True)}},
-    typer.Option(help="""
-        {{parameter.description or ''}}
-    """) ]  = {% if parameter.default %}{{parameter.default.python_code}}{% else %}None{% endif %},
+    typer.Option(help="{{parameter.description or ''}}") ]  = {% if parameter.default %}{{parameter.default.python_code}}{% else %}None{% endif %},
 {% endfor %}
 
 ) -> None:
-    rich_print(sync(
+    result = sync(
         {% for parameter in endpoint.path_parameters %}
             {{ parameter.python_name }}={{ parameter.python_name }},
         {% endfor %}
@@ -70,5 +62,7 @@ def {{endpoint.name | replace("-", "_") }}(
         {% endfor %}
 
         client=ctx.obj["client"]
-    ))
+    )
+    if "console" in ctx.obj:
+        ctx.obj["console"].print(result)
 {% endif %}

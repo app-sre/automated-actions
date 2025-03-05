@@ -18,13 +18,28 @@ from rich.console import Console
 
 from automated_actions_cli.commands import test
 from automated_actions_cli.config import config
+from automated_actions_cli.utils import blend_text, progress_spinner
 
-app = typer.Typer(pretty_exceptions_show_locals=False)
+app = typer.Typer(
+    pretty_exceptions_show_locals=False,
+    rich_markup_mode="rich",
+    epilog="Made with [red]:heart:[/red] by [blue]AppSRE[/blue]",
+)
 app.add_typer(test.app, name="env", help="test related commands.")
 
 logger = logging.getLogger(__name__)
 
 console = Console(record=True)
+
+BANNER = """
+    [o_o]
+    <)   )╯
+     | | |
+    (_|_)
+-------------------
+ AUTOMATED ACTIONS
+-------------------
+"""
 
 
 def version_callback(*, value: bool) -> None:
@@ -68,7 +83,21 @@ def main(
     version: Annotated[  # noqa: ARG001
         bool | None, typer.Option(callback=version_callback, help="Display version")
     ] = None,
+    quiet: bool = typer.Option(default=False, help="Don't print anything"),
 ) -> None:
+    if "--help" in sys.argv:
+        rich_print(
+            blend_text(BANNER, (32, 32, 255), (255, 32, 255)),
+        )
+        # do not initialize the client and everything else if --help is passed
+        return
+
+    if not quiet:
+        progress = progress_spinner(console=console)
+        progress.start()
+        progress.add_task(description="Processing...", total=None)
+        atexit.register(progress.stop)
+
     logging.basicConfig(
         level="DEBUG" if config.debug or debug else "INFO",
         format="%(name)-20s: %(message)s",
@@ -82,8 +111,10 @@ def main(
             httpx_args={
                 "auth": HTTPSPNEGOAuth(mutual_authentication=OPTIONAL),
             },
-        )
+        ),
+        "console": console,
     }
+
     # enforce the user to login
     api_v1_me(client=ctx.obj["client"])
 

@@ -170,7 +170,6 @@ async def asyncio(
 from typing import Annotated
 
 import typer
-from rich import print as rich_print
 
 app = typer.Typer()
 
@@ -178,13 +177,8 @@ app = typer.Typer()
 @app.command(help="Cancel an action.")
 def task_cancel(
     ctx: typer.Context,
-    task_id: Annotated[
-        str,
-        typer.Option(
-            help="""
-            
-        """
-        ),
-    ],
+    task_id: Annotated[str, typer.Option(help="", show_default=False)],
 ) -> None:
-    rich_print(sync(task_id=task_id, client=ctx.obj["client"]))
+    result = sync(task_id=task_id, client=ctx.obj["client"])
+    if "console" in ctx.obj:
+        ctx.obj["console"].print(result)

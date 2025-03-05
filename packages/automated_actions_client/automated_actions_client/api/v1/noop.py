@@ -208,7 +208,6 @@ async def asyncio(
 from typing import Annotated
 
 import typer
-from rich import print as rich_print
 
 app = typer.Typer()
 
@@ -218,22 +217,15 @@ def noop(
     ctx: typer.Context,
     alias: Annotated[str, typer.Option(help="")],
     description: Annotated[str, typer.Option(help="")] = "no description",
-    labels: Annotated[
-        None | list[str],
-        typer.Option(
-            help="""
-        
-    """
-        ),
-    ] = None,
+    labels: Annotated[None | list[str], typer.Option(help="")] = None,
 ) -> None:
-    rich_print(
-        sync(
-            labels=labels,
-            body=NoopParam(
-                alias=alias,
-                description=description,
-            ),
-            client=ctx.obj["client"],
-        )
+    result = sync(
+        labels=labels,
+        body=NoopParam(
+            alias=alias,
+            description=description,
+        ),
+        client=ctx.obj["client"],
     )
+    if "console" in ctx.obj:
+        ctx.obj["console"].print(result)

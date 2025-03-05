@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 
 from automated_actions.api.models import (
     Task,
@@ -20,10 +20,17 @@ log = logging.getLogger(__name__)
     status_code=202,
 )
 def openshift_workload_restart(
-    cluster: str,
-    namespace: str,
-    kind: str,
-    name: str,
+    cluster: Annotated[str, Path(description="OpenShift cluster name")],
+    namespace: Annotated[str, Path(description="OpenShift namespace")],
+    kind: Annotated[
+        str,
+        Path(
+            description="OpenShift workload kind. e.g. Deployment or Pod",
+            example="Deployment",
+            # openapi_examples=["Deployment", "Pod"],
+        ),
+    ],
+    name: Annotated[str, Path(description="OpenShift workload name")],
     task: Annotated[Task, Depends(TaskLog("openshift-workload-restart"))],
 ) -> TaskSchemaOut:
     """Restart an OpenShift workload."""

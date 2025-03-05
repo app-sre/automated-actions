@@ -65,10 +65,10 @@ def sync_detailed(
      Restart an OpenShift workload.
 
     Args:
-        cluster (str):
-        namespace (str):
-        kind (str):
-        name (str):
+        cluster (str): OpenShift cluster name
+        namespace (str): OpenShift namespace
+        kind (str): OpenShift workload kind. e.g. Deployment or Pod
+        name (str): OpenShift workload name
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -106,10 +106,10 @@ def sync(
      Restart an OpenShift workload.
 
     Args:
-        cluster (str):
-        namespace (str):
-        kind (str):
-        name (str):
+        cluster (str): OpenShift cluster name
+        namespace (str): OpenShift namespace
+        kind (str): OpenShift workload kind. e.g. Deployment or Pod
+        name (str): OpenShift workload name
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -141,10 +141,10 @@ async def asyncio_detailed(
      Restart an OpenShift workload.
 
     Args:
-        cluster (str):
-        namespace (str):
-        kind (str):
-        name (str):
+        cluster (str): OpenShift cluster name
+        namespace (str): OpenShift namespace
+        kind (str): OpenShift workload kind. e.g. Deployment or Pod
+        name (str): OpenShift workload name
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -182,10 +182,10 @@ async def asyncio(
      Restart an OpenShift workload.
 
     Args:
-        cluster (str):
-        namespace (str):
-        kind (str):
-        name (str):
+        cluster (str): OpenShift cluster name
+        namespace (str): OpenShift namespace
+        kind (str): OpenShift workload kind. e.g. Deployment or Pod
+        name (str): OpenShift workload name
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -209,7 +209,6 @@ async def asyncio(
 from typing import Annotated
 
 import typer
-from rich import print as rich_print
 
 app = typer.Typer()
 
@@ -218,44 +217,27 @@ app = typer.Typer()
 def openshift_workload_restart(
     ctx: typer.Context,
     cluster: Annotated[
-        str,
-        typer.Option(
-            help="""
-            
-        """
-        ),
+        str, typer.Option(help="OpenShift cluster name", show_default=False)
     ],
     namespace: Annotated[
-        str,
-        typer.Option(
-            help="""
-            
-        """
-        ),
+        str, typer.Option(help="OpenShift namespace", show_default=False)
     ],
     kind: Annotated[
         str,
         typer.Option(
-            help="""
-            
-        """
+            help="OpenShift workload kind. e.g. Deployment or Pod", show_default=False
         ),
     ],
     name: Annotated[
-        str,
-        typer.Option(
-            help="""
-            
-        """
-        ),
+        str, typer.Option(help="OpenShift workload name", show_default=False)
     ],
 ) -> None:
-    rich_print(
-        sync(
-            cluster=cluster,
-            namespace=namespace,
-            kind=kind,
-            name=name,
-            client=ctx.obj["client"],
-        )
+    result = sync(
+        cluster=cluster,
+        namespace=namespace,
+        kind=kind,
+        name=name,
+        client=ctx.obj["client"],
     )
+    if "console" in ctx.obj:
+        ctx.obj["console"].print(result)

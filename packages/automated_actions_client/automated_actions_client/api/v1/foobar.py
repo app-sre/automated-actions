@@ -196,7 +196,6 @@ async def asyncio(
 from typing import Annotated
 
 import typer
-from rich import print as rich_print
 
 app = typer.Typer()
 
@@ -204,21 +203,9 @@ app = typer.Typer()
 @app.command(help="Run a foobar action")
 def foobar(
     ctx: typer.Context,
-    pk: Annotated[
-        str,
-        typer.Option(
-            help="""
-            
-        """
-        ),
-    ],
-    q: Annotated[
-        None | str,
-        typer.Option(
-            help="""
-        
-    """
-        ),
-    ] = None,
+    pk: Annotated[str, typer.Option(help="", show_default=False)],
+    q: Annotated[None | str, typer.Option(help="")] = None,
 ) -> None:
-    rich_print(sync(pk=pk, q=q, client=ctx.obj["client"]))
+    result = sync(pk=pk, q=q, client=ctx.obj["client"])
+    if "console" in ctx.obj:
+        ctx.obj["console"].print(result)
