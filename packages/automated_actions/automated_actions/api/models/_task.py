@@ -24,7 +24,7 @@ class TaskSchemaIn(BaseModel):
 
 
 class TaskSchemaOut(TaskSchemaIn):
-    pk: str
+    task_id: str
     result: str | None = None
     created_at: float
     updated_at: float
@@ -51,13 +51,13 @@ class Task(Table[TaskSchemaIn, TaskSchemaOut]):
     @staticmethod
     def _pre_create(values: dict[str, Any]) -> dict[str, Any]:
         values = super(Task, Task)._pre_create(values)
-        values["pk"] = str(uuid.uuid4())
+        values["task_id"] = str(uuid.uuid4())
         return values
 
     def set_status(self, status: TaskStatus) -> None:
         self.update(actions=[Task.status.set(status.value)])
 
-    pk = UnicodeAttribute(hash_key=True)
+    task_id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
     status = UnicodeAttribute()
     result = UnicodeAttribute(null=True)

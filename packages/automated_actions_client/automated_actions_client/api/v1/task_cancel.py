@@ -11,11 +11,11 @@ from ...types import Response
 
 
 def _get_kwargs(
-    pk: str,
+    task_id: str,
 ) -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": f"/api/v1/tasks/{pk}",
+        "url": f"/api/v1/tasks/{task_id}",
     }
 
     return _kwargs
@@ -50,7 +50,7 @@ def _build_response(
 
 
 def sync_detailed(
-    pk: str,
+    task_id: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[HTTPValidationError | TaskSchemaOut]:
@@ -59,7 +59,7 @@ def sync_detailed(
      Cancel an action.
 
     Args:
-        pk (str):
+        task_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -70,7 +70,7 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        pk=pk,
+        task_id=task_id,
     )
 
     with client as _client:
@@ -82,7 +82,7 @@ def sync_detailed(
 
 
 def sync(
-    pk: str,
+    task_id: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> HTTPValidationError | TaskSchemaOut | None:
@@ -91,7 +91,7 @@ def sync(
      Cancel an action.
 
     Args:
-        pk (str):
+        task_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -102,13 +102,13 @@ def sync(
     """
 
     return sync_detailed(
-        pk=pk,
+        task_id=task_id,
         client=client,
     ).parsed
 
 
 async def asyncio_detailed(
-    pk: str,
+    task_id: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[HTTPValidationError | TaskSchemaOut]:
@@ -117,7 +117,7 @@ async def asyncio_detailed(
      Cancel an action.
 
     Args:
-        pk (str):
+        task_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -128,7 +128,7 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        pk=pk,
+        task_id=task_id,
     )
 
     async with client as _client:
@@ -140,7 +140,7 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    pk: str,
+    task_id: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> HTTPValidationError | TaskSchemaOut | None:
@@ -149,7 +149,7 @@ async def asyncio(
      Cancel an action.
 
     Args:
-        pk (str):
+        task_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -161,7 +161,7 @@ async def asyncio(
 
     return (
         await asyncio_detailed(
-            pk=pk,
+            task_id=task_id,
             client=client,
         )
     ).parsed
@@ -178,7 +178,7 @@ app = typer.Typer()
 @app.command(help="Cancel an action.")
 def task_cancel(
     ctx: typer.Context,
-    pk: Annotated[
+    task_id: Annotated[
         str,
         typer.Option(
             help="""
@@ -187,4 +187,4 @@ def task_cancel(
         ),
     ],
 ) -> None:
-    rich_print(sync(pk=pk, client=ctx.obj["client"]))
+    rich_print(sync(task_id=task_id, client=ctx.obj["client"]))

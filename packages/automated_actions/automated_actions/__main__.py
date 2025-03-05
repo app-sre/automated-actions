@@ -10,12 +10,9 @@ from fastapi import APIRouter, FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
-from fastapi.exception_handlers import (
-    http_exception_handler,
-    request_validation_exception_handler,
-)
+
 from automated_actions.api import router
-from automated_actions.api.models import ALL_TABLES
+from automated_actions.api import startup_hook as api_startup_hook
 from automated_actions.config import settings
 
 HOSTNAME = socket.gethostname()
@@ -61,14 +58,16 @@ async def healthz() -> str:
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:  # noqa: RUF029
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: RUF029
     """Startup and shutdown events."""
     logging.config.dictConfig(logging_config)
     log.info("Starting Automated Actions")
-    for table in ALL_TABLES:
-        # create pynamodb tables
-        if not table.exists():
-            table.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
+    api_startup_hook(app)
+
+    # init routers after the sub apps startup hooks!
+    app.include_router(default_router)
+    app.include_router(router, prefix="/api")
+
     yield
     log.info("Shutting down Automated Actions")
 
@@ -82,9 +81,6 @@ app = FastAPI(
     openapi_url="/docs/openapi.json",
     lifespan=lifespan,
 )
-# no auth for healthz check
-app.include_router(default_router)
-app.include_router(router, prefix="/api")
 instrumentator = Instrumentator(
     excluded_handlers=[
         "/metrics",

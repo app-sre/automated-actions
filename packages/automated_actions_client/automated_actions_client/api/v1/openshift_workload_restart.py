@@ -11,11 +11,14 @@ from ...types import Response
 
 
 def _get_kwargs(
-    task_id: str,
+    cluster: str,
+    namespace: str,
+    kind: str,
+    name: str,
 ) -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
-        "method": "get",
-        "url": f"/api/v1/tasks/{task_id}",
+        "method": "post",
+        "url": f"/api/v1/openshift/workload-restart/{cluster}/{namespace}/{kind}/{name}",
     }
 
     return _kwargs
@@ -24,10 +27,10 @@ def _get_kwargs(
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> HTTPValidationError | TaskSchemaOut | None:
-    if response.status_code == 200:
-        response_200 = TaskSchemaOut.from_dict(response.json())
+    if response.status_code == 202:
+        response_202 = TaskSchemaOut.from_dict(response.json())
 
-        return response_200
+        return response_202
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -50,16 +53,22 @@ def _build_response(
 
 
 def sync_detailed(
-    task_id: str,
+    cluster: str,
+    namespace: str,
+    kind: str,
+    name: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[HTTPValidationError | TaskSchemaOut]:
-    """Task Detail
+    """Openshift Workload Restart
 
-     Retrieve an task.
+     Restart an OpenShift workload.
 
     Args:
-        task_id (str):
+        cluster (str):
+        namespace (str):
+        kind (str):
+        name (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -70,7 +79,10 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        task_id=task_id,
+        cluster=cluster,
+        namespace=namespace,
+        kind=kind,
+        name=name,
     )
 
     with client as _client:
@@ -82,16 +94,22 @@ def sync_detailed(
 
 
 def sync(
-    task_id: str,
+    cluster: str,
+    namespace: str,
+    kind: str,
+    name: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> HTTPValidationError | TaskSchemaOut | None:
-    """Task Detail
+    """Openshift Workload Restart
 
-     Retrieve an task.
+     Restart an OpenShift workload.
 
     Args:
-        task_id (str):
+        cluster (str):
+        namespace (str):
+        kind (str):
+        name (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -102,22 +120,31 @@ def sync(
     """
 
     return sync_detailed(
-        task_id=task_id,
+        cluster=cluster,
+        namespace=namespace,
+        kind=kind,
+        name=name,
         client=client,
     ).parsed
 
 
 async def asyncio_detailed(
-    task_id: str,
+    cluster: str,
+    namespace: str,
+    kind: str,
+    name: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[HTTPValidationError | TaskSchemaOut]:
-    """Task Detail
+    """Openshift Workload Restart
 
-     Retrieve an task.
+     Restart an OpenShift workload.
 
     Args:
-        task_id (str):
+        cluster (str):
+        namespace (str):
+        kind (str):
+        name (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -128,7 +155,10 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        task_id=task_id,
+        cluster=cluster,
+        namespace=namespace,
+        kind=kind,
+        name=name,
     )
 
     async with client as _client:
@@ -140,16 +170,22 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    task_id: str,
+    cluster: str,
+    namespace: str,
+    kind: str,
+    name: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> HTTPValidationError | TaskSchemaOut | None:
-    """Task Detail
+    """Openshift Workload Restart
 
-     Retrieve an task.
+     Restart an OpenShift workload.
 
     Args:
-        task_id (str):
+        cluster (str):
+        namespace (str):
+        kind (str):
+        name (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -161,7 +197,10 @@ async def asyncio(
 
     return (
         await asyncio_detailed(
-            task_id=task_id,
+            cluster=cluster,
+            namespace=namespace,
+            kind=kind,
+            name=name,
             client=client,
         )
     ).parsed
@@ -175,10 +214,34 @@ from rich import print as rich_print
 app = typer.Typer()
 
 
-@app.command(help="Retrieve an task.")
-def task_detail(
+@app.command(help="Restart an OpenShift workload.")
+def openshift_workload_restart(
     ctx: typer.Context,
-    task_id: Annotated[
+    cluster: Annotated[
+        str,
+        typer.Option(
+            help="""
+            
+        """
+        ),
+    ],
+    namespace: Annotated[
+        str,
+        typer.Option(
+            help="""
+            
+        """
+        ),
+    ],
+    kind: Annotated[
+        str,
+        typer.Option(
+            help="""
+            
+        """
+        ),
+    ],
+    name: Annotated[
         str,
         typer.Option(
             help="""
@@ -187,4 +250,12 @@ def task_detail(
         ),
     ],
 ) -> None:
-    rich_print(sync(task_id=task_id, client=ctx.obj["client"]))
+    rich_print(
+        sync(
+            cluster=cluster,
+            namespace=namespace,
+            kind=kind,
+            name=name,
+            client=ctx.obj["client"],
+        )
+    )

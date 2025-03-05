@@ -15,7 +15,7 @@ class TaskSchemaOut:
     Attributes:
         name (str):
         owner (str):
-        pk (str):
+        task_id (str):
         created_at (float):
         updated_at (float):
         status (Union[Unset, TaskStatus]):
@@ -24,7 +24,7 @@ class TaskSchemaOut:
 
     name: str
     owner: str
-    pk: str
+    task_id: str
     created_at: float
     updated_at: float
     status: Unset | TaskStatus = UNSET
@@ -36,7 +36,7 @@ class TaskSchemaOut:
 
         owner = self.owner
 
-        pk = self.pk
+        task_id = self.task_id
 
         created_at = self.created_at
 
@@ -57,7 +57,7 @@ class TaskSchemaOut:
         field_dict.update({
             "name": name,
             "owner": owner,
-            "pk": pk,
+            "task_id": task_id,
             "created_at": created_at,
             "updated_at": updated_at,
         })
@@ -75,7 +75,7 @@ class TaskSchemaOut:
 
         owner = d.pop("owner")
 
-        pk = d.pop("pk")
+        task_id = d.pop("task_id")
 
         created_at = d.pop("created_at")
 
@@ -100,7 +100,7 @@ class TaskSchemaOut:
         task_schema_out = cls(
             name=name,
             owner=owner,
-            pk=pk,
+            task_id=task_id,
             created_at=created_at,
             updated_at=updated_at,
             status=status,

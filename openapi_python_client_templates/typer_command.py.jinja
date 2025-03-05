@@ -8,7 +8,7 @@ app = typer.Typer()
 {% if parsed_responses %}
 @app.command(help="{{ endpoint.description }}")
 
-def {{endpoint.name}}(
+def {{endpoint.name | replace("-", "_") }}(
     ctx: typer.Context,
 
 {# required fields from path and query_params #}

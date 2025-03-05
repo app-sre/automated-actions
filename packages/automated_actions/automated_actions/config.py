@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
 
 
@@ -33,6 +35,7 @@ class Settings(BaseSettings):
     oidc_client_secret: str
     session_secret: str
     app_interface_role_prefix: str = "ai-"
+    policy_file: Path
 
     # worker metrics config
     worker_metrics_port: int = 8000

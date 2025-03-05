@@ -1,23 +1,22 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
 from automated_actions.api.models import (
     Task,
     TaskSchemaOut,
     TaskStatus,
-    User,
 )
-from automated_actions.api.v1.auth import oidc
+from automated_actions.api.v1.dependencies import UserDep
 
 router = APIRouter()
 log = logging.getLogger(__name__)
 
 
-@router.get("/tasks", operation_id="task_list")
+@router.get("/tasks", operation_id="task-list")
 def task_list(
-    user: Annotated[User, Depends(oidc)],
+    user: UserDep,
     status: Annotated[TaskStatus | None, Query()] = TaskStatus.RUNNING,
 ) -> list[TaskSchemaOut]:
     """List all user tasks."""
@@ -27,15 +26,15 @@ def task_list(
     ]
 
 
-@router.get("/tasks/{pk}", operation_id="task_detail")
-def task_detail(pk: str) -> TaskSchemaOut:
+@router.get("/tasks/{task_id}", operation_id="task-detail")
+def task_detail(task_id: str) -> TaskSchemaOut:
     """Retrieve an task."""
-    return Task.get_or_404(pk).dump()
+    return Task.get_or_404(task_id).dump()
 
 
-@router.post("/tasks/{pk}", operation_id="task_cancel", status_code=202)
-def task_cancel(pk: str) -> TaskSchemaOut:
+@router.post("/tasks/{task_id}", operation_id="task-cancel", status_code=202)
+def task_cancel(task_id: str) -> TaskSchemaOut:
     """Cancel an action."""
-    action = Task.get_or_404(pk)
-    action.set_status(TaskStatus.CANCELLED)
-    return action.dump()
+    task = Task.get_or_404(task_id)
+    task.set_status(TaskStatus.CANCELLED)
+    return task.dump()

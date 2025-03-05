@@ -9,7 +9,7 @@ from itsdangerous import URLSafeTimedSerializer
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class AccessToken(BaseModel):
@@ -92,7 +92,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
                 access_token = self.session_serializer.loads(session_token)
                 return self.get_user_info(access_token)
             except Exception:  # noqa: BLE001
-                logger.error("Access token cannot be loaded or is outdated")  # noqa: TRY400
+                log.error("Access token cannot be loaded or is outdated")  # noqa: TRY400
                 raise enforce_login from None
 
         if authorization := request.headers.get("Authorization"):
