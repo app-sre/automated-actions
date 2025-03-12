@@ -1,9 +1,7 @@
 #
 # Base image with defaults for all stages
-FROM registry.access.redhat.com/ubi9/python-312 AS base
+FROM registry.access.redhat.com/ubi9/python-312@sha256:25d91bc7f8bd90dc1d17553c30e2c48ab8f57c25940b8f68b4654b32eaf4b99e AS base
 
-# Keep this version tag in sync with pyproject.toml or feel free to remove it
-LABEL konflux.additional-tags="0.1.0"
 COPY LICENSE /licenses/
 
 
@@ -11,7 +9,7 @@ COPY LICENSE /licenses/
 # Builder image
 #
 FROM base AS builder
-COPY --from=ghcr.io/astral-sh/uv:0.5.29@sha256:88d7b48fc9f17462c82b5482e497af250d337f3f14e1ac97c16e68eba49b651e /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.6.6@sha256:031ddbc79275e351a43cbb66f64d8cd314cc78c3878898f4ab4f147b092e8e2d /uv /bin/uv
 
 ENV \
     # use venv from ubi image
@@ -37,6 +35,7 @@ FROM builder AS test
 
 COPY Makefile ./
 COPY tests ./tests
+RUN uv sync --frozen
 RUN make test
 
 #
@@ -44,4 +43,5 @@ RUN make test
 #
 FROM base AS prod
 COPY --from=builder /opt/app-root /opt/app-root
+COPY app.sh ./
 ENTRYPOINT [ "./app.sh" ]

@@ -5,8 +5,9 @@ metadata:
     build.appstudio.openshift.io/repo: https://github.com/app-sre/automated-actions?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
-    pipelinesascode.tekton.dev/max-keep-runs: "20"
-    pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch == "main"
+    pipelinesascode.tekton.dev/max-keep-runs: "10"
+    pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
+      == "main" && files.all.exists(x, x.matches('automated_actions/|.tekton/automated-actions-main-pull-request.yaml|.tekton/automated-actions-main-push.yaml'))
   labels:
     appstudio.openshift.io/application: automated-actions-main
     appstudio.openshift.io/component: automated-actions-main
@@ -24,9 +25,7 @@ spec:
   - name: dockerfile
     value: Dockerfile
   - name: path-context
-    value: .
-  - name: target-stage
-    value: prod
+    value: ./
   pipelineRef:
     resolver: git
     params:

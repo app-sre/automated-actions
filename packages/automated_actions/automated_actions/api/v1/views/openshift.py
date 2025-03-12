@@ -27,7 +27,6 @@ def openshift_workload_restart(
         Path(
             description="OpenShift workload kind. e.g. Deployment or Pod",
             example="Deployment",
-            # openapi_examples=["Deployment", "Pod"],
         ),
     ],
     name: Annotated[str, Path(description="OpenShift workload name")],

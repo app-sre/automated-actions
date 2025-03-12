@@ -1,32 +1,14 @@
 [project]
 name = "automated-actions-project"
 version = "0.1.0"
-description = "Automated Actions Server"
-authors = [
-    # Feel free to add or change authors
-    { name = "AppSRE", email = "sd-app-sre@redhat.com" },
-]
+description = "Automated Actions Project"
+authors = [{ name = "AppSRE", email = "sd-app-sre@redhat.com" }]
 license = { text = "Apache 2.0" }
-readme = "README.md"
-requires-python = "~= 3.12.0"
 
 [tool.uv.sources]
 automated-actions = { workspace = true }
 automated-actions-client = { workspace = true }
 automated-actions-cli = { workspace = true }
-# fix for https://github.com/openapi-generators/openapi-python-client/issues/1188
-openapi-python-client = { git = "https://github.com/chassing/openapi-python-client", branch = "issue1188-models-enums-iterable" }
 
 [tool.uv.workspace]
 members = ["packages/*"]
-
-[dependency-groups]
-dev = [
-    # Development dependencies
-    "ruff ~=0.9",
-    "mypy ~=1.13",
-    "pytest ~=8.2.0",
-    "pytest-cov ~=6.0.0",
-    "openapi-python-client>=0.23.1",
-    "rh-aws-saml-login>=0.8.0",
-]

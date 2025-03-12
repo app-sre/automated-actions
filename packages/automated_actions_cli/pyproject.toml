@@ -18,10 +18,6 @@ dependencies = [
     "typer>=0.15.1",
 ]
 
-
-[tool.uv.sources]
-automated-actions-client = { workspace = true }
-
 [project.urls]
 homepage = "https://github.com/app-sre/automated-actions"
 repository = "https://github.com/app-sre/automated-actions"

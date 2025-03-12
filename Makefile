@@ -10,12 +10,7 @@ format:
 .PHONY: test
 test:
 	@for d in $(shell find packages -mindepth 1 -maxdepth 1 -type d); do \
-		cd $$d; \
-		uv run ruff check --no-fix || exit 1; \
-		uv run ruff format --check || exit 1; \
-		uv run mypy || exit 1; \
-		uv run pytest -vv --cov=`basename $$d` --cov-report=term-missing --cov-report xml || exit 1; \
-		cd -; \
+		$(MAKE) -C $$d test || exit 1; \
 	done
 
 .PHONY: build
