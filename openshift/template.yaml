@@ -8,11 +8,21 @@ metadata:
     description: automated-actions
 objects:
 # ------- API DEPLOYMENT --------------------
+- apiVersion: policy/v1
+  kind: PodDisruptionBudget
+  metadata:
+    name: automated-actions-api
+  spec:
+    minAvailable: 1
+    selector:
+      matchLabels:
+        app.kubernetes.io/component: api
+
 - apiVersion: v1
   kind: ServiceAccount
   imagePullSecrets: "${{IMAGE_PULL_SECRETS}}"
   metadata:
-    name: automated-actions
+    name: automated-actions-api
     labels:
       app.kubernetes.io/component: api
       app.kubernetes.io/name: automated-actions
@@ -39,7 +49,7 @@ objects:
           app.kubernetes.io/name: automated-actions
       spec:
         restartPolicy: Always
-        serviceAccountName: automated-actions
+        serviceAccountName: automated-actions-api
         affinity:
           podAntiAffinity:
             requiredDuringSchedulingIgnoredDuringExecution:
@@ -116,6 +126,16 @@ objects:
       app.kubernetes.io/name: automated-actions
 
 # --------- WORKER DEPLOYMENT --------------
+- apiVersion: policy/v1
+  kind: PodDisruptionBudget
+  metadata:
+    name: automated-actions-worker
+  spec:
+    minAvailable: 1
+    selector:
+      matchLabels:
+        app.kubernetes.io/component: worker
+
 - apiVersion: v1
   kind: ServiceAccount
   imagePullSecrets: "${{IMAGE_PULL_SECRETS}}"
