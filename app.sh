@@ -14,7 +14,7 @@ fi
 
 START_MODE="${AA_START_MODE:-api}"
 APP_PORT="${AA_APP_PORT:-8080}"
-UVICORN_OPTS="${AA_UVICORN_OPTS:- --host 0.0.0.0}"
+UVICORN_OPTS="${AA_UVICORN_OPTS:- --host 0.0.0.0 --proxy-headers --forwarded-allow-ips=*}"
 UVICORN_OPTS="${UVICORN_OPTS} --port ${APP_PORT}"
 # start celery worker with solo pool by default to ensure only one worker is running
 # we scale the number of workers using kubernetes pods
