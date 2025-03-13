@@ -26,8 +26,6 @@ spec:
     value: Dockerfile.client
   - name: path-context
     value: ./
-  - name: image-expires-after
-    value: 1d
   - name: target-stage
     value: pypi
   - name: additional_secret
