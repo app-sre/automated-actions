@@ -100,10 +100,10 @@ class YamlAdapter(Adapter):
             log.warning(
                 f"Policy file {policy_file} does not exist. Using default policy."
             )
-            return
-
-        policy = yaml.safe_load(policy_file.read_text(encoding="utf-8"))
-        policy["p"] += DEFAULT_POLICY["p"]
+            policy = DEFAULT_POLICY
+        else:
+            policy = yaml.safe_load(policy_file.read_text(encoding="utf-8"))
+            policy["p"] += DEFAULT_POLICY["p"]
 
         model.add_policies("g", "g", self._get_role_rules(policy))
 
