@@ -22,7 +22,7 @@ dev = [
     # Development dependencies
     "ruff ~=0.9",
     "mypy ~=1.13",
-    "pytest ~=8.2.0",
+    "pytest ~=8.3.5",
     "pytest-cov ~=6.0.0",
     "openapi-python-client>=0.23.1",
 ]
