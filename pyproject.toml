@@ -11,4 +11,8 @@ automated-actions-client = { workspace = true }
 automated-actions-cli = { workspace = true }
 
 [tool.uv.workspace]
-members = ["packages/*"]
+members = [
+    "packages/automated_actions",
+    "packages/automated_actions_client",
+    "packages/automated_actions_cli",
+]

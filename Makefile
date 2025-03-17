@@ -25,20 +25,8 @@ prod:
 dev-env:
 	uv sync --all-packages
 
-.PHONY: kill-uvicorn
-kill-uvicorn:
-	@pkill -KILL -f bin/uvicorn || true
-	@pkill -KILL -f "from multiprocessing.spawn import spawn_main" || true
-
 .PHONY: generate-client
-generate-client: kill-uvicorn
-	@./app.sh &
-	@sleep 3
-	@rm -rf packages/automated_actions_client/automated_actions_client
-	openapi-python-client generate \
-		--url http://localhost:8080/docs/openapi.json \
-		--meta none --output-path packages/automated_actions_client/automated_actions_client \
-		--custom-template-path=openapi_python_client_templates \
-		--overwrite
+generate-client:
+	@rm -rf packages/automated_actions_client/automated_actions_client/*
+	docker compose run --remove-orphans generate-automated-actions-client
 	@touch packages/automated_actions_client/automated_actions_client/py.typed
-	@make kill-uvicorn

@@ -1,10 +1,12 @@
 import logging
+import re
+from json import JSONDecodeError
 from typing import Protocol, Self
 from urllib.parse import quote
 
 import httpx
 import jwt
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, HTTPException, Request, Response, status
 from itsdangerous import URLSafeTimedSerializer
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
@@ -21,12 +23,12 @@ class AccessToken(BaseModel):
 
 class UserModelProtocol(Protocol):
     @classmethod
-    def load(cls, access_token: AccessToken) -> Self: ...
+    def load(cls, username: str, name: str, email: str) -> Self: ...
+
+    def dump(self) -> BaseModel: ...
 
 
 class OpenIDConnect[UserModel: UserModelProtocol]:
-    well_known_pattern = "{}/auth/realms/{}/.well-known/openid-configuration"
-
     def __init__(
         self,
         issuer: str,
@@ -158,4 +160,52 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
                 options={"verify_signature": False},
             )
         )
-        return self.user_model.load(access_token=token)
+        return self.user_model.load(
+            username=token.preferred_username,
+            name=token.name,
+            email=token.email,
+        )
+
+
+class OPA[UserModel: UserModelProtocol]:
+    def __init__(
+        self,
+        opa_host: str,
+        skip_endpoints: list[str] | None = None,
+        package_name: str = "authz",
+    ) -> None:
+        self.opa_url = (
+            f"{opa_host.rstrip('/')}/v1/data/{package_name.replace('.', '/')}/allow"
+        )
+        self.skip_endpoints = [re.compile(skip) for skip in skip_endpoints or []]
+
+    def should_skip_endpoint(self, endpoint: str) -> bool:
+        return any(skip.match(endpoint) for skip in self.skip_endpoints)
+
+    async def __call__(self, request: Request, user: UserModel) -> None:
+        # allow endpoints without authorization
+        if self.should_skip_endpoint(request.url.path):
+            return
+
+        data = {"input": user.dump().model_dump()}
+        data["input"]["obj"] = request["route"].operation_id
+        data["input"]["params"] = request.path_params
+        async with httpx.AsyncClient() as client:
+            # Call OPA
+            opa_decision = await client.post(self.opa_url, json=data, timeout=5)
+
+        if not self.check_opa_decision(opa_decision):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized"
+            )
+
+    @staticmethod
+    def check_opa_decision(opa_decision: httpx.Response) -> bool:
+        if opa_decision.status_code != status.HTTP_200_OK:
+            log.error(f"Returned with status {opa_decision.status_code}.")
+            return False
+        try:
+            return opa_decision.json().get("result", False)
+        except JSONDecodeError:
+            log.exception("Unable to decode OPA response.")
+            return False

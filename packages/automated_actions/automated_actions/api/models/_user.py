@@ -1,18 +1,15 @@
 from typing import Self
 
 from pydantic import BaseModel
-from pynamodb.attributes import UnicodeAttribute, UnicodeSetAttribute
+from pynamodb.attributes import UnicodeAttribute
 
 from automated_actions.api.models._base import Table
-from automated_actions.auth import AccessToken
-from automated_actions.config import settings
 
 
 class UserSchemaIn(BaseModel):
     name: str
     username: str
     email: str
-    roles: set[str]
 
 
 class UserSchemaOut(UserSchemaIn):
@@ -28,35 +25,14 @@ class User(Table[UserSchemaIn, UserSchemaOut]):
         schema_out = UserSchemaOut
 
     @classmethod
-    def load(cls, access_token: AccessToken) -> Self:
-        def _get_roles(access_token: AccessToken) -> set[str]:
-            return {
-                role
-                for role in access_token.realm_access.get("roles", [])
-                if role.startswith(settings.app_interface_role_prefix)
-            }
-
+    def load(cls, username: str, name: str, email: str) -> Self:
         try:
-            user = cls.get(access_token.email)
-            user.update(
-                actions=[
-                    cls.name.set(access_token.name),
-                    cls.username.set(access_token.preferred_username),
-                    cls.roles.set(_get_roles(access_token)),
-                ]
-            )
+            user = cls.get(email)
+            user.update(actions=[cls.name.set(name), cls.username.set(username)])
             return user
         except cls.DoesNotExist:
-            return cls.create(
-                UserSchemaIn(
-                    name=access_token.name,
-                    username=access_token.preferred_username,
-                    email=access_token.email,
-                    roles=_get_roles(access_token),
-                )
-            )
+            return cls.create(UserSchemaIn(name=name, username=username, email=email))
 
     email = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
     username = UnicodeAttribute()
-    roles = UnicodeSetAttribute()

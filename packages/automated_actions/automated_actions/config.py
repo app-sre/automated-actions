@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from pydantic_settings import BaseSettings
 
 
@@ -16,7 +14,7 @@ class Settings(BaseSettings):
 
     # worker config
     broker_url: str = "sqs://localhost:4566"
-    sqs_url: str = "http://localhost:4566/000000000000/app-interface"
+    sqs_url: str = "http://localhost:4566/000000000000/automated-actions"
     broker_aws_region: str = "us-east-1"
     broker_aws_access_key_id: str = "localstack"
     broker_aws_secret_access_key: str = "localstack"  # noqa: S105
@@ -34,8 +32,9 @@ class Settings(BaseSettings):
     oidc_client_id: str
     oidc_client_secret: str
     session_secret: str
-    app_interface_role_prefix: str = "ai-"
-    policy_file: Path = Path("/data/policy.yml")
+
+    # AuthZ
+    opa_host: str = "http://opa:8181"
 
     # worker metrics config
     worker_metrics_port: int = 8000

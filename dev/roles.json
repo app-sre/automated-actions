@@ -1,0 +1,14 @@
+{
+  "users": {
+    "cassing": ["admin"],
+    "rporresm": ["admin"]
+  },
+  "roles": {
+    "admin": [
+      {
+        "obj": "*",
+        "params": {}
+      }
+    ]
+  }
+}

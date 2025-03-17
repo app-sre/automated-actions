@@ -1,4 +1,4 @@
-from typing import Any, TypeVar, cast
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -13,7 +13,6 @@ class UserSchemaOut:
         name (str):
         username (str):
         email (str):
-        roles (list[str]):
         created_at (float):
         updated_at (float):
     """
@@ -21,7 +20,6 @@ class UserSchemaOut:
     name: str
     username: str
     email: str
-    roles: list[str]
     created_at: float
     updated_at: float
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -33,8 +31,6 @@ class UserSchemaOut:
 
         email = self.email
 
-        roles = self.roles
-
         created_at = self.created_at
 
         updated_at = self.updated_at
@@ -45,7 +41,6 @@ class UserSchemaOut:
             "name": name,
             "username": username,
             "email": email,
-            "roles": roles,
             "created_at": created_at,
             "updated_at": updated_at,
         })
@@ -61,8 +56,6 @@ class UserSchemaOut:
 
         email = d.pop("email")
 
-        roles = cast(list[str], d.pop("roles"))
-
         created_at = d.pop("created_at")
 
         updated_at = d.pop("updated_at")
@@ -71,7 +64,6 @@ class UserSchemaOut:
             name=name,
             username=username,
             email=email,
-            roles=roles,
             created_at=created_at,
             updated_at=updated_at,
         )

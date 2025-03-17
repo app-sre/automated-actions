@@ -1,0 +1,26 @@
+{
+  "users": {
+    "user1": ["test-team", "another-team"],
+    "admin-user": ["admin"]
+  },
+  "roles": {
+    "test-team": [
+      {
+        "obj": "restart",
+        "params": {
+          "cluster": "^cluster-1$",
+          "namespace": "example",
+          "kind": "pod",
+          "name": "^foobar.*"
+        }
+      }
+    ],
+    "another-team": [],
+    "admin": [
+      {
+        "obj": "*",
+        "params": {}
+      }
+    ]
+  }
+}

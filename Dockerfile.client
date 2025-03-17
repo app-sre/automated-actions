@@ -9,16 +9,16 @@ ENV \
     # disable uv cache. it doesn't make sense in a container
     UV_NO_CACHE=true
 
-COPY pyproject.toml uv.lock ./
-COPY packages/automated_actions_client/README.md ./packages/automated_actions_client/
-COPY packages/automated_actions_client/pyproject.toml ./packages/automated_actions_client/
-# install just the dependencies
-RUN uv sync --frozen --no-install-project
 
-COPY packages/automated_actions_client/Makefile ./packages/automated_actions_client/
-COPY packages/automated_actions_client/tests ./packages/automated_actions_client/tests
-COPY packages/automated_actions_client/automated_actions_client ./packages/automated_actions_client/automated_actions_client
-RUN uv sync --frozen
+COPY packages/automated_actions_client/README.md ./
+COPY packages/automated_actions_client/pyproject.toml ./
+RUN uv sync --no-install-project
+
+COPY packages/automated_actions_client/openapi_python_client_templates ./openapi_python_client_templates
+COPY packages/automated_actions_client/Makefile ./
+COPY packages/automated_actions_client/tests ./tests
+COPY packages/automated_actions_client/automated_actions_client ./automated_actions_client
+RUN uv sync
 
 #
 # Test image
@@ -29,7 +29,7 @@ USER root
 RUN chown -R 1001:0 ./
 USER 1001
 
-RUN make -C packages/automated_actions_client test
+RUN make test
 
 #
 # PyPI publish image
@@ -37,5 +37,5 @@ RUN make -C packages/automated_actions_client test
 FROM test AS pypi
 # Secrets are owned by root and are not readable by others :(
 USER root
-RUN --mount=type=secret,id=app-sre-pypi-credentials/token make -C packages/automated_actions_client -s pypi
+RUN --mount=type=secret,id=app-sre-pypi-credentials/token make -s pypi
 USER 1001

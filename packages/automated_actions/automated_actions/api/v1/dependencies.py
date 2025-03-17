@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import Depends, Request
 
 from automated_actions.api.models import Task, TaskSchemaIn, User
+from automated_actions.auth import OPA
 
 
 async def get_user(request: Request) -> User:
@@ -10,6 +11,13 @@ async def get_user(request: Request) -> User:
 
 
 UserDep = Annotated[User, Depends(get_user)]
+
+
+async def get_authz(request: Request, user: UserDep) -> OPA:
+    return await request.app.state.authz(request, user)
+
+
+AuthZDep = Annotated[OPA, Depends(get_authz)]
 
 
 class TaskLog:

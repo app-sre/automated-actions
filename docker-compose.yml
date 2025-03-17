@@ -14,52 +14,78 @@ services:
       - "${LOCALSTACK_VOLUME_DIR:-./.localstack_volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - ./localstack:/etc/localstack/init/ready.d
-    # networks:
-    #   - qontract-development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 1s
+      retries: 10
 
-  # gjb:
-  #   restart: always
-  #   env_file:
-  #     - settings.conf
-  #   environment:
-  #     - GJB_BROKER_URL=sqs://localstack:4566
-  #     - GJB_SQS_URL=http://localstack:4566/000000000000/app-interface
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     target: prod
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - localstack
-  #   volumes:
-  #     - ./glitchtip_jira_bridge:/opt/app-root/src/glitchtip_jira_bridge
-  #   networks:
-  #     - qontract-development
+  opa:
+    image: openpolicyagent/opa:latest
+    command:
+      - run
+      - --server
+      - --log-level=debug
+      - --disable-telemetry
+      - --addr=0.0.0.0:8181
+      - /policies/
+      - /roles/
+    volumes:
+      - ./packages/opa/authz:/policies
+      - ./dev:/roles
+    ports:
+      - 8181:8181
 
-  # worker:
-  #   restart: always
-  #   env_file:
-  #     - settings.conf
-  #   environment:
-  #     - GJB_START_MODE=worker
-  #     - GJB_BROKER_URL=sqs://localstack:4566
-  #     - GJB_SQS_URL=http://localstack:4566/000000000000/app-interface
-  #     - GJB_DYNAMODB_URL=http://localstack:4566
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     target: prod
-  #   ports:
-  #     - "8001:8001"
-  #   depends_on:
-  #     - localstack
-  #   volumes:
-  #     - ./glitchtip_jira_bridge:/opt/app-root/src/glitchtip_jira_bridge
-  #   networks:
-  #     - qontract-development
+  automated-actions:
+    restart: always
+    env_file:
+      - settings.conf
+    environment:
+      - AA_BROKER_URL=sqs://localstack:4566
+      - AA_SQS_URL=http://localstack:4566/000000000000/automated-actions
+      - AA_DYNAMODB_URL=http://localstack:4566
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - "8080:8080"
+    depends_on:
+      localstack:
+        condition: service_healthy
+      opa:
+        condition: service_started
+    volumes:
+      - ./packages/automated_actions:/opt/app-root/src/packages/automated_actions
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      start_interval: 1s
+      interval: 120m
+      timeout: 1s
+      retries: 10
 
-# networks:
-#   qontract-development:
-#     external: true
-#     name: qontract-development
+  generate-automated-actions-client:
+    restart: never
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+      target: base
+    profiles:
+      - dont-start-automatically
+    entrypoint:
+      - uv
+      - run
+      - --frozen
+      - openapi-python-client
+    command:
+      - generate
+      - --url=http://automated-actions:8080/docs/openapi.json
+      - --meta=none
+      - --output-path=automated_actions_client
+      - --custom-template-path=openapi_python_client_templates
+      - --overwrite
+    depends_on:
+      automated-actions:
+        condition: service_healthy
+    volumes:
+      - ./packages/automated_actions_client/automated_actions_client:/opt/app-root/src/automated_actions_client

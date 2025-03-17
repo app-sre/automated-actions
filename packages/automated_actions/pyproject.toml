@@ -7,7 +7,6 @@ license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.12.0"
 dependencies = [
-    "casbin>=1.38.0",
     "celery[sqs]>=5.4.0",
     "fastapi>=0.115.8",
     "httpx>=0.28.1",
@@ -17,7 +16,6 @@ dependencies = [
     "pydantic-settings>=2.7.1",
     "pyjwt>=2.10.1",
     "pynamodb>=6.0.2",
-    "pyyaml>=6.0.2",
     "uvicorn>=0.34.0",
 ]
 
@@ -33,7 +31,6 @@ dev = [
     "mypy ~=1.13",
     "pytest ~=8.2.0",
     "pytest-cov ~=6.0.0",
-    "types-pyyaml>=6.0.12.20241230",
 ]
 
 [build-system]
@@ -124,7 +121,7 @@ disallow_incomplete_defs = true
 [[tool.mypy.overrides]]
 # Below are all of the packages that don't implement stub packages. Mypy will throw an error if we don't ignore the
 # missing imports. See: https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
-module = ["celery.*", "casbin.*"]
+module = ["celery.*"]
 ignore_missing_imports = true
 
 # Coverage configuration
