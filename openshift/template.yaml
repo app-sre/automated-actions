@@ -298,7 +298,7 @@ objects:
                   - opa
               topologyKey: "kubernetes.io/hostname"
         containers:
-          name: opa
+        - name: opa
           image: "${OPA_IMAGE}:${IMAGE_TAG}"
           args:
           - run
