@@ -29,6 +29,19 @@ test_user_allowed if {
 	}
 }
 
+test_user_case_insensitive if {
+	authz.allow with input as {
+		"username": "user1",
+		"obj": "restart",
+		"params": {
+			"cluster": "cluster-1",
+			"namespace": "exaMPle",
+			"kind": "POD",
+			"name": "FOObar-123",
+		},
+	}
+}
+
 test_user_allowed_extra_param if {
 	authz.allow with input as {
 		"username": "user1",

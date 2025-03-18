@@ -36,6 +36,6 @@ object_matches(permission_obj, input_obj) if {
 
 valid_params(expected, provided) if {
 	every k, v in expected {
-		regex.match(v, provided[k])
+		regex.match(sprintf("(?i)%s", [v]), provided[k])
 	}
 }
