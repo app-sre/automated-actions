@@ -307,6 +307,7 @@ objects:
           - --log-level=info
           - --disable-telemetry
           - --addr=0.0.0.0:8181
+          - --watch
           - /authz        # rego policy and default roles
           - /policies     # app-interface roles
           ports:
