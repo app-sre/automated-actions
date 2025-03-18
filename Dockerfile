@@ -34,7 +34,6 @@ RUN uv sync --frozen --no-group dev
 FROM builder AS test
 
 COPY Makefile ./
-COPY tests ./tests
 RUN uv sync --frozen
 RUN make test
 
