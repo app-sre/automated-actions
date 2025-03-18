@@ -325,14 +325,14 @@ objects:
               scheme: HTTP
               port: ${{AA_OPA_PORT}}
             initialDelaySeconds: 5
-            periodSeconds: 5
+            periodSeconds: 60
           readinessProbe:
             httpGet:
               path: /health?bundle=true  # Include bundle activation in readiness
               scheme: HTTP
               port: ${{AA_OPA_PORT}}
             initialDelaySeconds: 5
-            periodSeconds: 5
+            periodSeconds: 10
           startupProbe:
             tcpSocket:
               port: ${{AA_OPA_PORT}}
