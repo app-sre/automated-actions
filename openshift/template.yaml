@@ -306,7 +306,7 @@ objects:
           - --server
           - --log-level=info
           - --disable-telemetry
-          - --addr=0.0.0.0:${{AA_OPA_PORT}}
+          - --addr=0.0.0.0:8181
           - /authz        # rego policy and default roles
           - /policies     # app-interface roles
           ports:
