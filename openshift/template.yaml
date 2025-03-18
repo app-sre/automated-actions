@@ -107,14 +107,6 @@ objects:
               memory: ${{AA_API_MEMORY_REQUESTS}}
             limits:
               memory: ${{AA_API_MEMORY_LIMITS}}
-          volumeMounts:
-            - name: policy-volume
-              mountPath: /data
-              readOnly: true
-        volumes:
-        - name: policy-volume
-          configMap:
-            name: automated-actions-policy
 
 # ---------- API SERVICE -----------
 - apiVersion: v1
