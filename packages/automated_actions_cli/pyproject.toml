@@ -10,12 +10,12 @@ license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.12.0"
 dependencies = [
-    "appdirs>=1.4.4",
+    "appdirs==1.4.4",
     "automated-actions-client",
-    "httpx-gssapi>=0.4",
-    "pydantic-settings>=2.7.1",
-    "rich>=13.9.4",
-    "typer>=0.15.1",
+    "httpx-gssapi==0.4",
+    "pydantic-settings==2.8.1",
+    "rich==13.9.4",
+    "typer==0.15.2",
 ]
 
 [project.urls]
@@ -26,10 +26,10 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "ruff ~=0.9",
-    "mypy ~=1.13",
-    "pytest ~=8.2.0",
-    "pytest-cov ~=6.0.0",
+    "ruff==0.11.0",
+    "mypy==1.15.0",
+    "pytest==8.3.5",
+    "pytest-cov==6.0.0",
 ]
 
 [project.scripts]
