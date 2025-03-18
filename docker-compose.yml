@@ -21,7 +21,10 @@ services:
       retries: 10
 
   opa:
-    image: openpolicyagent/opa:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.opa
+      target: prod
     command:
       - run
       - --server
