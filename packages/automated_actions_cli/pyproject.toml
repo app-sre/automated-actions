@@ -26,7 +26,7 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "ruff==0.11.0",
+    "ruff==0.11.2",
     "mypy==1.15.0",
     "pytest==8.3.5",
     "pytest-cov==6.0.0",
