@@ -1,0 +1,14 @@
+---
+users:
+  '*':
+  - default
+roles:
+  default:
+  - obj: me
+    params: {}
+  - obj: task-list
+    params: {}
+  - obj: task-detail
+    params: {}
+  - obj: task-cancel
+    params: {}

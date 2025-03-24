@@ -1,0 +1,20 @@
+---
+users:
+  cassing:
+  - app-sre
+  rporresm:
+  - admin
+roles:
+  admin:
+  - obj: '*'
+    params: {}
+  app-sre:
+  - obj: openshift-workload-restart
+    params:
+      cluster: ^appsres09ue1$
+      kind: Deployment|Pod
+      name: glitchtip.*
+      namespace: ^glitchtip-dev$
+  - obj: another-action
+    params:
+      cluster: ^appsres09ue1$
