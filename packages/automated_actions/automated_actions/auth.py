@@ -1,5 +1,6 @@
 import logging
 import re
+from collections.abc import Iterable
 from json import JSONDecodeError
 from typing import Protocol, Self
 from urllib.parse import quote
@@ -22,10 +23,14 @@ class AccessToken(BaseModel):
 
 
 class UserModelProtocol(Protocol):
+    username: str
+
     @classmethod
     def load(cls, username: str, name: str, email: str) -> Self: ...
 
     def dump(self) -> BaseModel: ...
+
+    def set_allowed_actions(self, allowed_actions: Iterable[str]) -> None: ...
 
 
 class OpenIDConnect[UserModel: UserModelProtocol]:
@@ -175,37 +180,79 @@ class OPA[UserModel: UserModelProtocol]:
         package_name: str = "authz",
     ) -> None:
         self.opa_url = (
-            f"{opa_host.rstrip('/')}/v1/data/{package_name.replace('.', '/')}/allow"
+            f"{opa_host.rstrip('/')}/v1/data/{package_name.replace('.', '/')}"
         )
         self.skip_endpoints = [re.compile(skip) for skip in skip_endpoints or []]
 
     def should_skip_endpoint(self, endpoint: str) -> bool:
         return any(skip.match(endpoint) for skip in self.skip_endpoints)
 
+    @staticmethod
+    def get_opa_result(opa_decision: httpx.Response) -> bool | dict | list | None:
+        if opa_decision.status_code != status.HTTP_200_OK:
+            log.error(f"Returned with status {opa_decision.status_code}.")
+            return False
+        try:
+            return opa_decision.json().get("result")
+        except JSONDecodeError:
+            log.exception("Unable to decode OPA response.")
+            return False
+
+    async def user_is_authorized(
+        self, user: UserModel, obj: str, params: dict[str, str]
+    ) -> bool:
+        """Check if user is authorized to access endpoint."""
+        data = {"input": user.dump().model_dump()}
+        data["input"]["obj"] = obj
+        data["input"]["params"] = params
+
+        async with httpx.AsyncClient() as client:
+            opa_decision = await client.post(
+                f"{self.opa_url}/allow", json=data, timeout=5
+            )
+
+        result = self.get_opa_result(opa_decision)
+        if not isinstance(result, bool):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="OPA returned unexpected result",
+            )
+        return result
+
+    async def user_objects(self, user: UserModel) -> list[str]:
+        """Get objects for the user."""
+        async with httpx.AsyncClient() as client:
+            opa_decision = await client.post(
+                f"{self.opa_url}/objects",
+                json={
+                    "input": {
+                        "username": user.username,
+                    }
+                },
+                timeout=5,
+            )
+
+        result = self.get_opa_result(opa_decision)
+        if not isinstance(result, list):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="OPA returned unexpected result",
+            )
+        return result
+
     async def __call__(self, request: Request, user: UserModel) -> None:
         # allow endpoints without authorization
         if self.should_skip_endpoint(request.url.path):
             return
 
-        data = {"input": user.dump().model_dump()}
-        data["input"]["obj"] = request["route"].operation_id
-        data["input"]["params"] = request.path_params
-        async with httpx.AsyncClient() as client:
-            # Call OPA
-            opa_decision = await client.post(self.opa_url, json=data, timeout=5)
-
-        if not self.check_opa_decision(opa_decision):
+        # check if user is authorized to access endpoint
+        if not await self.user_is_authorized(
+            user, obj=request["route"].operation_id, params=request.path_params
+        ):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized"
             )
 
-    @staticmethod
-    def check_opa_decision(opa_decision: httpx.Response) -> bool:
-        if opa_decision.status_code != status.HTTP_200_OK:
-            log.error(f"Returned with status {opa_decision.status_code}.")
-            return False
-        try:
-            return opa_decision.json().get("result", False)
-        except JSONDecodeError:
-            log.exception("Unable to decode OPA response.")
-            return False
+        # get user allowed_actions
+        allowed_actions = await self.user_objects(user)
+        user.set_allowed_actions(allowed_actions)

@@ -1,4 +1,5 @@
-from typing import Any, TypeVar
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -15,6 +16,7 @@ class UserSchemaOut:
         email (str):
         created_at (float):
         updated_at (float):
+        allowed_actions (list[str]):
     """
 
     name: str
@@ -22,6 +24,7 @@ class UserSchemaOut:
     email: str
     created_at: float
     updated_at: float
+    allowed_actions: list[str]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -35,6 +38,8 @@ class UserSchemaOut:
 
         updated_at = self.updated_at
 
+        allowed_actions = self.allowed_actions
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({
@@ -43,13 +48,14 @@ class UserSchemaOut:
             "email": email,
             "created_at": created_at,
             "updated_at": updated_at,
+            "allowed_actions": allowed_actions,
         })
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         name = d.pop("name")
 
         username = d.pop("username")
@@ -60,12 +66,15 @@ class UserSchemaOut:
 
         updated_at = d.pop("updated_at")
 
+        allowed_actions = cast(list[str], d.pop("allowed_actions"))
+
         user_schema_out = cls(
             name=name,
             username=username,
             email=email,
             created_at=created_at,
             updated_at=updated_at,
+            allowed_actions=allowed_actions,
         )
 
         user_schema_out.additional_properties = d

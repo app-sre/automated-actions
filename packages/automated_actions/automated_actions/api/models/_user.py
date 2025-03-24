@@ -1,7 +1,7 @@
 from typing import Self
 
 from pydantic import BaseModel
-from pynamodb.attributes import UnicodeAttribute
+from pynamodb.attributes import ListAttribute, UnicodeAttribute
 
 from automated_actions.api.models._base import Table
 
@@ -15,6 +15,7 @@ class UserSchemaIn(BaseModel):
 class UserSchemaOut(UserSchemaIn):
     created_at: float
     updated_at: float
+    allowed_actions: list[str]
 
 
 class User(Table[UserSchemaIn, UserSchemaOut]):
@@ -33,6 +34,10 @@ class User(Table[UserSchemaIn, UserSchemaOut]):
         except cls.DoesNotExist:
             return cls.create(UserSchemaIn(name=name, username=username, email=email))
 
+    def set_allowed_actions(self, allowed_actions: list[str]) -> None:
+        self.update(actions=[User.allowed_actions.set(allowed_actions)])
+
     email = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
     username = UnicodeAttribute()
+    allowed_actions: ListAttribute = ListAttribute(default=list)
