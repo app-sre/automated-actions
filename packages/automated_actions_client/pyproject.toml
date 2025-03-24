@@ -13,10 +13,6 @@ homepage = "https://github.com/app-sre/automated-actions"
 repository = "https://github.com/app-sre/automated-actions"
 documentation = "https://github.com/app-sre/automated-actions"
 
-[tool.uv.sources]
-# fix for https://github.com/openapi-generators/openapi-python-client/issues/1188
-openapi-python-client = { git = "https://github.com/chassing/openapi-python-client", branch = "issue1188-models-enums-iterable" }
-
 [dependency-groups]
 dev = [
     # Development dependencies
@@ -24,7 +20,7 @@ dev = [
     "mypy==1.15.0",
     "pytest==8.3.5",
     "pytest-cov==6.0.0",
-    "openapi-python-client>=0.23.1",
+    "openapi-python-client==0.24.2",
 ]
 
 [build-system]

@@ -178,7 +178,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = "==1.15.0" },
-    { name = "openapi-python-client", git = "https://github.com/chassing/openapi-python-client?branch=issue1188-models-enums-iterable" },
+    { name = "openapi-python-client", specifier = ">=0.24.2" },
     { name = "pytest", specifier = "==8.3.5" },
     { name = "pytest-cov", specifier = "==6.0.0" },
     { name = "ruff", specifier = "==0.11.0" },
@@ -565,8 +565,8 @@ wheels = [
 
 [[package]]
 name = "openapi-python-client"
-version = "0.23.1"
-source = { git = "https://github.com/chassing/openapi-python-client?branch=issue1188-models-enums-iterable#c12f331c56d219efc093ad0bf2738fbbc66f4214" }
+version = "0.24.2"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
     { name = "colorama", marker = "sys_platform == 'win32'" },
@@ -579,6 +579,10 @@ dependencies = [
     { name = "shellingham" },
     { name = "typer" },
     { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cd/74/a041376dad86123e8c6577da209fa88731b2922fafd645b0276fd4e7e31d/openapi_python_client-0.24.2.tar.gz", hash = "sha256:ba462eed3a111e13c7ef441d170a592c87cb802f53adbf73a997742e98a4d90e", size = 124019 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ac/ae/164cd0b3e944d467605fb9b17426e75473ec161cd83adcb381a8a2967627/openapi_python_client-0.24.2-py3-none-any.whl", hash = "sha256:29e8cb47b01e7c82b9c0bfca4ec0ad0e409c936c4b9bb255918d5e7abf166551", size = 180580 },
 ]
 
 [[package]]
