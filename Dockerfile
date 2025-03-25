@@ -1,6 +1,6 @@
 #
 # Base image with defaults for all stages
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:bafd57451de2daa71ed301b277d49bd120b474ed438367f087eac0b885a668dc AS base
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:ac61c96b93894b9169221e87718733354dd3765dd4a62b275893c7ff0d876869 AS base
 ENV APP_ROOT=/opt/app-root
 ENV \
     # use venv from ubi image
