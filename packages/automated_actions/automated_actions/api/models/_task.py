@@ -10,11 +10,11 @@ from automated_actions.api.models._base import Table
 
 
 class TaskStatus(StrEnum):
-    PENDING = "pending"
-    RUNNING = "running"
-    SUCCESS = "success"
-    FAILURE = "failure"
-    CANCELLED = "cancelled"
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
+    CANCELLED = "CANCELLED"
 
 
 class TaskSchemaIn(BaseModel):
@@ -56,6 +56,9 @@ class Task(Table[TaskSchemaIn, TaskSchemaOut]):
 
     def set_status(self, status: TaskStatus) -> None:
         self.update(actions=[Task.status.set(status.value)])
+
+    def set_status_and_result(self, status: TaskStatus, result: str) -> None:
+        self.update(actions=[Task.status.set(status.value), Task.result.set(result)])
 
     task_id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()

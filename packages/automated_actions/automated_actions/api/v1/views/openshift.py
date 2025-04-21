@@ -6,9 +6,11 @@ from fastapi import APIRouter, Depends, Path
 from automated_actions.api.models import (
     Task,
     TaskSchemaOut,
-    TaskStatus,
 )
 from automated_actions.api.v1.dependencies import TaskLog
+from automated_actions.tasks import (
+    openshift_workload_restart as openshift_workload_restart_task,
+)
 
 router = APIRouter()
 log = logging.getLogger(__name__)
@@ -34,5 +36,14 @@ def openshift_workload_restart(
 ) -> TaskSchemaOut:
     """Restart an OpenShift workload."""
     log.info(f"Restarting {kind}/{name} in {cluster}/{namespace}")
-    task.set_status(TaskStatus.RUNNING)
+    openshift_workload_restart_task.apply_async(
+        kwargs={
+            "cluster": cluster,
+            "namespace": namespace,
+            "kind": kind,
+            "name": name,
+            "task": task,
+        },
+        task_id=task.task_id,
+    )
     return task.dump()

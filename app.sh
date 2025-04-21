@@ -21,18 +21,23 @@ UVICORN_OPTS="${UVICORN_OPTS} --port ${APP_PORT}"
 # this also ensures prometheus metrics are working
 CELERY_OPTS="${AA_CELERY_OPTS:- --pool solo}"
 
-if [[ "${AA_DEBUG}" == "1" ]]; then
-    UVICORN_OPTS="${UVICORN_OPTS} --reload"
-fi
-
 if [[ "${START_MODE}" == "api" ]]; then
     echo "---> Serving application with uvicorn ..."
+    [[ "${AA_DEBUG}" == "1" ]] && UVICORN_OPTS="${UVICORN_OPTS} --reload"
     # shellcheck disable=SC2086
     exec uvicorn $UVICORN_OPTS "$@" automated_actions.__main__:app
 elif [[ "${START_MODE}" == "worker" ]]; then
-    echo "---> Starting worker ..."
-    # shellcheck disable=SC2086
-    exec celery --app=automated_actions.worker worker ${CELERY_OPTS} "$@"
+    if [[ "${AA_DEBUG}" == "1" ]]; then
+        echo "--> Statring worker with auto-restart enabled"
+        # shellcheck disable=SC2086
+        watchmedo auto-restart -d /opt/app-root/src/packages/automated_actions -p '*.py' --recursive \
+            -- celery --app=automated_actions.worker worker ${CELERY_OPTS} "$@"
+    else
+        echo "---> Starting worker ..."
+        # shellcheck disable=SC2086
+        exec celery --app=automated_actions.worker worker ${CELERY_OPTS} "$@"
+    fi
+
 else
     echo "unknow mode $START_MODE - use 'api' or 'worker' instead"
 fi

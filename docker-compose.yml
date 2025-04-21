@@ -67,6 +67,27 @@ services:
       timeout: 1s
       retries: 10
 
+  celery-worker:
+    restart: always
+    env_file:
+      - settings.conf
+    environment:
+      - AA_START_MODE=worker
+      - AA_BROKER_URL=sqs://localstack:4566
+      - AA_SQS_URL=http://localstack:4566/000000000000/automated-actions
+      - AA_DYNAMODB_URL=http://localstack:4566
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - "8001:8001"
+    depends_on:
+      localstack:
+        condition: service_healthy
+    volumes:
+      - ./packages/automated_actions:/opt/app-root/src/packages/automated_actions
+
   generate-automated-actions-client:
     restart: never
     build:

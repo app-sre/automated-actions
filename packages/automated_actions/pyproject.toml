@@ -9,14 +9,21 @@ requires-python = "~= 3.12.0"
 dependencies = [
     "celery[sqs]==5.4.0",
     "fastapi==0.115.12",
+    "gql==3.5.0",
     "httpx==0.28.1",
+    "hvac>=2.3.0",
     "itsdangerous==2.2.0",
+    "kubernetes==32.0.1",
+    "openshift==0.13.2",
     "prometheus-fastapi-instrumentator==7.1.0",
     "pydantic==2.10.6",
     "pydantic-settings==2.8.1",
     "pyjwt==2.10.1",
     "pynamodb==6.0.2",
+    "requests-toolbelt==1.0.0",
+    "types-hvac>=2.3.0.20240621",
     "uvicorn==0.34.0",
+    "watchdog==6.0.0",
 ]
 
 [project.urls]
@@ -31,6 +38,7 @@ dev = [
     "mypy==1.15.0",
     "pytest==8.3.5",
     "pytest-cov==6.0.0",
+    "qenerate==0.7.0",
 ]
 
 [build-system]
@@ -52,6 +60,7 @@ extend-exclude = [
     ".local",
     ".cache",
     "tmp",
+    "automated_actions/gql_definitions"
 ]
 fix = true
 
@@ -121,7 +130,7 @@ disallow_incomplete_defs = true
 [[tool.mypy.overrides]]
 # Below are all of the packages that don't implement stub packages. Mypy will throw an error if we don't ignore the
 # missing imports. See: https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
-module = ["celery.*"]
+module = ["celery.*", "kubernetes.*", "openshift.dynamic.*", "billiard.einfo.*"]
 ignore_missing_imports = true
 
 # Coverage configuration

@@ -30,3 +30,15 @@ generate-client:
 	@rm -rf packages/automated_actions_client/automated_actions_client/*
 	docker compose run --remove-orphans generate-automated-actions-client
 	@touch packages/automated_actions_client/automated_actions_client/py.typed
+
+.PHONY: gql-introspection
+gql-introspection:
+	@uv run qenerate introspection http://localhost:4000/graphql > packages/automated_actions/automated_actions/gql_definitions/introspection.json
+
+.PHONY: gql-query-classes
+gql-query-classes:
+	@uv run qenerate code -i packages/automated_actions/automated_actions/gql_definitions/introspection.json packages/automated_actions/automated_actions/gql_definitions
+	@find packages/automated_actions/automated_actions/gql_definitions -path '*/__pycache__' -prune -o -type d -exec touch "{}/__init__.py" \;
+
+.PHONY: qenerate
+qenerate: gql-introspection gql-query-classes

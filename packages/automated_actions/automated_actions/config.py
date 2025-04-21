@@ -39,5 +39,17 @@ class Settings(BaseSettings):
     # worker metrics config
     worker_metrics_port: int = 8000
 
+    # qontract-server
+    qontract_server_url: str = "http://localhost:4000/graphql"
+    qontract_server_token: str | None = None
+
+    # vault
+    vault_server_url: str = "http://localhost:8200"
+    vault_role_id: str | None = None
+    vault_secret_id: str | None = None
+    vault_kube_auth_role: str | None = None
+    vault_kube_auth_mount: str | None = None
+
 
 settings = Settings()
+####
