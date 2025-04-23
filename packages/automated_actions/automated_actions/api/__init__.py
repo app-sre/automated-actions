@@ -21,7 +21,7 @@ def startup_hook(app: FastAPI) -> None:
         if not table.exists():
             table.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
 
-    app.state.oidc = OpenIDConnect[User](
+    app.state.oidc = OpenIDConnect[User](  # type: ignore[type-var]
         issuer=settings.oidc_issuer,
         client_id=settings.oidc_client_id,
         client_secret=settings.oidc_client_secret,
@@ -29,6 +29,6 @@ def startup_hook(app: FastAPI) -> None:
         enforce_https=not settings.debug,
         user_model=User,
     )
-    app.state.authz = OPA[User](opa_host=settings.opa_host, package_name="authz")
+    app.state.authz = OPA[User](opa_host=settings.opa_host, package_name="authz")  # type: ignore[type-var]
     v1_router.include_router(app.state.oidc.router, prefix="/auth")
     router.include_router(v1_router, prefix="/v1", tags=["v1"])

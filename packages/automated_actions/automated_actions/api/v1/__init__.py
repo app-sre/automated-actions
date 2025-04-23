@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from automated_actions.api.models import UserSchemaOut as UserSchemaOut
+from automated_actions.api.models import UserSchemaOut as UserSchemaOut  # noqa: PLC0414
 
-from .dependencies import UserDep as UserDep
+from .dependencies import UserDep as UserDep  # noqa: PLC0414
 from .dependencies import get_authz, get_user
 from .views.noop import router as noop_router
 from .views.openshift import router as openshift_router
