@@ -2,11 +2,11 @@ from enum import Enum
 
 
 class TaskStatus(str, Enum):
-    CANCELLED = "cancelled"
-    FAILURE = "failure"
-    PENDING = "pending"
-    RUNNING = "running"
-    SUCCESS = "success"
+    CANCELLED = "CANCELLED"
+    FAILURE = "FAILURE"
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    SUCCESS = "SUCCESS"
 
     def __str__(self) -> str:
         return str(self.value)
