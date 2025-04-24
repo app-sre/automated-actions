@@ -22,7 +22,7 @@ WORKDIR ${APP_ROOT}/src
 #
 # Builder image
 #
-FROM registry.access.redhat.com/ubi9/python-312@sha256:0c23550f08fb257342be41d1784af37906f9aee8aae8a577fb83e6b41d1d5e0c AS builder
+FROM registry.access.redhat.com/ubi9/python-312@sha256:a12a2ef4e1ecd34c0d149397ee281b703c0b58d345279c8a8015d46680207399 AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.6.10@sha256:57da96c4557243fc0a732817854084e81af9393f64dc7d172f39c16465b5e2ba /uv /bin/uv
 ENV \
     # use venv from ubi image
