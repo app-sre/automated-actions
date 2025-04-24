@@ -101,7 +101,7 @@ requires-dist = [
     { name = "fastapi", specifier = "==0.115.12" },
     { name = "gql", specifier = "==3.5.0" },
     { name = "httpx", specifier = "==0.28.1" },
-    { name = "hvac", specifier = ">=2.3.0" },
+    { name = "hvac", specifier = "==2.3.0" },
     { name = "itsdangerous", specifier = "==2.2.0" },
     { name = "kubernetes", specifier = "==32.0.1" },
     { name = "openshift", specifier = "==0.13.2" },
@@ -111,7 +111,7 @@ requires-dist = [
     { name = "pyjwt", specifier = "==2.10.1" },
     { name = "pynamodb", specifier = "==6.0.2" },
     { name = "requests-toolbelt", specifier = "==1.0.0" },
-    { name = "types-hvac", specifier = ">=2.3.0.20240621" },
+    { name = "types-hvac", specifier = "==2.3.0.20240621" },
     { name = "uvicorn", specifier = "==0.34.0" },
     { name = "watchdog", specifier = "==6.0.0" },
 ]

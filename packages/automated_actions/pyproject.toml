@@ -11,7 +11,7 @@ dependencies = [
     "fastapi==0.115.12",
     "gql==3.5.0",
     "httpx==0.28.1",
-    "hvac>=2.3.0",
+    "hvac==2.3.0",
     "itsdangerous==2.2.0",
     "kubernetes==32.0.1",
     "openshift==0.13.2",
@@ -21,7 +21,7 @@ dependencies = [
     "pyjwt==2.10.1",
     "pynamodb==6.0.2",
     "requests-toolbelt==1.0.0",
-    "types-hvac>=2.3.0.20240621",
+    "types-hvac==2.3.0.20240621",
     "uvicorn==0.34.0",
     "watchdog==6.0.0",
 ]
