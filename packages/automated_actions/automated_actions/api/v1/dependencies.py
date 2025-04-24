@@ -2,8 +2,8 @@ from typing import Annotated
 
 from fastapi import Depends, Request
 
-from automated_actions.api.models import Task, TaskSchemaIn, User
 from automated_actions.auth import OPA
+from automated_actions.db.models import Task, TaskSchemaIn, User
 
 
 async def get_user(request: Request) -> User:

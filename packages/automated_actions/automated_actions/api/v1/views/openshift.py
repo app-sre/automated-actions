@@ -5,14 +5,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path
 
-from automated_actions.celery.openshift.tasks  import (
+from automated_actions.api.v1.dependencies import TaskLog
+from automated_actions.celery.openshift.tasks import (
     openshift_workload_restart as openshift_workload_restart_task,
 )
-from automated_actions.api.models import (
+from automated_actions.db.models import (
     Task,
     TaskSchemaOut,
 )
-from automated_actions.api.v1.dependencies import TaskLog
 
 router = APIRouter()
 log = logging.getLogger(__name__)

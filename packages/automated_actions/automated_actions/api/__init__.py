@@ -2,11 +2,10 @@ import logging
 
 from fastapi import APIRouter, FastAPI
 
+from automated_actions.api.v1 import router as v1_router
 from automated_actions.auth import OPA, OpenIDConnect
 from automated_actions.config import settings
-
-from .models import ALL_TABLES, User
-from .v1 import router as v1_router
+from automated_actions.db.models import ALL_TABLES, User
 
 router = APIRouter()
 log = logging.getLogger(__name__)

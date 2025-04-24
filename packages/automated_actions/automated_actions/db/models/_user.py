@@ -3,7 +3,7 @@ from typing import Self
 from pydantic import BaseModel
 from pynamodb.attributes import ListAttribute, UnicodeAttribute
 
-from automated_actions.api.models._base import Table
+from automated_actions.db.models._base import Table
 
 
 class UserSchemaIn(BaseModel):

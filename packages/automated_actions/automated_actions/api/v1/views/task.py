@@ -3,12 +3,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
-from automated_actions.api.models import (
+from automated_actions.api.v1.dependencies import UserDep
+from automated_actions.db.models import (
     Task,
     TaskSchemaOut,
     TaskStatus,
 )
-from automated_actions.api.v1.dependencies import UserDep
 
 router = APIRouter()
 log = logging.getLogger(__name__)

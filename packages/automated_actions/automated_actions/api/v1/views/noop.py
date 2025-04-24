@@ -4,13 +4,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
-from automated_actions.api.models import (
+from automated_actions.api.v1.dependencies import TaskLog, UserDep
+from automated_actions.db.models import (
     Task,
     TaskSchemaOut,
     TaskStatus,
     UserSchemaOut,
 )
-from automated_actions.api.v1.dependencies import TaskLog, UserDep
 
 router = APIRouter()
 log = logging.getLogger(__name__)

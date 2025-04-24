@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from pynamodb.attributes import UnicodeAttribute
 from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
-from automated_actions.api.models._base import Table
+from automated_actions.db.models._base import Table
 
 
 class TaskStatus(StrEnum):

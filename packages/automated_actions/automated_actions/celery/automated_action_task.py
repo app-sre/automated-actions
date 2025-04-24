@@ -5,7 +5,7 @@ from billiard.einfo import ExceptionInfo
 from hvac.exceptions import VaultError
 from kubernetes.client.exceptions import ApiException
 
-from automated_actions.api.models import TaskStatus
+from automated_actions.db.models import TaskStatus
 from celery import Task
 
 log = logging.getLogger(__name__)
