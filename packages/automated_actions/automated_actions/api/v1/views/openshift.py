@@ -5,15 +5,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path
 
+from automated_actions.celery.openshift.tasks  import (
+    openshift_workload_restart as openshift_workload_restart_task,
+)
 from automated_actions.api.models import (
     Task,
     TaskSchemaOut,
 )
 from automated_actions.api.v1.dependencies import TaskLog
-
-# from automated_actions.tasks import (
-#    openshift_workload_restart as openshift_workload_restart_task,
-# )
 
 router = APIRouter()
 log = logging.getLogger(__name__)
@@ -39,14 +38,14 @@ def openshift_workload_restart(
 ) -> TaskSchemaOut:
     """Restart an OpenShift workload."""
     log.info(f"Restarting {kind}/{name} in {cluster}/{namespace}")
-    #    openshift_workload_restart_task.apply_async(
-    #        kwargs={
-    #            "cluster": cluster,
-    #            "namespace": namespace,
-    #            "kind": kind,
-    #            "name": name,
-    #            "task": task,
-    #        },
-    #        task_id=task.task_id,
-    #    )
+    openshift_workload_restart_task.apply_async(
+        kwargs={
+            "cluster": cluster,
+            "namespace": namespace,
+            "kind": kind,
+            "name": name,
+            "task": task,
+        },
+        task_id=task.task_id,
+    )
     return task.dump()
