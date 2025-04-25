@@ -8,6 +8,7 @@ metadata:
     pipelinesascode.tekton.dev/max-keep-runs: "10"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
       == "main"
+  creationTimestamp: null
   labels:
     appstudio.openshift.io/application: automated-actions-main
     appstudio.openshift.io/component: automated-actions-client-main
@@ -31,7 +32,6 @@ spec:
   - name: additional_secret
     value: app-sre-pypi-credentials
   pipelineRef:
-    resolver: git
     params:
     - name: url
       value: https://github.com/app-sre/shared-pipelines
@@ -39,16 +39,22 @@ spec:
       value: main
     - name: pathInRepo
       value: pipelines/multi-arch-build-pipeline.yaml
-  taskRunTemplate: {}
+    resolver: git
+  taskRunTemplate:
+    serviceAccountName: build-pipeline-automated-actions-client-main
   workspaces:
   - name: workspace
     volumeClaimTemplate:
+      metadata:
+        creationTimestamp: null
       spec:
         accessModes:
         - ReadWriteOnce
         resources:
           requests:
             storage: 1Gi
+      status: {}
   - name: git-auth
     secret:
       secretName: '{{ git_auth_secret }}'
+status: {}
