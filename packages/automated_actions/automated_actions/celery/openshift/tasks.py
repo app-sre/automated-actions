@@ -1,6 +1,6 @@
 from automated_actions.celery.app import app
 from automated_actions.celery.automated_action_task import AutomatedActionTask
-from automated_actions.db.models import Task
+from automated_actions.db.models import Action
 from automated_actions.utils.cluster_connection import get_cluster_connection_data
 from automated_actions.utils.openshift_client import (
     OpenshiftClient,
@@ -44,7 +44,7 @@ def openshift_workload_restart(
     namespace: str,
     kind: str,
     name: str,
-    task: Task,  # noqa: ARG001
+    action: Action,  # noqa: ARG001
 ) -> None:
     cluster_connection = get_cluster_connection_data(cluster)
     oc = OpenshiftClient(

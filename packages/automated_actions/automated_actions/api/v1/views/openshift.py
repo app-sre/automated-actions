@@ -1,17 +1,16 @@
-# ruff: noqa: ERA001
 
 import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path
 
-from automated_actions.api.v1.dependencies import TaskLog
+from automated_actions.api.v1.dependencies import ActionLog
 from automated_actions.celery.openshift.tasks import (
     openshift_workload_restart as openshift_workload_restart_task,
 )
 from automated_actions.db.models import (
-    Task,
-    TaskSchemaOut,
+    Action,
+    ActionSchemaOut,
 )
 
 router = APIRouter()
@@ -34,8 +33,8 @@ def openshift_workload_restart(
         ),
     ],
     name: Annotated[str, Path(description="OpenShift workload name")],
-    task: Annotated[Task, Depends(TaskLog("openshift-workload-restart"))],
-) -> TaskSchemaOut:
+    action: Annotated[Action, Depends(ActionLog("openshift-workload-restart"))],
+) -> ActionSchemaOut:
     """Restart an OpenShift workload."""
     log.info(f"Restarting {kind}/{name} in {cluster}/{namespace}")
     openshift_workload_restart_task.apply_async(
@@ -44,8 +43,8 @@ def openshift_workload_restart(
             "namespace": namespace,
             "kind": kind,
             "name": name,
-            "task": task,
+            "action": action,
         },
-        task_id=task.task_id,
+        task_id=action.action_id,
     )
-    return task.dump()
+    return action.dump()

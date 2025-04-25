@@ -9,7 +9,7 @@ from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 from automated_actions.db.models._base import Table
 
 
-class TaskStatus(StrEnum):
+class ActionStatus(StrEnum):
     PENDING = "PENDING"
     RUNNING = "RUNNING"
     SUCCESS = "SUCCESS"
@@ -17,20 +17,20 @@ class TaskStatus(StrEnum):
     CANCELLED = "CANCELLED"
 
 
-class TaskSchemaIn(BaseModel):
+class ActionSchemaIn(BaseModel):
     name: str
     owner: str
-    status: TaskStatus = TaskStatus.PENDING
+    status: ActionStatus = ActionStatus.PENDING
 
 
-class TaskSchemaOut(TaskSchemaIn):
-    task_id: str
+class ActionSchemaOut(ActionSchemaIn):
+    action_id: str
     result: str | None = None
     created_at: float
     updated_at: float
 
 
-class OwnerIndex(GlobalSecondaryIndex["Task"]):
+class OwnerIndex(GlobalSecondaryIndex["Action"]):
     class Meta:
         index_name = "owner-index"
         read_capacity_units = 10
@@ -41,26 +41,26 @@ class OwnerIndex(GlobalSecondaryIndex["Task"]):
     status = UnicodeAttribute(range_key=True)
 
 
-class Task(Table[TaskSchemaIn, TaskSchemaOut]):
-    """Task."""
+class Action(Table[ActionSchemaIn, ActionSchemaOut]):
+    """Action."""
 
     class Meta(Table.Meta):
-        table_name = "aa-task"
-        schema_out = TaskSchemaOut
+        table_name = "aa-action"
+        schema_out = ActionSchemaOut
 
     @staticmethod
     def _pre_create(values: dict[str, Any]) -> dict[str, Any]:
-        values = super(Task, Task)._pre_create(values)
-        values["task_id"] = str(uuid.uuid4())
+        values = super(Action, Action)._pre_create(values)
+        values["action_id"] = str(uuid.uuid4())
         return values
 
-    def set_status(self, status: TaskStatus) -> None:
-        self.update(actions=[Task.status.set(status.value)])
+    def set_status(self, status: ActionStatus) -> None:
+        self.update(actions=[Action.status.set(status.value)])
 
-    def set_status_and_result(self, status: TaskStatus, result: str) -> None:
-        self.update(actions=[Task.status.set(status.value), Task.result.set(result)])
+    def set_status_and_result(self, status: ActionStatus, result: str) -> None:
+        self.update(actions=[Action.status.set(status.value), Action.result.set(result)])
 
-    task_id = UnicodeAttribute(hash_key=True)
+    action_id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
     status = UnicodeAttribute()
     result = UnicodeAttribute(null=True)

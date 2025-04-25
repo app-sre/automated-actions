@@ -5,7 +5,7 @@ from billiard.einfo import ExceptionInfo
 from hvac.exceptions import VaultError
 from kubernetes.client.exceptions import ApiException
 
-from automated_actions.db.models import TaskStatus
+from automated_actions.db.models import ActionStatus
 from celery import Task
 
 log = logging.getLogger(__name__)
@@ -18,17 +18,17 @@ class AutomatedActionTask(Task):
 
     def before_start(  # noqa: PLR6301
         self,
-        task_id: str,  # noqa: ARG002
+        action_id: str,  # noqa: ARG002
         args: tuple,  # noqa: ARG002
         kwargs: dict,
     ) -> None:
-        kwargs["task"].set_status(TaskStatus.RUNNING)
-        log.info("task_id=%s status=%s", kwargs["task"].task_id, TaskStatus.RUNNING)
+        kwargs["action"].set_status(ActionStatus.RUNNING)
+        log.info("action_id=%s status=%s", kwargs["action"].action_id, ActionStatus.RUNNING)
 
     def on_success(  # noqa: PLR6301
         self,
         retval: Any,  # noqa: ARG002
-        task_id: str,  # noqa: ARG002
+        action_id: str,  # noqa: ARG002
         args: tuple,  # noqa: ARG002
         kwargs: dict,
     ) -> None:
@@ -36,18 +36,18 @@ class AutomatedActionTask(Task):
             f"{kwargs['kind']} {kwargs['name']} restarted successfully on "
             f"{kwargs['cluster']}/{kwargs['namespace']}."
         )
-        kwargs["task"].set_status_and_result(TaskStatus.SUCCESS, result)
+        kwargs["action"].set_status_and_result(ActionStatus.SUCCESS, result)
         log.info(
-            "task_id=%s status=%s - %s",
-            kwargs["task"].task_id,
-            TaskStatus.SUCCESS,
+            "action_id=%s status=%s - %s",
+            kwargs["action"].action_id,
+            ActionStatus.SUCCESS,
             result,
         )
 
     def on_failure(  # noqa: PLR6301
         self,
         exc: Exception,
-        task_id: str,  # noqa: ARG002
+        action_id: str,  # noqa: ARG002
         args: tuple,  # noqa: ARG002
         kwargs: dict,
         einfo: ExceptionInfo,  # noqa: ARG002
@@ -56,20 +56,20 @@ class AutomatedActionTask(Task):
             f"{kwargs['kind']} '{kwargs['name']}' restart failed on "
             f"'{kwargs['cluster']}/{kwargs['namespace']}': {exc}."
         )
-        kwargs["task"].set_status_and_result(TaskStatus.FAILURE, result)
+        kwargs["action"].set_status_and_result(ActionStatus.FAILURE, result)
         log.error(
-            "task_id=%s status=%s - %s",
-            kwargs["task"].task_id,
-            TaskStatus.FAILURE,
+            "action_id=%s status=%s - %s",
+            kwargs["action"].action_id,
+            ActionStatus.FAILURE,
             result,
         )
 
     def on_retry(  # noqa: PLR6301
         self,
         exc: Exception,
-        task_id: str,  # noqa: ARG002
+        action_id: str,  # noqa: ARG002
         args: tuple,  # noqa: ARG002
         kwargs: dict,
         einfo: ExceptionInfo,  # noqa: ARG002
     ) -> None:
-        log.debug("task_id=%s retrying due to %s", kwargs["task"].task_id, exc)
+        log.debug("action_id=%s retrying due to %s", kwargs["action"].action_id, exc)

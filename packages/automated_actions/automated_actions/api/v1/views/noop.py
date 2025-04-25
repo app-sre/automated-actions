@@ -4,11 +4,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
-from automated_actions.api.v1.dependencies import TaskLog, UserDep
+from automated_actions.api.v1.dependencies import ActionLog, UserDep
 from automated_actions.db.models import (
-    Task,
-    TaskSchemaOut,
-    TaskStatus,
+    Action,
+    ActionSchemaOut,
+    ActionStatus,
     UserSchemaOut,
 )
 
@@ -31,13 +31,13 @@ class NoopParam(BaseModel):
 )
 def run_noop(
     param: NoopParam,
-    task: Annotated[Task, Depends(TaskLog("noop"))],
+    action: Annotated[Action, Depends(ActionLog("noop"))],
     labels: Annotated[list[str] | None, Query()] = None,
-) -> TaskSchemaOut:
+) -> ActionSchemaOut:
     """Run a noop action"""
     log.info(f"{param=}, {labels=}")
-    task.set_status(TaskStatus.RUNNING)
-    return task.dump()
+    action.set_status(ActionStatus.RUNNING)
+    return action.dump()
 
 
 @router.get("/foobar/{pk}", operation_id="foobar")
