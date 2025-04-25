@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class TaskStatus(str, Enum):
+class ActionStatus(str, Enum):
     CANCELLED = "CANCELLED"
     FAILURE = "FAILURE"
     PENDING = "PENDING"

@@ -5,17 +5,33 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.action_schema_out import ActionSchemaOut
+from ...models.action_status import ActionStatus
 from ...models.http_validation_error import HTTPValidationError
-from ...models.task_schema_out import TaskSchemaOut
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
-    task_id: str,
+    *,
+    status: ActionStatus | None | Unset = ActionStatus.RUNNING,
 ) -> dict[str, Any]:
+    params: dict[str, Any] = {}
+
+    json_status: None | Unset | str
+    if isinstance(status, Unset):
+        json_status = UNSET
+    elif isinstance(status, ActionStatus):
+        json_status = status.value
+    else:
+        json_status = status
+    params["status"] = json_status
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
+
     _kwargs: dict[str, Any] = {
-        "method": "post",
-        "url": f"/api/v1/tasks/{task_id}",
+        "method": "get",
+        "url": "/api/v1/actions",
+        "params": params,
     }
 
     return _kwargs
@@ -23,11 +39,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> HTTPValidationError | TaskSchemaOut | None:
-    if response.status_code == 202:
-        response_202 = TaskSchemaOut.from_dict(response.json())
+) -> HTTPValidationError | list["ActionSchemaOut"] | None:
+    if response.status_code == 200:
+        response_200 = []
+        _response_200 = response.json()
+        for response_200_item_data in _response_200:
+            response_200_item = ActionSchemaOut.from_dict(response_200_item_data)
 
-        return response_202
+            response_200.append(response_200_item)
+
+        return response_200
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -40,7 +61,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | TaskSchemaOut]:
+) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -50,27 +71,27 @@ def _build_response(
 
 
 def sync_detailed(
-    task_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[HTTPValidationError | TaskSchemaOut]:
-    """Task Cancel
+    status: ActionStatus | None | Unset = ActionStatus.RUNNING,
+) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
+    """Action List
 
-     Cancel an action.
+     List all user actions.
 
     Args:
-        task_id (str):
+        status (Union[ActionStatus, None, Unset]):  Default: ActionStatus.RUNNING.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, TaskSchemaOut]]
+        Response[Union[HTTPValidationError, list['ActionSchemaOut']]]
     """
 
     kwargs = _get_kwargs(
-        task_id=task_id,
+        status=status,
     )
 
     with client as _client:
@@ -82,53 +103,53 @@ def sync_detailed(
 
 
 def sync(
-    task_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> HTTPValidationError | TaskSchemaOut | None:
-    """Task Cancel
+    status: ActionStatus | None | Unset = ActionStatus.RUNNING,
+) -> HTTPValidationError | list["ActionSchemaOut"] | None:
+    """Action List
 
-     Cancel an action.
+     List all user actions.
 
     Args:
-        task_id (str):
+        status (Union[ActionStatus, None, Unset]):  Default: ActionStatus.RUNNING.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, TaskSchemaOut]
+        Union[HTTPValidationError, list['ActionSchemaOut']]
     """
 
     return sync_detailed(
-        task_id=task_id,
         client=client,
+        status=status,
     ).parsed
 
 
 async def asyncio_detailed(
-    task_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[HTTPValidationError | TaskSchemaOut]:
-    """Task Cancel
+    status: ActionStatus | None | Unset = ActionStatus.RUNNING,
+) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
+    """Action List
 
-     Cancel an action.
+     List all user actions.
 
     Args:
-        task_id (str):
+        status (Union[ActionStatus, None, Unset]):  Default: ActionStatus.RUNNING.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, TaskSchemaOut]]
+        Response[Union[HTTPValidationError, list['ActionSchemaOut']]]
     """
 
     kwargs = _get_kwargs(
-        task_id=task_id,
+        status=status,
     )
 
     async with client as _client:
@@ -140,29 +161,29 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    task_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> HTTPValidationError | TaskSchemaOut | None:
-    """Task Cancel
+    status: ActionStatus | None | Unset = ActionStatus.RUNNING,
+) -> HTTPValidationError | list["ActionSchemaOut"] | None:
+    """Action List
 
-     Cancel an action.
+     List all user actions.
 
     Args:
-        task_id (str):
+        status (Union[ActionStatus, None, Unset]):  Default: ActionStatus.RUNNING.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, TaskSchemaOut]
+        Union[HTTPValidationError, list['ActionSchemaOut']]
     """
 
     return (
         await asyncio_detailed(
-            task_id=task_id,
             client=client,
+            status=status,
         )
     ).parsed
 
@@ -174,11 +195,13 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="Cancel an action.")
-def task_cancel(
+@app.command(help="List all user actions.")
+def action_list(
     ctx: typer.Context,
-    task_id: Annotated[str, typer.Option(help="", show_default=False)],
+    status: Annotated[
+        ActionStatus | None, typer.Option(help="")
+    ] = ActionStatus.RUNNING,
 ) -> None:
-    result = sync(task_id=task_id, client=ctx.obj["client"])
+    result = sync(status=status, client=ctx.obj["client"])
     if "console" in ctx.obj:
         ctx.obj["console"].print(result)

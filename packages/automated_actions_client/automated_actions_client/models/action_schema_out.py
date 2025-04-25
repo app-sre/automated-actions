@@ -4,31 +4,31 @@ from typing import Any, TypeVar, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.task_status import TaskStatus
+from ..models.action_status import ActionStatus
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="TaskSchemaOut")
+T = TypeVar("T", bound="ActionSchemaOut")
 
 
 @_attrs_define
-class TaskSchemaOut:
+class ActionSchemaOut:
     """
     Attributes:
         name (str):
         owner (str):
-        task_id (str):
+        action_id (str):
         created_at (float):
         updated_at (float):
-        status (Union[Unset, TaskStatus]):
+        status (Union[Unset, ActionStatus]):
         result (Union[None, Unset, str]):
     """
 
     name: str
     owner: str
-    task_id: str
+    action_id: str
     created_at: float
     updated_at: float
-    status: Unset | TaskStatus = UNSET
+    status: Unset | ActionStatus = UNSET
     result: None | Unset | str = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -37,7 +37,7 @@ class TaskSchemaOut:
 
         owner = self.owner
 
-        task_id = self.task_id
+        action_id = self.action_id
 
         created_at = self.created_at
 
@@ -58,7 +58,7 @@ class TaskSchemaOut:
         field_dict.update({
             "name": name,
             "owner": owner,
-            "task_id": task_id,
+            "action_id": action_id,
             "created_at": created_at,
             "updated_at": updated_at,
         })
@@ -76,18 +76,18 @@ class TaskSchemaOut:
 
         owner = d.pop("owner")
 
-        task_id = d.pop("task_id")
+        action_id = d.pop("action_id")
 
         created_at = d.pop("created_at")
 
         updated_at = d.pop("updated_at")
 
         _status = d.pop("status", UNSET)
-        status: Unset | TaskStatus
+        status: Unset | ActionStatus
         if isinstance(_status, Unset):
             status = UNSET
         else:
-            status = TaskStatus(_status)
+            status = ActionStatus(_status)
 
         def _parse_result(data: object) -> None | Unset | str:
             if data is None:
@@ -98,18 +98,18 @@ class TaskSchemaOut:
 
         result = _parse_result(d.pop("result", UNSET))
 
-        task_schema_out = cls(
+        action_schema_out = cls(
             name=name,
             owner=owner,
-            task_id=task_id,
+            action_id=action_id,
             created_at=created_at,
             updated_at=updated_at,
             status=status,
             result=result,
         )
 
-        task_schema_out.additional_properties = d
-        return task_schema_out
+        action_schema_out.additional_properties = d
+        return action_schema_out
 
     @property
     def additional_keys(self) -> list[str]:

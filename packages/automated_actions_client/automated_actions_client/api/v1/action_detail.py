@@ -5,17 +5,17 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.action_schema_out import ActionSchemaOut
 from ...models.http_validation_error import HTTPValidationError
-from ...models.task_schema_out import TaskSchemaOut
 from ...types import Response
 
 
 def _get_kwargs(
-    task_id: str,
+    action_id: str,
 ) -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": f"/api/v1/tasks/{task_id}",
+        "url": f"/api/v1/actions/{action_id}",
     }
 
     return _kwargs
@@ -23,9 +23,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> HTTPValidationError | TaskSchemaOut | None:
+) -> ActionSchemaOut | HTTPValidationError | None:
     if response.status_code == 200:
-        response_200 = TaskSchemaOut.from_dict(response.json())
+        response_200 = ActionSchemaOut.from_dict(response.json())
 
         return response_200
     if response.status_code == 422:
@@ -40,7 +40,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | TaskSchemaOut]:
+) -> Response[ActionSchemaOut | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -50,27 +50,27 @@ def _build_response(
 
 
 def sync_detailed(
-    task_id: str,
+    action_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[HTTPValidationError | TaskSchemaOut]:
-    """Task Detail
+) -> Response[ActionSchemaOut | HTTPValidationError]:
+    """Action Detail
 
-     Retrieve an task.
+     Retrieve an action.
 
     Args:
-        task_id (str):
+        action_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, TaskSchemaOut]]
+        Response[Union[ActionSchemaOut, HTTPValidationError]]
     """
 
     kwargs = _get_kwargs(
-        task_id=task_id,
+        action_id=action_id,
     )
 
     with client as _client:
@@ -82,53 +82,53 @@ def sync_detailed(
 
 
 def sync(
-    task_id: str,
+    action_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> HTTPValidationError | TaskSchemaOut | None:
-    """Task Detail
+) -> ActionSchemaOut | HTTPValidationError | None:
+    """Action Detail
 
-     Retrieve an task.
+     Retrieve an action.
 
     Args:
-        task_id (str):
+        action_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, TaskSchemaOut]
+        Union[ActionSchemaOut, HTTPValidationError]
     """
 
     return sync_detailed(
-        task_id=task_id,
+        action_id=action_id,
         client=client,
     ).parsed
 
 
 async def asyncio_detailed(
-    task_id: str,
+    action_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[HTTPValidationError | TaskSchemaOut]:
-    """Task Detail
+) -> Response[ActionSchemaOut | HTTPValidationError]:
+    """Action Detail
 
-     Retrieve an task.
+     Retrieve an action.
 
     Args:
-        task_id (str):
+        action_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, TaskSchemaOut]]
+        Response[Union[ActionSchemaOut, HTTPValidationError]]
     """
 
     kwargs = _get_kwargs(
-        task_id=task_id,
+        action_id=action_id,
     )
 
     async with client as _client:
@@ -140,28 +140,28 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    task_id: str,
+    action_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> HTTPValidationError | TaskSchemaOut | None:
-    """Task Detail
+) -> ActionSchemaOut | HTTPValidationError | None:
+    """Action Detail
 
-     Retrieve an task.
+     Retrieve an action.
 
     Args:
-        task_id (str):
+        action_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, TaskSchemaOut]
+        Union[ActionSchemaOut, HTTPValidationError]
     """
 
     return (
         await asyncio_detailed(
-            task_id=task_id,
+            action_id=action_id,
             client=client,
         )
     ).parsed
@@ -174,11 +174,11 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="Retrieve an task.")
-def task_detail(
+@app.command(help="Retrieve an action.")
+def action_detail(
     ctx: typer.Context,
-    task_id: Annotated[str, typer.Option(help="", show_default=False)],
+    action_id: Annotated[str, typer.Option(help="", show_default=False)],
 ) -> None:
-    result = sync(task_id=task_id, client=ctx.obj["client"])
+    result = sync(action_id=action_id, client=ctx.obj["client"])
     if "console" in ctx.obj:
         ctx.obj["console"].print(result)

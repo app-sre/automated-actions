@@ -1,19 +1,19 @@
 from . import (
+    action_cancel,
+    action_detail,
+    action_list,
     foobar,
     me,
     noop,
     openshift_workload_restart,
-    task_cancel,
-    task_detail,
-    task_list,
 )
 
 __all__ = [
+    "action_cancel",
+    "action_detail",
+    "action_list",
     "foobar",
     "me",
     "noop",
     "openshift_workload_restart",
-    "task_cancel",
-    "task_detail",
-    "task_list",
 ]
