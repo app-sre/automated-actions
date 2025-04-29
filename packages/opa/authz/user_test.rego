@@ -4,7 +4,7 @@ import data.authz
 
 test_user_objects if {
 	objects := authz.objects with input as {"username": "user1"}
-	expected := {"restart", "me", "task-cancel", "task-detail", "task-list"}
+	expected := {"restart", "me", "action-cancel", "action-detail", "action-list"}
 	every obj in expected {
 		obj in objects
 	}
@@ -15,7 +15,7 @@ test_user_objects if {
 
 test_admin_objects if {
 	objects := authz.objects with input as {"username": "admin-user"}
-	expected := {"*", "me", "task-cancel", "task-detail", "task-list"}
+	expected := {"*", "me", "action-cancel", "action-detail", "action-list"}
 	every obj in expected {
 		obj in objects
 	}
@@ -26,7 +26,7 @@ test_admin_objects if {
 
 test_unknown_user_objects if {
 	objects := authz.objects with input as {"username": "unknown"}
-	expected := {"me", "task-cancel", "task-detail", "task-list"}
+	expected := {"me", "action-cancel", "action-detail", "action-list"}
 	every obj in expected {
 		obj in objects
 	}

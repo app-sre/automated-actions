@@ -6,9 +6,9 @@ roles:
   default:
   - obj: me
     params: {}
-  - obj: task-list
+  - obj: action-list
     params: {}
-  - obj: task-detail
+  - obj: action-detail
     params: {}
-  - obj: task-cancel
+  - obj: action-cancel
     params: {}

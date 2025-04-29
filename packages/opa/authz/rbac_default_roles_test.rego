@@ -10,26 +10,26 @@ test_default_me if {
 	}
 }
 
-test_default_task_list if {
+test_default_action_list if {
 	authz.allow with input as {
 		"username": "random-user",
-		"obj": "task-list",
+		"obj": "action-list",
 		"params": {},
 	}
 }
 
-test_default_task_detail if {
+test_default_action_detail if {
 	authz.allow with input as {
 		"username": "random-user",
-		"obj": "task-detail",
+		"obj": "action-detail",
 		"params": {},
 	}
 }
 
-test_default_task_cancel if {
+test_default_action_cancel if {
 	authz.allow with input as {
 		"username": "random-user",
-		"obj": "task-cancel",
+		"obj": "action-cancel",
 		"params": {},
 	}
 }
