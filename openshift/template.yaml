@@ -416,13 +416,9 @@ parameters:
 
 - name: AA_CELERY_OPTS
   description: Celery options
-  value: ""
-  required: true
 
 - name: AA_UVICORN_OPTS
   description: Uvicorn options
-  value: ""
-  required: true
 
 - name: AA_DEBUG
   description: Debug mode
@@ -431,8 +427,6 @@ parameters:
 
 - name: AA_ROOT_PATH
   description: Root path for the API
-  value: ""
-  required: true
 
 - name: AA_URL
   description: URL of the API
