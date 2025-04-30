@@ -63,7 +63,7 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
       start_interval: 1s
-      interval: 1m
+      interval: 10s
       timeout: 1s
       retries: 10
 
@@ -112,4 +112,5 @@ services:
       automated-actions:
         condition: service_healthy
     volumes:
+      - ./packages/automated_actions_client/openapi_python_client_templates:/opt/app-root/src/openapi_python_client_templates
       - ./packages/automated_actions_client/automated_actions_client:/opt/app-root/src/automated_actions_client
