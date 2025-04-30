@@ -1,6 +1,8 @@
 import logging
 import re
 from collections.abc import Iterable
+from datetime import UTC
+from datetime import datetime as dt
 from json import JSONDecodeError
 from typing import Protocol, Self
 from urllib.parse import quote
@@ -19,7 +21,9 @@ class AccessToken(BaseModel):
     name: str
     preferred_username: str
     email: str
-    realm_access: dict[str, list[str]]
+    iss: str  # issuer
+    exp: int  # expiration time
+    iat: int  # issued at
 
 
 class UserModelProtocol(Protocol):
@@ -40,6 +44,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         client_id: str,
         client_secret: str,
         session_secret: str,
+        session_timeout_secs: int,
         scope: str = "openid email profile",
         *,
         enforce_https: bool = True,
@@ -82,6 +87,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         )
 
         self.session_serializer = URLSafeTimedSerializer(session_secret)
+        self.session_timeout_secs = session_timeout_secs
 
     async def __call__(self, request: Request) -> UserModel:
         enforce_login = HTTPException(
@@ -98,13 +104,9 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
             try:
                 access_token = self.session_serializer.loads(session_token)
                 return self.get_user_info(access_token)
-            except Exception:  # noqa: BLE001
-                log.error("Access token cannot be loaded or is outdated")  # noqa: TRY400
+            except Exception:
+                log.exception("Access token cannot be loaded or is outdated")
                 raise enforce_login from None
-
-        if authorization := request.headers.get("Authorization"):
-            # custom auth
-            raise NotImplementedError(f"Custom auth not implemented: {authorization}")
 
         raise enforce_login
 
@@ -121,7 +123,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
     async def callback(
         self, request: Request, response: Response, code: str, state: str
     ) -> Response:
-        """Keycloak leitet nach Authentifizierung hierher zurück."""
+        """Keycloak callback."""
         async with httpx.AsyncClient() as client:
             token_response = await client.post(
                 self.token_endpoint,
@@ -140,7 +142,10 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         session_token = self.session_serializer.dumps(token_data["access_token"])
         response = RedirectResponse(url=state)
         response.set_cookie(
-            key="session", value=session_token, secure=self.enforce_https, expires=3600
+            key="session",
+            value=session_token,
+            secure=self.enforce_https,
+            expires=self.session_timeout_secs,
         )
         return response
 
@@ -151,7 +156,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         return response
 
     def get_user_info(self, access_token: str) -> UserModel:
-        # Check if access token is still valid
+        # Check against the userinfo endpoint
         response = httpx.get(
             self.userinfo_endpoint,
             headers={"Authorization": f"Bearer {access_token}"},
@@ -161,8 +166,11 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         token = AccessToken(
             **jwt.decode(
                 access_token,
-                audience=self.client_id,
-                options={"verify_signature": False},
+                options={
+                    # no further verification needed because we verify the token via the userinfo endpoint
+                    "verify_signature": False,
+                    "require": ["exp", "iat", "iss"],
+                },
             )
         )
         return self.user_model.load(
@@ -256,3 +264,63 @@ class OPA[UserModel: UserModelProtocol]:
         # get user allowed_actions
         allowed_actions = await self.user_objects(user)
         user.set_allowed_actions(allowed_actions)
+
+
+class BearerTokenAuth[UserModel: UserModelProtocol]:
+    def __init__(self, issuer: str, secret: str, user_model: type[UserModel]) -> None:
+        self.issuer = issuer
+        self.secret = secret
+        self.user_model = user_model
+
+    async def __call__(self, request: Request) -> UserModel | None:
+        if authorization := request.headers.get("Authorization"):
+            # check if the authorization header is a bearer token
+            if not authorization.startswith("Bearer "):
+                raise HTTPException(
+                    status_code=401,
+                    detail="Invalid authorization header.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                ) from None
+
+            # extract the token from the header
+            token = authorization.split(" ")[1]
+            try:
+                return self.get_user_info(token)
+            except Exception:
+                log.exception("Access token cannot be loaded or is not valid anymore")
+
+        return None
+
+    def get_user_info(self, encoded_token: str) -> UserModel:
+        token = AccessToken(
+            **jwt.decode(
+                encoded_token,
+                self.secret,
+                algorithms="HS256",
+                options={
+                    "require": ["exp", "iat", "iss"],
+                    "verify_exp": True,
+                    "verify_iss": True,
+                },
+                issuer=self.issuer,
+            )
+        )
+        return self.user_model.load(
+            username=token.preferred_username,
+            name=token.name,
+            email=token.email,
+        )
+
+    def create_token(self, username: str, name: str, email: str, expiration: dt) -> str:
+        return jwt.encode(
+            {
+                "preferred_username": username,
+                "name": name,
+                "email": email,
+                "iss": self.issuer,
+                "exp": expiration,
+                "iat": dt.now(tz=UTC),
+            },
+            self.secret,
+            algorithm="HS256",
+        )

@@ -2,6 +2,7 @@ import atexit
 import contextlib
 import importlib
 import logging
+import os
 import sys
 from http.cookiejar import MozillaCookieJar
 from importlib.metadata import version
@@ -16,20 +17,23 @@ from httpx_gssapi import OPTIONAL, HTTPSPNEGOAuth
 from rich import print as rich_print
 from rich.console import Console
 
-from automated_actions_cli.commands import test
 from automated_actions_cli.config import config
-from automated_actions_cli.utils import blend_text, progress_spinner
+from automated_actions_cli.utils import (
+    blend_text,
+    kerberos_available,
+    kinit,
+    progress_spinner,
+)
 
 app = typer.Typer(
     pretty_exceptions_show_locals=False,
     rich_markup_mode="rich",
     epilog="Made with [red]:heart:[/red] by [blue]AppSRE[/blue]",
 )
-app.add_typer(test.app, name="env", help="test related commands.")
 
 logger = logging.getLogger(__name__)
 
-console = Console(record=True)
+console = Console(record=True, soft_wrap=True)
 
 BANNER = """
     [o_o]
@@ -103,17 +107,36 @@ def main(
         format="%(name)-20s: %(message)s",
     )
     logging.getLogger("httpx").setLevel(logging.WARNING)
-    ctx.obj = {
-        "client": ClientWithCookieJar(
-            base_url=str(config.url),
-            raise_on_unexpected_status=True,
-            follow_redirects=True,
-            httpx_args={
-                "auth": HTTPSPNEGOAuth(mutual_authentication=OPTIONAL),
-            },
-        ),
-        "console": console,
-    }
+
+    if token := os.environ.get("AA_TOKEN"):
+        ctx.obj = {
+            "client": Client(
+                base_url=str(config.url),
+                raise_on_unexpected_status=True,
+                follow_redirects=True,
+                headers={"Authorization": f"Bearer {token}"},
+            ),
+            "console": console,
+        }
+
+    elif kerberos_available():
+        kinit()
+        ctx.obj = {
+            "client": ClientWithCookieJar(
+                base_url=str(config.url),
+                raise_on_unexpected_status=True,
+                follow_redirects=True,
+                httpx_args={
+                    "auth": HTTPSPNEGOAuth(mutual_authentication=OPTIONAL),
+                },
+            ),
+            "console": console,
+        }
+    else:
+        logger.error(
+            "No bearer token or Kerberos authentication available. Please set AA_TOKEN or install and configure Kerberos."
+        )
+        raise typer.Exit(1)
 
     # enforce the user to login
     api_v1_me(client=ctx.obj["client"])

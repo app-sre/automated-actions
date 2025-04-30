@@ -11,4 +11,5 @@ log = logging.getLogger(__name__)
 
 @router.get("/me", operation_id="me")
 def me(user: UserDep) -> UserSchemaOut:
+    """Get the current user information."""
     return user.dump()

@@ -7,10 +7,8 @@ class Settings(BaseSettings):
 
     # app config
     debug: bool = False
+    url: str = "http://localhost:8080"
     root_path: str = ""
-
-    # fastapi auth config
-    api_keys: list[str] = []
 
     # worker config
     broker_url: str = "sqs://localhost:4566"
@@ -32,6 +30,8 @@ class Settings(BaseSettings):
     oidc_client_id: str
     oidc_client_secret: str
     session_secret: str
+    session_timeout_secs: int = 3600
+    token_secret: str
 
     # AuthZ
     opa_host: str = "http://opa:8181"
@@ -52,4 +52,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-####

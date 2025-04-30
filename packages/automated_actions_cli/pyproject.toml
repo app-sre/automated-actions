@@ -78,6 +78,8 @@ ignore = [
     "S404",    # subprocess import
     "EM101",   # Exception must not use a string literal, assign to variable first
     "EM102",   # Exception must not use an f-string literal, assign to variable first
+    "S603",    # subprocess
+    "S607",    # subprocess.run w/o full path
     "TRY003",  # Avoid specifying long messages outside the exception class
     "TRY300",  # try-consider-else
     # pydoclint

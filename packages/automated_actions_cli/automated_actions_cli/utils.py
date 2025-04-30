@@ -1,6 +1,12 @@
+import logging
+import shutil
+import subprocess
+
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.text import Text
+
+logger = logging.getLogger(__name__)
 
 
 def blend_text(
@@ -29,3 +35,17 @@ def progress_spinner(console: Console) -> Progress:
         console=console,
         transient=True,
     )
+
+
+def kerberos_available() -> bool:
+    return bool(shutil.which("kinit"))
+
+
+def kinit() -> None:
+    """Acquire a kerberos ticket if needed."""
+    try:
+        # Check if the kerberos ticket is valid
+        subprocess.run(["klist", "-s"], check=True, capture_output=True)
+    except subprocess.CalledProcessError:
+        # If the ticket is not valid, acquire a new one
+        subprocess.run(["kinit"], check=True, capture_output=False)
