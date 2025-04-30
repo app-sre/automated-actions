@@ -7,6 +7,23 @@ metadata:
   annotations:
     description: automated-actions
 objects:
+# -------- CONFIG MAP ----------
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    annotations:
+      qontract.recycle: "true"
+    labels:
+      app.kubernetes.io/name: automated-actions
+    name: automated-actions-config
+  data:
+    AA_SESSION_TIMEOUT_SECS: "${AA_SESSION_TIMEOUT_SECS}"
+    AA_CELERY_OPTS: "${AA_CELERY_OPTS}"
+    AA_UVICORN_OPTS: "${AA_UVICORN_OPTS}"
+    AA_DEBUG: "${AA_DEBUG}"
+    AA_ROOT_PATH: "${AA_ROOT_PATH}"
+    AA_URL: "${AA_URL}"
+
 # ------- API DEPLOYMENT --------------------
 - apiVersion: policy/v1
   kind: PodDisruptionBudget
@@ -388,8 +405,37 @@ parameters:
 
 # Api config
 - name: AA_APP_PORT
-  description: Port to expose the api app on
+  description: Port to expose the API app on
   value: "8080"
+  required: true
+
+- name: AA_SESSION_TIMEOUT_SECS
+  description: Session timeout in seconds
+  value: "3600"
+  required: true
+
+- name: AA_CELERY_OPTS
+  description: Celery options
+  value: ""
+  required: true
+
+- name: AA_UVICORN_OPTS
+  description: Uvicorn options
+  value: ""
+  required: true
+
+- name: AA_DEBUG
+  description: Debug mode
+  value: "0"
+  required: true
+
+- name: AA_ROOT_PATH
+  description: Root path for the API
+  value: ""
+  required: true
+
+- name: AA_URL
+  description: URL of the API
   required: true
 
 ## Api Pod limits
