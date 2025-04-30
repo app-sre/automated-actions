@@ -58,7 +58,9 @@ class Action(Table[ActionSchemaIn, ActionSchemaOut]):
         self.update(actions=[Action.status.set(status.value)])
 
     def set_status_and_result(self, status: ActionStatus, result: str) -> None:
-        self.update(actions=[Action.status.set(status.value), Action.result.set(result)])
+        self.update(
+            actions=[Action.status.set(status.value), Action.result.set(result)]
+        )
 
     action_id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()

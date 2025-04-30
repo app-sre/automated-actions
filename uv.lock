@@ -184,6 +184,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "types-python-dateutil" },
 ]
 
 [package.metadata]
@@ -200,6 +201,7 @@ dev = [
     { name = "pytest", specifier = "==8.3.5" },
     { name = "pytest-cov", specifier = "==6.0.0" },
     { name = "ruff", specifier = "==0.11.7" },
+    { name = "types-python-dateutil", specifier = "==2.9.0.20241206" },
 ]
 
 [[package]]
@@ -1248,6 +1250,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/3c/1e/ff22549ecfba344035b8a28477ab597e17a5a6f334ea1f17d8837069359a/types-hvac-2.3.0.20240621.tar.gz", hash = "sha256:ae168990a51caadfec84da1b6502a84fce56cc48c2fd196e555f18b52fc8bd37", size = 19323, upload_time = "2024-06-21T02:25:27.84Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e3/0c/9a8d51edf7256fd5a24cd3b848852173a39958fba6a580b9c0b48d18708c/types_hvac-2.3.0.20240621-py3-none-any.whl", hash = "sha256:22e4a3834f7c4135158f23c2edc3d66c9a0bbde379db1d2c459fc47979878e96", size = 38770, upload_time = "2024-06-21T02:25:26.317Z" },
+]
+
+[[package]]
+name = "types-python-dateutil"
+version = "2.9.0.20241206"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a9/60/47d92293d9bc521cd2301e423a358abfac0ad409b3a1606d8fbae1321961/types_python_dateutil-2.9.0.20241206.tar.gz", hash = "sha256:18f493414c26ffba692a72369fea7a154c502646301ebfe3d56a04b3767284cb", size = 13802, upload_time = "2024-12-06T02:56:41.019Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0f/b3/ca41df24db5eb99b00d97f89d7674a90cb6b3134c52fb8121b6d8d30f15c/types_python_dateutil-2.9.0.20241206-py3-none-any.whl", hash = "sha256:e248a4bc70a486d3e3ec84d0dc30eec3a5f979d6e7ee4123ae043eedbb987f53", size = 14384, upload_time = "2024-12-06T02:56:39.412Z" },
 ]
 
 [[package]]

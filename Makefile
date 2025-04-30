@@ -9,8 +9,10 @@ format:
 
 .PHONY: test
 test:
-	@for d in $(shell find packages -mindepth 1 -maxdepth 1 -type d); do \
-		$(MAKE) -C $$d test || exit 1; \
+	@for d in $(wildcard packages/*); do \
+		if [ -d "$$d" ]; then \
+			$(MAKE) -C $$d test || exit 1; \
+		fi \
 	done
 
 .PHONY: build

@@ -23,7 +23,9 @@ class AutomatedActionTask(Task):
         kwargs: dict,
     ) -> None:
         kwargs["action"].set_status(ActionStatus.RUNNING)
-        log.info("action_id=%s status=%s", kwargs["action"].action_id, ActionStatus.RUNNING)
+        log.info(
+            "action_id=%s status=%s", kwargs["action"].action_id, ActionStatus.RUNNING
+        )
 
     def on_success(  # noqa: PLR6301
         self,
