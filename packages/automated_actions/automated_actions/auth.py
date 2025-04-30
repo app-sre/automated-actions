@@ -277,7 +277,7 @@ class BearerTokenAuth[UserModel: UserModelProtocol]:
             # check if the authorization header is a bearer token
             if not authorization.startswith("Bearer "):
                 raise HTTPException(
-                    status_code=401,
+                    status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid authorization header.",
                     headers={"WWW-Authenticate": "Bearer"},
                 ) from None
