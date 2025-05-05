@@ -1,42 +1,21 @@
-from collections.abc import Iterable
 from datetime import UTC
 from datetime import datetime as dt
 from datetime import timedelta as td
-from typing import Any, Self
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi import HTTPException, Request, status
-from pydantic import BaseModel
+from fastapi import HTTPException, status
 
 from automated_actions.auth import BearerTokenAuth
 
 
-class MockUserModel(BaseModel):
-    username: str
-
-    @classmethod
-    def load(cls, username: str, **_: Any) -> Self:
-        return cls(username=username)
-
-    def set_allowed_actions(self, allowed_actions: Iterable[str]) -> None:
-        pass
-
-
 @pytest.fixture
-def bearer_token_auth() -> BearerTokenAuth:
-    return BearerTokenAuth[MockUserModel](  # type: ignore[type-var]
+def bearer_token_auth(usermodel: type) -> BearerTokenAuth:
+    return BearerTokenAuth[usermodel](  # type: ignore[valid-type]
         issuer="http://dev.com",
         secret="secret",  # noqa: S106
-        user_model=MockUserModel,
+        user_model=usermodel,
     )
-
-
-@pytest.fixture
-def mock_request() -> Request:
-    request = MagicMock(spec=Request)
-    request.headers = {}
-    return request
 
 
 @pytest.mark.asyncio

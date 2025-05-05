@@ -26,10 +26,7 @@ def openshift_workload_restart(
     namespace: Annotated[str, Path(description="OpenShift namespace")],
     kind: Annotated[
         str,
-        Path(
-            description="OpenShift workload kind. e.g. Deployment or Pod",
-            example="Deployment",
-        ),
+        Path(description="OpenShift workload kind. e.g. Deployment or Pod"),
     ],
     name: Annotated[str, Path(description="OpenShift workload name")],
     action: Annotated[Action, Depends(ActionLog("openshift-workload-restart"))],

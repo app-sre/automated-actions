@@ -120,9 +120,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         )
         return RedirectResponse(auth_url)
 
-    async def callback(
-        self, request: Request, response: Response, code: str, state: str
-    ) -> Response:
+    async def callback(self, request: Request, code: str, state: str) -> Response:
         """Keycloak callback."""
         async with httpx.AsyncClient() as client:
             token_response = await client.post(
@@ -150,7 +148,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         return response
 
     @staticmethod
-    def logout(response: Response) -> Response:
+    def logout() -> Response:
         response = RedirectResponse(url="/")
         response.delete_cookie("session")
         return response
