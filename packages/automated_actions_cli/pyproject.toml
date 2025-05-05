@@ -14,7 +14,7 @@ dependencies = [
     "automated-actions-client",
     "httpx-gssapi==0.4",
     "pydantic-settings==2.9.1",
-    "rich==13.9.4",
+    "rich==14.0.0",
     "typer==0.15.2",
 ]
 
