@@ -14,8 +14,8 @@ dependencies = [
     "automated-actions-client",
     "httpx-gssapi==0.4",
     "pydantic-settings==2.9.1",
-    "rich==13.9.4",
-    "typer==0.15.2",
+    "rich==14.0.0",
+    "typer==0.15.3",
 ]
 
 [project.urls]
@@ -26,10 +26,10 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "ruff==0.11.7",
+    "ruff==0.11.8",
     "mypy==1.15.0",
     "pytest==8.3.5",
-    "pytest-cov==6.0.0",
+    "pytest-cov==6.1.1",
 ]
 
 [project.scripts]
