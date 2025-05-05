@@ -85,7 +85,7 @@ class OpenshiftClient:
         if not has_pod_proper_owner:
             raise OpenshiftClientPodDeletionNotSupportedError(
                 f"Pod '{name}' in namespace '{namespace}' cannot be deleted as "
-                f"it does not belong to a {', '.join(SUPPORTED_POD_OWNERS)}."
+                f"it does not belong to a {', '.join(sorted(SUPPORTED_POD_OWNERS))}."
             )
 
         return api.delete(name=name, namespace=namespace)

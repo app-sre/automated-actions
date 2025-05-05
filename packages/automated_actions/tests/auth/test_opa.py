@@ -170,7 +170,7 @@ async def test_opa_call(
 
 @pytest.mark.asyncio
 async def test_opa_call_skipped(
-    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock
 ) -> None:
     user = usermodel.load("test_user")
     mock_request.url = MagicMock()

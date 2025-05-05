@@ -45,8 +45,9 @@ class VaultClient:
         secret_id: str | None = None,
         kube_auth_role: str | None = None,
         kube_auth_mount: str | None = None,
+        hvac_client: type[hvac.Client] = hvac.Client,
     ) -> None:
-        self._client = hvac.Client(url=server_url)
+        self._client = hvac_client(url=server_url)
 
         if role_id is not None and secret_id is not None:
             self._client.auth.approle.login(
