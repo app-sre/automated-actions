@@ -19,6 +19,10 @@ os.environ["AA_TOKEN_SECRET"] = "test_token_secret"
 class MockUserModel(BaseModel):
     username: str
     allowed_actions: list[str] = Field([], exclude=True)
+    name: str = "test user"
+    email: str = "test@example.com"
+    created_at: float = 1
+    updated_at: float = 2
 
     @classmethod
     def load(cls, username: str, **_: Any) -> Self:
