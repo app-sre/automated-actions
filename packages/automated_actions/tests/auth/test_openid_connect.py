@@ -1,6 +1,7 @@
 # ruff: noqa: S106
 
 
+from collections.abc import Callable
 from datetime import UTC
 from datetime import datetime as dt
 from datetime import timedelta as td
@@ -8,7 +9,7 @@ from unittest.mock import MagicMock
 
 import jwt
 import pytest
-from fastapi import HTTPException, status
+from fastapi import FastAPI, HTTPException, status
 from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 from httpx import HTTPStatusError
@@ -16,12 +17,26 @@ from pytest_httpx import HTTPXMock
 from pytest_mock import MockerFixture
 
 from automated_actions.auth import OpenIDConnect
-
-from .conftest import MockUserModel
+from tests.conftest import MockUserModel
 
 
 @pytest.fixture
-def openid_connect(usermodel: type, httpx_mock: HTTPXMock) -> OpenIDConnect:
+def openid_connect(usermodel: type) -> OpenIDConnect:
+    return OpenIDConnect[usermodel](  # type: ignore[valid-type]
+        issuer="http://dev.com",
+        client_id="test_client_id",
+        client_secret="test_client_secret",
+        session_secret="test_session_secret",
+        session_timeout_secs=60,
+        authorization_endpoint="http://dev.com/authorize",
+        token_endpoint="http://dev.com/token",
+        userinfo_endpoint="http://dev.com/userinfo",
+        user_model=usermodel,
+    )
+
+
+@pytest.mark.asyncio
+async def test_openid_connect_create(httpx_mock: HTTPXMock, usermodel: type) -> None:
     httpx_mock.add_response(
         url="http://dev.com/.well-known/openid-configuration",
         json={
@@ -30,7 +45,7 @@ def openid_connect(usermodel: type, httpx_mock: HTTPXMock) -> OpenIDConnect:
             "userinfo_endpoint": "http://dev.com/userinfo",
         },
     )
-    return OpenIDConnect[usermodel](  # type: ignore[valid-type]
+    openid_connect = await OpenIDConnect[usermodel].create(  # type: ignore[valid-type]
         issuer="http://dev.com",
         client_id="test_client_id",
         client_secret="test_client_secret",
@@ -38,6 +53,9 @@ def openid_connect(usermodel: type, httpx_mock: HTTPXMock) -> OpenIDConnect:
         session_timeout_secs=60,
         user_model=usermodel,
     )
+    assert openid_connect.authorization_endpoint
+    assert openid_connect.token_endpoint
+    assert openid_connect.userinfo_endpoint
 
 
 def test_openid_connect_init_endpoints(openid_connect: OpenIDConnect) -> None:
@@ -132,9 +150,11 @@ async def test_openid_connect_call_bad_token(
 
 
 def test_openid_connect_login(
-    openid_connect: OpenIDConnect, client: TestClient
+    openid_connect: OpenIDConnect,
+    full_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
 ) -> None:
-    response = client.get(
+    response = client(full_app).get(
         "/api/v1/auth/login", params={"next_url": "/foobar"}, follow_redirects=False
     )
     assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
@@ -145,7 +165,10 @@ def test_openid_connect_login(
 
 
 def test_openid_connect_callback_endpoint(
-    openid_connect: OpenIDConnect, client: TestClient, httpx_mock: HTTPXMock
+    openid_connect: OpenIDConnect,
+    full_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+    httpx_mock: HTTPXMock,
 ) -> None:
     httpx_mock.add_response(
         url=openid_connect.token_endpoint,
@@ -156,7 +179,7 @@ def test_openid_connect_callback_endpoint(
         json={"access_token": "not_a_real_token"},
     )
 
-    response = client.get(
+    response = client(full_app).get(
         "/api/v1/auth/callback",
         params={"code": "test_code", "state": "/foobar"},
         follow_redirects=False,
@@ -167,14 +190,17 @@ def test_openid_connect_callback_endpoint(
 
 
 def test_openid_connect_callback_endpoint_error(
-    openid_connect: OpenIDConnect, client: TestClient, httpx_mock: HTTPXMock
+    openid_connect: OpenIDConnect,
+    full_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+    httpx_mock: HTTPXMock,
 ) -> None:
     httpx_mock.add_response(
         url=openid_connect.token_endpoint,
         status_code=status.HTTP_400_BAD_REQUEST,
     )
 
-    response = client.get(
+    response = client(full_app).get(
         "/api/v1/auth/callback",
         params={"code": "test_code", "state": "/foobar"},
         follow_redirects=False,
@@ -183,8 +209,10 @@ def test_openid_connect_callback_endpoint_error(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
-def test_openid_connect_logout_endpoint(client: TestClient) -> None:
-    response = client.get(
+def test_openid_connect_logout_endpoint(
+    full_app: FastAPI, client: Callable[[FastAPI], TestClient]
+) -> None:
+    response = client(full_app).get(
         "/api/v1/auth/logout",
         follow_redirects=False,
     )
