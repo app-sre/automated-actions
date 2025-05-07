@@ -16,6 +16,11 @@ router = APIRouter()
 log = logging.getLogger(__name__)
 
 
+def get_action_log() -> ActionLog:
+    """Get the action log dependency."""
+    return ActionLog("openshift-workload-restart")
+
+
 @router.post(
     "/openshift/workload-restart/{cluster}/{namespace}/{kind}/{name}",
     operation_id="openshift-workload-restart",
@@ -29,7 +34,7 @@ def openshift_workload_restart(
         Path(description="OpenShift workload kind. e.g. Deployment or Pod"),
     ],
     name: Annotated[str, Path(description="OpenShift workload name")],
-    action: Annotated[Action, Depends(ActionLog("openshift-workload-restart"))],
+    action: Annotated[Action, Depends(get_action_log)],
 ) -> ActionSchemaOut:
     """Restart an OpenShift workload."""
     log.info(f"Restarting {kind}/{name} in {cluster}/{namespace}")

@@ -102,3 +102,17 @@ def client() -> Callable[[FastAPI], TestClient]:
         return client
 
     return _client
+
+
+@pytest.fixture
+def running_action() -> dict[str, Any]:
+    """Fixture for a running action."""
+    return {
+        "name": "test action",
+        "owner": "test@example.com",
+        "status": "RUNNING",
+        "action_id": "1",
+        "result": "test result",
+        "created_at": 1.0,
+        "updated_at": 2.0,
+    }
