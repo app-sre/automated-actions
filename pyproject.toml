@@ -15,4 +15,5 @@ members = [
     "packages/automated_actions",
     "packages/automated_actions_client",
     "packages/automated_actions_cli",
+    "packages/integration_tests",
 ]

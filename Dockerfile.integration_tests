@@ -1,6 +1,7 @@
 #
 # Base image with defaults for all stages
 FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:e1c4703364c5cb58f5462575dc90345bcd934ddc45e6c32f9c162f2b5617681c AS base
+COPY --from=ghcr.io/astral-sh/uv:0.7.2@sha256:3b898ca84fbe7628c5adcd836c1de78a0f1ded68344d019af8478d4358417399 /uv /bin/uv
 
 COPY LICENSE /licenses/
 
@@ -27,6 +28,7 @@ WORKDIR ${APP_ROOT}/src
 #
 FROM registry.access.redhat.com/ubi9/python-312@sha256:6779499e4e43ac7a24c3e7ec5e312dc1b36879209244ed387640046ec9df7712 AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.7.2@sha256:3b898ca84fbe7628c5adcd836c1de78a0f1ded68344d019af8478d4358417399 /uv /bin/uv
+
 ENV \
     # use venv from ubi image
     UV_PROJECT_ENVIRONMENT=${APP_ROOT} \
@@ -35,31 +37,30 @@ ENV \
     # disable uv cache. it doesn't make sense in a container
     UV_NO_CACHE=true
 
-COPY packages/automated_actions/pyproject.toml uv.lock ./
-# Install the project dependencies
-RUN uv sync --frozen --no-install-project --no-group dev
+COPY --chown=1001:0 pyproject.toml uv.lock ./
+# automated_actions_client is a dependency of automated_actions_cli
+COPY --chown=1001:0 packages/automated_actions_client ./packages/automated_actions_client
+COPY packages/automated_actions_cli ./packages/automated_actions_cli
 
-COPY README.md ./
-COPY --chown=1001:root packages/automated_actions packages/automated_actions
-RUN uv sync --frozen --no-group dev
+COPY packages/integration_tests/ ./packages/integration_tests/
+RUN cd ./packages/integration_tests/ && uv sync
 
 
 #
 # Test image
 #
 FROM base AS test
-COPY --from=ghcr.io/astral-sh/uv:0.7.2@sha256:3b898ca84fbe7628c5adcd836c1de78a0f1ded68344d019af8478d4358417399 /uv /bin/uv
 
-COPY Makefile ./
-COPY --from=builder /opt/app-root /opt/app-root
-RUN uv sync --frozen
-RUN make test
+COPY --from=builder --chown=1001:0 /opt/app-root /opt/app-root
+COPY packages/integration_tests/Makefile ./packages/integration_tests/
+RUN make -C packages/integration_tests test
 
 
 #
 # Production image
 #
 FROM base AS prod
-COPY --from=builder /opt/app-root /opt/app-root
-COPY app.sh ./
-ENTRYPOINT [ "./app.sh" ]
+COPY --from=builder --chown=1001:0 /opt/app-root /opt/app-root
+
+WORKDIR ${APP_ROOT}/src/packages/integration_tests
+ENTRYPOINT [ "uv", "run", "pytest", "tests" ]
