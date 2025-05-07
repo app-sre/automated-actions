@@ -18,30 +18,25 @@ class AutomatedActionTask(Task):
 
     def before_start(  # noqa: PLR6301
         self,
-        action_id: str,  # noqa: ARG002
+        task_id: str,
         args: tuple,  # noqa: ARG002
         kwargs: dict,
     ) -> None:
         kwargs["action"].set_status(ActionStatus.RUNNING)
-        log.info(
-            "action_id=%s status=%s", kwargs["action"].action_id, ActionStatus.RUNNING
-        )
+        log.info("action_id=%s status=%s", task_id, ActionStatus.RUNNING)
 
     def on_success(  # noqa: PLR6301
         self,
         retval: Any,  # noqa: ARG002
-        action_id: str,  # noqa: ARG002
+        task_id: str,
         args: tuple,  # noqa: ARG002
         kwargs: dict,
     ) -> None:
-        result = (
-            f"{kwargs['kind']} {kwargs['name']} restarted successfully on "
-            f"{kwargs['cluster']}/{kwargs['namespace']}."
-        )
+        result = "ok"
         kwargs["action"].set_status_and_result(ActionStatus.SUCCESS, result)
         log.info(
             "action_id=%s status=%s - %s",
-            kwargs["action"].action_id,
+            task_id,
             ActionStatus.SUCCESS,
             result,
         )
@@ -49,19 +44,16 @@ class AutomatedActionTask(Task):
     def on_failure(  # noqa: PLR6301
         self,
         exc: Exception,
-        action_id: str,  # noqa: ARG002
+        task_id: str,
         args: tuple,  # noqa: ARG002
         kwargs: dict,
         einfo: ExceptionInfo,  # noqa: ARG002
     ) -> None:
-        result = (
-            f"{kwargs['kind']} '{kwargs['name']}' restart failed on "
-            f"'{kwargs['cluster']}/{kwargs['namespace']}': {exc}."
-        )
+        result = str(exc)
         kwargs["action"].set_status_and_result(ActionStatus.FAILURE, result)
         log.error(
             "action_id=%s status=%s - %s",
-            kwargs["action"].action_id,
+            task_id,
             ActionStatus.FAILURE,
             result,
         )
@@ -69,9 +61,9 @@ class AutomatedActionTask(Task):
     def on_retry(  # noqa: PLR6301
         self,
         exc: Exception,
-        action_id: str,  # noqa: ARG002
+        task_id: str,
         args: tuple,  # noqa: ARG002
-        kwargs: dict,
+        kwargs: dict,  # noqa: ARG002
         einfo: ExceptionInfo,  # noqa: ARG002
     ) -> None:
-        log.debug("action_id=%s retrying due to %s", kwargs["action"].action_id, exc)
+        log.debug("action_id=%s retrying due to %s", task_id, exc)
