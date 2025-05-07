@@ -100,6 +100,8 @@ ignore = [
     "EM102",   # Exception must not use an f-string literal, assign to variable first
     "TRY003",  # Avoid specifying long messages outside the exception class
     "TRY300",  # try-consider-else
+    "TC002",   # type-checking-block
+    "TC003",   # type-checking-block
     # pydoclint
     "DOC",
     # May conflict with the formatter, https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules

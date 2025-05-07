@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import uuid
+from collections.abc import Iterable
 from enum import StrEnum
-from typing import Any
+from typing import Any, Protocol, Self, TypeVar
 
 from pydantic import BaseModel
 from pynamodb.attributes import UnicodeAttribute
@@ -62,9 +65,54 @@ class Action(Table[ActionSchemaIn, ActionSchemaOut]):
             actions=[Action.status.set(status.value), Action.result.set(result)]
         )
 
+    @classmethod
+    def find_by_owner_and_status(
+        cls: type[Self], owner_email: str, status: ActionStatus
+    ) -> Iterable[Action]:
+        """Returns actions by owner and status."""
+        return cls.owner_index.query(owner_email, cls.status == status.value)
+
     action_id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
     status = UnicodeAttribute()
     result = UnicodeAttribute(null=True)
     owner = UnicodeAttribute()
     owner_index = OwnerIndex()
+
+
+T_co = TypeVar("T_co", covariant=True)
+
+
+class ActionProtocol(Protocol[T_co]):
+    """Protocol for the action model."""
+
+    status: Any
+
+    @classmethod
+    def find_by_owner_and_status(
+        cls, owner_email: str, status: ActionStatus
+    ) -> Iterable[T_co]: ...
+
+    @classmethod
+    def get_or_404(cls, pk: str) -> T_co: ...
+
+
+class ActionManager[ActionClass: ActionProtocol]:
+    """Abstract class for the action model."""
+
+    def __init__(self, klass: type[ActionClass]) -> None:
+        self.klass = klass
+
+    def get_user_actions(
+        self, email: str, status: ActionStatus
+    ) -> Iterable[ActionClass]:
+        return self.klass.find_by_owner_and_status(email, status)
+
+    def get_or_404(self, pk: str) -> ActionClass:
+        """Get an action by its primary key or raise a 404 error."""
+        return self.klass.get_or_404(pk)
+
+
+def get_action_manager() -> ActionManager[Action]:
+    """Get the action manager."""
+    return ActionManager[Action](Action)
