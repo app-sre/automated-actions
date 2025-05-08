@@ -52,6 +52,11 @@ parameters:
   value: ''
   required: true
 
+- name: IMAGE_PULL_SECRETS
+  description: Pull secrets to use for automated-actions images
+  value: '[]'
+  required: false
+
 - name: SERVICE_ACCOUNT
   description: name of the service account to use when deploying the pod
   value: "integration-tests"
