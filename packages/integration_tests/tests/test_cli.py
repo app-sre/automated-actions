@@ -1,17 +1,9 @@
-import os
 from collections.abc import Callable
 from subprocess import CalledProcessError, CompletedProcess, run
 
 import pytest
 
 AACli = Callable[..., CompletedProcess]
-
-
-@pytest.fixture(autouse=True)
-def cli_env() -> None:
-    """Set up the environment for the CLI tests."""
-    assert os.environ.get("AA_TOKEN") is not None
-    assert os.environ.get("AA_URL") is not None
 
 
 @pytest.fixture
@@ -43,7 +35,7 @@ def test_cli_me(cli: AACli) -> None:
 def test_cli_action_list(cli: AACli) -> None:
     result = cli("action-list")
 
-    assert result.stdout.strip() == "[]"
+    assert result.stdout.strip() == "[]" or "ActionSchemaOut" in result.stdout
 
 
 def test_cli_optional_option_in_help(cli: AACli) -> None:

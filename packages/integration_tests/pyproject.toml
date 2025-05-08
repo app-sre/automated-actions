@@ -9,8 +9,10 @@ requires-python = "~= 3.12.0"
 dependencies = [
     "automated-actions-client",
     "automated-actions-cli",
+    "pydantic-settings==2.9.1",
     "pytest==8.3.5",
     "pytest-order==1.3.0",
+    "pytest-rerunfailures>=15.1",
 ]
 
 [project.urls]
@@ -96,9 +98,13 @@ known-first-party = ["tests"]
 [tool.mypy]
 files = ["tests"]
 enable_error_code = ["truthy-bool", "redundant-expr"]
+plugins = ["pydantic.mypy"]
 no_implicit_optional = true
 check_untyped_defs = true
 warn_unused_ignores = true
 show_error_codes = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
