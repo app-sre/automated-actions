@@ -7,13 +7,14 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.action_schema_out import ActionSchemaOut
 from ...models.http_validation_error import HTTPValidationError
+from ...models.openshift_workload_restart_kind import OpenshiftWorkloadRestartKind
 from ...types import Response
 
 
 def _get_kwargs(
     cluster: str,
     namespace: str,
-    kind: str,
+    kind: OpenshiftWorkloadRestartKind,
     name: str,
 ) -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
@@ -55,7 +56,7 @@ def _build_response(
 def sync_detailed(
     cluster: str,
     namespace: str,
-    kind: str,
+    kind: OpenshiftWorkloadRestartKind,
     name: str,
     *,
     client: AuthenticatedClient | Client,
@@ -67,7 +68,7 @@ def sync_detailed(
     Args:
         cluster (str): OpenShift cluster name
         namespace (str): OpenShift namespace
-        kind (str): OpenShift workload kind. e.g. Deployment or Pod
+        kind (OpenshiftWorkloadRestartKind): OpenShift workload kind. e.g. Deployment or Pod
         name (str): OpenShift workload name
 
     Raises:
@@ -96,7 +97,7 @@ def sync_detailed(
 def sync(
     cluster: str,
     namespace: str,
-    kind: str,
+    kind: OpenshiftWorkloadRestartKind,
     name: str,
     *,
     client: AuthenticatedClient | Client,
@@ -108,7 +109,7 @@ def sync(
     Args:
         cluster (str): OpenShift cluster name
         namespace (str): OpenShift namespace
-        kind (str): OpenShift workload kind. e.g. Deployment or Pod
+        kind (OpenshiftWorkloadRestartKind): OpenShift workload kind. e.g. Deployment or Pod
         name (str): OpenShift workload name
 
     Raises:
@@ -131,7 +132,7 @@ def sync(
 async def asyncio_detailed(
     cluster: str,
     namespace: str,
-    kind: str,
+    kind: OpenshiftWorkloadRestartKind,
     name: str,
     *,
     client: AuthenticatedClient | Client,
@@ -143,7 +144,7 @@ async def asyncio_detailed(
     Args:
         cluster (str): OpenShift cluster name
         namespace (str): OpenShift namespace
-        kind (str): OpenShift workload kind. e.g. Deployment or Pod
+        kind (OpenshiftWorkloadRestartKind): OpenShift workload kind. e.g. Deployment or Pod
         name (str): OpenShift workload name
 
     Raises:
@@ -172,7 +173,7 @@ async def asyncio_detailed(
 async def asyncio(
     cluster: str,
     namespace: str,
-    kind: str,
+    kind: OpenshiftWorkloadRestartKind,
     name: str,
     *,
     client: AuthenticatedClient | Client,
@@ -184,7 +185,7 @@ async def asyncio(
     Args:
         cluster (str): OpenShift cluster name
         namespace (str): OpenShift namespace
-        kind (str): OpenShift workload kind. e.g. Deployment or Pod
+        kind (OpenshiftWorkloadRestartKind): OpenShift workload kind. e.g. Deployment or Pod
         name (str): OpenShift workload name
 
     Raises:
@@ -223,7 +224,7 @@ def openshift_workload_restart(
         str, typer.Option(help="OpenShift namespace", show_default=False)
     ],
     kind: Annotated[
-        str,
+        OpenshiftWorkloadRestartKind,
         typer.Option(
             help="OpenShift workload kind. e.g. Deployment or Pod", show_default=False
         ),

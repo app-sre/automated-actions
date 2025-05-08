@@ -1,5 +1,5 @@
 import logging
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Path
 
@@ -33,7 +33,8 @@ def openshift_workload_restart(
     cluster: Annotated[str, Path(description="OpenShift cluster name")],
     namespace: Annotated[str, Path(description="OpenShift namespace")],
     kind: Annotated[
-        str,
+        # keep in sync with openshift_client.RollingRestartResource. Especially it must match the string cases!
+        Literal["Pod", "Deployment", "DaemonSet", "StatefulSet"],
         Path(description="OpenShift workload kind. e.g. Deployment or Pod"),
     ],
     name: Annotated[str, Path(description="OpenShift workload name")],
