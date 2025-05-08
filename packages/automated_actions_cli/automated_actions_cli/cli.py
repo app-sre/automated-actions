@@ -11,7 +11,7 @@ from typing import Annotated, Any
 
 import httpx
 import typer
-from automated_actions_client import Client
+from automated_actions_client import AuthenticatedClient, Client
 from automated_actions_client.api.v1.me import sync as api_v1_me
 from httpx_gssapi import OPTIONAL, HTTPSPNEGOAuth
 from rich import print as rich_print
@@ -110,11 +110,11 @@ def main(
 
     if token := os.environ.get("AA_TOKEN"):
         ctx.obj = {
-            "client": Client(
+            "client": AuthenticatedClient(
                 base_url=str(config.url),
+                token=token,
                 raise_on_unexpected_status=True,
                 follow_redirects=True,
-                headers={"Authorization": f"Bearer {token}"},
             ),
             "console": console,
         }
