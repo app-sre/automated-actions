@@ -5,8 +5,8 @@ from collections.abc import Iterable
 from enum import StrEnum
 from typing import Any, Protocol, Self, TypeVar
 
-from pydantic import BaseModel
-from pynamodb.attributes import UnicodeAttribute
+from pydantic import BaseModel, ConfigDict, field_serializer
+from pynamodb.attributes import DynamicMapAttribute, UnicodeAttribute
 from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
 from automated_actions.db.models._base import Table
@@ -27,10 +27,24 @@ class ActionSchemaIn(BaseModel):
 
 
 class ActionSchemaOut(ActionSchemaIn):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     action_id: str
     result: str | None = None
+    task_args: DynamicMapAttribute | None = None
     created_at: float
     updated_at: float
+
+    @field_serializer("task_args")
+    def serialize_task_args(self, task_args: DynamicMapAttribute) -> dict:  # noqa: PLR6301
+        if task_args is None:
+            return {}
+
+        return {
+            k: task_args.attribute_values[k]
+            for k in task_args.attribute_values
+            if k != "attribute_values"
+        }
 
 
 class OwnerIndex(GlobalSecondaryIndex["Action"]):
@@ -60,9 +74,15 @@ class Action(Table[ActionSchemaIn, ActionSchemaOut]):
     def set_status(self, status: ActionStatus) -> None:
         self.update(actions=[Action.status.set(status.value)])
 
-    def set_status_and_result(self, status: ActionStatus, result: str) -> None:
+    def set_final_state(
+        self, status: ActionStatus, result: str, task_args: dict
+    ) -> None:
         self.update(
-            actions=[Action.status.set(status.value), Action.result.set(result)]
+            actions=[
+                Action.status.set(status.value),
+                Action.result.set(result),
+                Action.task_args.set(task_args),
+            ]
         )
 
     @classmethod
@@ -76,6 +96,7 @@ class Action(Table[ActionSchemaIn, ActionSchemaOut]):
     name = UnicodeAttribute()
     status = UnicodeAttribute()
     result = UnicodeAttribute(null=True)
+    task_args = DynamicMapAttribute(null=True)
     owner = UnicodeAttribute()
     owner_index = OwnerIndex()
 

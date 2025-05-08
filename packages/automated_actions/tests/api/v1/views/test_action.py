@@ -5,6 +5,7 @@ from collections.abc import Callable
 import pytest
 from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
+from pynamodb.attributes import DynamicMapAttribute
 
 from automated_actions.db.models import (
     ActionManager,
@@ -34,6 +35,7 @@ class ActionStub(ActionSchemaOut):
                 owner=owner_email,
                 created_at=1.0,
                 updated_at=2.0,
+                task_args=None,
             ),
             ActionStub(
                 action_id="2",
@@ -43,6 +45,9 @@ class ActionStub(ActionSchemaOut):
                 owner=owner_email,
                 created_at=1.0,
                 updated_at=2.0,
+                task_args=DynamicMapAttribute(
+                    attribute_values={}, key1="value1", key2="value2"
+                ),
             ),
         ]
 
@@ -58,6 +63,7 @@ class ActionStub(ActionSchemaOut):
                 owner="test@example.com",
                 created_at=1.0,
                 updated_at=2.0,
+                task_args=None,
             )
         raise ValueError("Action not found")
 
@@ -90,6 +96,7 @@ def test_action_list(
             "result": "test result",
             "created_at": 1.0,
             "updated_at": 2.0,
+            "task_args": {},
         },
         {
             "name": "test action 2",
@@ -99,6 +106,7 @@ def test_action_list(
             "result": "test result 2",
             "created_at": 1.0,
             "updated_at": 2.0,
+            "task_args": {"key1": "value1", "key2": "value2"},
         },
     ]
 
@@ -118,6 +126,7 @@ def test_action_detail(
         "result": "test result",
         "created_at": 1.0,
         "updated_at": 2.0,
+        "task_args": {},
     }
 
 

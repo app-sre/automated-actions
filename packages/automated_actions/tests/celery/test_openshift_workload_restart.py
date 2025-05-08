@@ -87,14 +87,14 @@ def test_openshift_workload_restart_task(
     mock_owr = mocker.patch.object(OpenshiftWorkloadRestart, "run")
 
     action_id = str(uuid.uuid4())
+    task_args = {
+        "cluster": "cluster",
+        "namespace": "namespace",
+        "kind": "Pod",
+        "name": "pod-name",
+    }
     openshift_workload_restart.signature(
-        kwargs={
-            "cluster": "cluster",
-            "namespace": "namespace",
-            "kind": "Pod",
-            "name": "pod-name",
-            "action": mock_action,
-        },
+        kwargs={**task_args, "action": mock_action},
         task_id=action_id,
     ).apply()
 
@@ -103,8 +103,8 @@ def test_openshift_workload_restart_task(
     )
     mock_owr.assert_called_once()
     mock_action.set_status.assert_called_once_with(ActionStatus.RUNNING)
-    mock_action.set_status_and_result.assert_called_once_with(
-        ActionStatus.SUCCESS, "ok"
+    mock_action.set_final_state.assert_called_once_with(
+        status=ActionStatus.SUCCESS, result="ok", task_args=task_args
     )
 
 
@@ -125,14 +125,14 @@ def test_openshift_workload_restart_task_non_retryable_failure(
     )
 
     action_id = str(uuid.uuid4())
+    task_args = {
+        "cluster": "cluster",
+        "namespace": "namespace",
+        "kind": "Pod",
+        "name": "pod-name",
+    }
     openshift_workload_restart.signature(
-        kwargs={
-            "cluster": "cluster",
-            "namespace": "namespace",
-            "kind": "Pod",
-            "name": "pod-name",
-            "action": mock_action,
-        },
+        kwargs={**task_args, "action": mock_action},
         task_id=action_id,
     ).apply()
 
@@ -141,8 +141,10 @@ def test_openshift_workload_restart_task_non_retryable_failure(
     )
     mock_owr.assert_called_once()
     mock_action.set_status.assert_called_once_with(ActionStatus.RUNNING)
-    mock_action.set_status_and_result.assert_called_once_with(
-        ActionStatus.FAILURE, "pod pod-name does not exist"
+    mock_action.set_final_state.assert_called_once_with(
+        status=ActionStatus.FAILURE,
+        result="pod pod-name does not exist",
+        task_args=task_args,
     )
 
 
@@ -163,14 +165,14 @@ def test_openshift_workload_restart_task_retryable_failure(
     )
 
     action_id = str(uuid.uuid4())
+    task_args = {
+        "cluster": "cluster",
+        "namespace": "namespace",
+        "kind": "Pod",
+        "name": "pod-name",
+    }
     openshift_workload_restart.signature(
-        kwargs={
-            "cluster": "cluster",
-            "namespace": "namespace",
-            "kind": "Pod",
-            "name": "pod-name",
-            "action": mock_action,
-        },
+        kwargs={**task_args, "action": mock_action},
         task_id=action_id,
     ).apply()
 
@@ -186,6 +188,8 @@ def test_openshift_workload_restart_task_retryable_failure(
     )
     assert mock_owr.call_count == call_count
     mock_action.set_status.assert_has_calls([call(ActionStatus.RUNNING)] * call_count)
-    mock_action.set_status_and_result.assert_called_once_with(
-        ActionStatus.FAILURE, "(Cannot connect to cluster)\nReason: None\n"
+    mock_action.set_final_state.assert_called_once_with(
+        status=ActionStatus.FAILURE,
+        result="(Cannot connect to cluster)\nReason: None\n",
+        task_args=task_args,
     )

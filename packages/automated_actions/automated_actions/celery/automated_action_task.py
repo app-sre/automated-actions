@@ -33,7 +33,11 @@ class AutomatedActionTask(Task):
         kwargs: dict,
     ) -> None:
         result = "ok"
-        kwargs["action"].set_status_and_result(ActionStatus.SUCCESS, result)
+        kwargs["action"].set_final_state(
+            status=ActionStatus.SUCCESS,
+            result=result,
+            task_args=_task_kwargs_to_store(kwargs),
+        )
         log.info(
             "action_id=%s status=%s - %s",
             task_id,
@@ -50,7 +54,11 @@ class AutomatedActionTask(Task):
         einfo: ExceptionInfo,  # noqa: ARG002
     ) -> None:
         result = str(exc)
-        kwargs["action"].set_status_and_result(ActionStatus.FAILURE, result)
+        kwargs["action"].set_final_state(
+            status=ActionStatus.FAILURE,
+            result=result,
+            task_args=_task_kwargs_to_store(kwargs),
+        )
         log.error(
             "action_id=%s status=%s - %s",
             task_id,
@@ -67,3 +75,7 @@ class AutomatedActionTask(Task):
         einfo: ExceptionInfo,  # noqa: ARG002
     ) -> None:
         log.debug("action_id=%s retrying due to %s", task_id, exc)
+
+
+def _task_kwargs_to_store(kwargs: dict) -> dict:
+    return {k: kwargs[k] for k in kwargs if k != "action"}
