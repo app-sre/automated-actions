@@ -58,11 +58,14 @@ services:
         condition: service_healthy
       opa:
         condition: service_started
+      celery-worker:
+        condition: service_started
     volumes:
       - ./packages/automated_actions:/opt/app-root/src/packages/automated_actions
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
       start_interval: 1s
+      start_period: 1s
       interval: 10s
       timeout: 1s
       retries: 10

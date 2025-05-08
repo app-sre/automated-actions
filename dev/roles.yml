@@ -4,6 +4,8 @@ users:
   - admin
   rporresm:
   - admin
+  integration-tests-bot:
+  - admin
 roles:
   admin:
   - obj: '*'
