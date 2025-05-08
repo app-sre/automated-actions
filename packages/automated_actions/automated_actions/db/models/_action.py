@@ -96,6 +96,9 @@ class ActionProtocol(Protocol[T_co]):
     @classmethod
     def get_or_404(cls, pk: str) -> T_co: ...
 
+    @classmethod
+    def create(cls, params: ActionSchemaIn) -> T_co: ...
+
 
 class ActionManager[ActionClass: ActionProtocol]:
     """Abstract class for the action model."""
@@ -111,6 +114,9 @@ class ActionManager[ActionClass: ActionProtocol]:
     def get_or_404(self, pk: str) -> ActionClass:
         """Get an action by its primary key or raise a 404 error."""
         return self.klass.get_or_404(pk)
+
+    def create_action(self, name: str, owner: str) -> ActionClass:
+        return self.klass.create(ActionSchemaIn(name=name, owner=owner))
 
 
 def get_action_manager() -> ActionManager[Action]:

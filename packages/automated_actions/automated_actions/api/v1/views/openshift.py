@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path
 
-from automated_actions.api.v1.dependencies import ActionLog
+from automated_actions.api.v1.dependencies import UserDep
 from automated_actions.celery.openshift.tasks import (
     openshift_workload_restart as openshift_workload_restart_task,
 )
@@ -11,14 +11,17 @@ from automated_actions.db.models import (
     Action,
     ActionSchemaOut,
 )
+from automated_actions.db.models._action import ActionManager, get_action_manager
 
 router = APIRouter()
 log = logging.getLogger(__name__)
 
 
-def get_action_log() -> ActionLog:
-    """Get the action log dependency."""
-    return ActionLog("openshift-workload-restart")
+def get_action(
+    action_mgr: Annotated[ActionManager, Depends(get_action_manager)], user: UserDep
+) -> Action:
+    """Get a new action object for the user."""
+    return action_mgr.create_action(name="openshift-workload-restart", owner=user.email)
 
 
 @router.post(
@@ -34,7 +37,7 @@ def openshift_workload_restart(
         Path(description="OpenShift workload kind. e.g. Deployment or Pod"),
     ],
     name: Annotated[str, Path(description="OpenShift workload name")],
-    action: Annotated[Action, Depends(get_action_log)],
+    action: Annotated[Action, Depends(get_action)],
 ) -> ActionSchemaOut:
     """Restart an OpenShift workload."""
     log.info(f"Restarting {kind}/{name} in {cluster}/{namespace}")

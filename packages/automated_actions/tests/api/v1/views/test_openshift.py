@@ -6,7 +6,7 @@ from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
 from pytest_mock import MockerFixture
 
-from automated_actions.api.v1.views.openshift import get_action_log
+from automated_actions.api.v1.views.openshift import get_action
 from automated_actions.db.models import Action
 
 
@@ -23,7 +23,7 @@ def test_app(app: FastAPI, mocker: MockerFixture, running_action: dict) -> FastA
     action_mock = mocker.MagicMock(spec=Action)
     action_mock.action_id = running_action["action_id"]
     action_mock.dump.return_value = running_action
-    app.dependency_overrides[get_action_log] = lambda: action_mock
+    app.dependency_overrides[get_action] = lambda: action_mock
     return app
 
 
@@ -50,7 +50,7 @@ def test_openshift_workload_restart(
             "namespace": "test-namespace",
             "kind": "Pod",
             "name": "pod-xxx",
-            "action": test_app.dependency_overrides[get_action_log](),
+            "action": test_app.dependency_overrides[get_action](),
         },
         task_id=running_action["action_id"],
     )
