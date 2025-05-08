@@ -1,0 +1,76 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: automated-actions
+metadata:
+  name: integration-tests
+  annotations:
+    description: integration-tests
+objects:
+- apiVersion: v1
+  kind: ServiceAccount
+  imagePullSecrets: "${{IMAGE_PULL_SECRETS}}"
+  metadata:
+    name: ${SERVICE_ACCOUNT}
+    labels:
+      app.kubernetes.io/component: integration-tests
+      app.kubernetes.io/name: automated-actions
+
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    annotations:
+      ignore-check.kube-linter.io/unset-cpu-requirements: "no cpu limits"
+    name: integration-tests-${IMAGE_TAG}
+  spec:
+    backoffLimit: 5
+    template:
+      spec:
+        restartPolicy: Never
+        serviceAccountName: ${SERVICE_ACCOUNT}
+        containers:
+          - image: ${IMAGE}:${IMAGE_TAG}
+            imagePullPolicy: Always
+            name: integration-tests
+            env:
+              - name: AA_URL
+                value: ${AA_URL}
+              - name: AA_TOKEN
+                value: ${AA_TOKEN}
+            resources:
+              requests:
+                memory: ${MEMORY_REQUESTS}
+                cpu: ${CPU_REQUESTS}
+              limits:
+                memory: ${MEMORY_LIMIT}
+
+parameters:
+- name: IMAGE
+  value: quay.io/redhat-services-prod/app-sre-tenant/automated-actions-main/integration-tests-main
+
+- name: IMAGE_TAG
+  value: ''
+  required: true
+
+- name: SERVICE_ACCOUNT
+  description: name of the service account to use when deploying the pod
+  value: "integration-tests"
+
+- name: MEMORY_REQUESTS
+  value: 128Mi
+
+- name: MEMORY_LIMIT
+  value: 128Mi
+
+- name: CPU_REQUESTS
+  value: 300m
+
+- name: AA_URL
+  description: URL of the automated-actions instance to test
+  value: ""
+  required: true
+
+- name: AA_TOKEN
+  description: Access token for the automated-actions instance
+  value: ""
+  required: true
