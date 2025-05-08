@@ -8,6 +8,7 @@ members = [
     "automated-actions-cli",
     "automated-actions-client",
     "automated-actions-project",
+    "integration-tests",
 ]
 
 [[package]]
@@ -127,10 +128,10 @@ dev = [
     { name = "pytest", specifier = "==8.3.5" },
     { name = "pytest-asyncio", specifier = "==0.26.0" },
     { name = "pytest-cov", specifier = "==6.1.1" },
-    { name = "pytest-httpx", specifier = ">=0.35.0" },
-    { name = "pytest-mock", specifier = ">=3.14.0" },
+    { name = "pytest-httpx", specifier = "==0.35.0" },
+    { name = "pytest-mock", specifier = "==3.14.0" },
     { name = "qenerate", specifier = "==0.7.0" },
-    { name = "requests-mock", specifier = ">=1.12.1" },
+    { name = "requests-mock", specifier = "==1.12.1" },
     { name = "ruff", specifier = "==0.11.8" },
 ]
 
@@ -180,6 +181,7 @@ source = { editable = "packages/automated_actions_client" }
 dependencies = [
     { name = "attrs" },
     { name = "httpx" },
+    { name = "python-dateutil" },
     { name = "typer" },
 ]
 
@@ -197,6 +199,7 @@ dev = [
 requires-dist = [
     { name = "attrs" },
     { name = "httpx" },
+    { name = "python-dateutil" },
     { name = "typer" },
 ]
 
@@ -567,6 +570,37 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f2/97/ebf4da567aa6827c909642694d71c9fcf53e5b504f2d96afea02718862f3/iniconfig-2.1.0.tar.gz", hash = "sha256:3abbd2e30b36733fee78f9c7f7308f2d0050e88f0087fd25c2645f63c773e1c7", size = 4793, upload-time = "2025-03-19T20:09:59.721Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2c/e1/e6716421ea10d38022b952c159d5161ca1193197fb744506875fbb87ea7b/iniconfig-2.1.0-py3-none-any.whl", hash = "sha256:9deba5723312380e77435581c6bf4935c94cbfab9b1ed33ef8d238ea168eb760", size = 6050, upload-time = "2025-03-19T20:10:01.071Z" },
+]
+
+[[package]]
+name = "integration-tests"
+version = "0.1.0"
+source = { editable = "packages/integration_tests" }
+dependencies = [
+    { name = "automated-actions-cli" },
+    { name = "automated-actions-client" },
+    { name = "pytest" },
+    { name = "pytest-order" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "automated-actions-cli", editable = "packages/automated_actions_cli" },
+    { name = "automated-actions-client", editable = "packages/automated_actions_client" },
+    { name = "pytest", specifier = "==8.3.5" },
+    { name = "pytest-order", specifier = ">=1.3.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = "==1.15.0" },
+    { name = "ruff", specifier = "==0.11.8" },
 ]
 
 [[package]]
@@ -1024,6 +1058,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c6/90/a955c3ab35ccd41ad4de556596fa86685bf4fc5ffcc62d22d856cfd4e29a/pytest-mock-3.14.0.tar.gz", hash = "sha256:2719255a1efeceadbc056d6bf3df3d1c5015530fb40cf347c0f9afac88410bd0", size = 32814, upload-time = "2024-03-21T22:14:04.964Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f2/3b/b26f90f74e2986a82df6e7ac7e319b8ea7ccece1caec9f8ab6104dc70603/pytest_mock-3.14.0-py3-none-any.whl", hash = "sha256:0b72c38033392a5f4621342fe11e9219ac11ec9d375f8e2a0c164539e0d70f6f", size = 9863, upload-time = "2024-03-21T22:14:02.694Z" },
+]
+
+[[package]]
+name = "pytest-order"
+version = "1.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1d/66/02ae17461b14a52ce5a29ae2900156b9110d1de34721ccc16ccd79419876/pytest_order-1.3.0.tar.gz", hash = "sha256:51608fec3d3ee9c0adaea94daa124a5c4c1d2bb99b00269f098f414307f23dde", size = 47544, upload-time = "2024-08-22T12:29:54.512Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1b/73/59b038d1aafca89f8e9936eaa8ffa6bb6138d00459d13a32ce070be4f280/pytest_order-1.3.0-py3-none-any.whl", hash = "sha256:2cd562a21380345dd8d5774aa5fd38b7849b6ee7397ca5f6999bbe6e89f07f6e", size = 14609, upload-time = "2024-08-22T12:29:53.156Z" },
 ]
 
 [[package]]

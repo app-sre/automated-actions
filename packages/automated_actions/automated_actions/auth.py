@@ -40,13 +40,16 @@ class UserModelProtocol(Protocol):
 class OpenIDConnect[UserModel: UserModelProtocol]:
     def __init__(
         self,
+        *,
         issuer: str,
         client_id: str,
         client_secret: str,
         session_secret: str,
         session_timeout_secs: int,
+        authorization_endpoint: str,
+        token_endpoint: str,
+        userinfo_endpoint: str,
         scope: str = "openid email profile",
-        *,
         enforce_https: bool = True,
         user_model: type[UserModel],
     ) -> None:
@@ -57,15 +60,9 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         self.enforce_https = enforce_https
         self.user_model = user_model
 
-        res = httpx.get(
-            self.issuer.rstrip("/") + "/.well-known/openid-configuration", timeout=5
-        )
-        res.raise_for_status()
-        endpoints: dict[str, str] = res.json()
-
-        self.authorization_endpoint = endpoints["authorization_endpoint"]
-        self.token_endpoint = endpoints["token_endpoint"]
-        self.userinfo_endpoint = endpoints["userinfo_endpoint"]
+        self.authorization_endpoint = authorization_endpoint
+        self.token_endpoint = token_endpoint
+        self.userinfo_endpoint = userinfo_endpoint
 
         self.router = APIRouter()
         self.router.add_api_route(
@@ -83,11 +80,48 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
             include_in_schema=False,
         )
         self.router.add_api_route(
-            "/logout", self.logout, methods=["GET"], include_in_schema=False
+            "/logout",
+            self.logout,
+            methods=["GET"],
+            include_in_schema=False,
         )
 
         self.session_serializer = URLSafeTimedSerializer(session_secret)
         self.session_timeout_secs = session_timeout_secs
+
+    @classmethod
+    async def create(
+        cls,
+        *,
+        issuer: str,
+        client_id: str,
+        client_secret: str,
+        session_secret: str,
+        session_timeout_secs: int,
+        scope: str = "openid email profile",
+        enforce_https: bool = True,
+        user_model: type[UserModel],
+    ) -> "OpenIDConnect[UserModel]":
+        async with httpx.AsyncClient() as client:
+            res = await client.get(
+                issuer.rstrip("/") + "/.well-known/openid-configuration", timeout=5
+            )
+        res.raise_for_status()
+        endpoints: dict[str, str] = res.json()
+
+        return cls(
+            issuer=issuer,
+            client_id=client_id,
+            client_secret=client_secret,
+            session_secret=session_secret,
+            session_timeout_secs=session_timeout_secs,
+            authorization_endpoint=endpoints["authorization_endpoint"],
+            token_endpoint=endpoints["token_endpoint"],
+            userinfo_endpoint=endpoints["userinfo_endpoint"],
+            scope=scope,
+            enforce_https=enforce_https,
+            user_model=user_model,
+        )
 
     async def __call__(self, request: Request) -> UserModel:
         enforce_login = HTTPException(

@@ -1,30 +1,16 @@
 [project]
-name = "automated-actions"
+name = "integration-tests"
 version = "0.1.0"
-description = "Automated Actions Server"
+description = "Automated Actions Client"
 authors = [{ name = "AppSRE", email = "sd-app-sre@redhat.com" }]
 license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.12.0"
 dependencies = [
-    "celery[sqs]==5.5.2",
-    "fastapi==0.115.12",
-    # 3.5.2 needs newer graphql-core, but qenerate doesn't support it yet
-    "gql==3.5.0",
-    "httpx==0.28.1",
-    "hvac==2.3.0",
-    "itsdangerous==2.2.0",
-    "kubernetes==32.0.1",
-    "openshift==0.13.2",
-    "prometheus-fastapi-instrumentator==7.1.0",
-    "pydantic==2.11.4",
-    "pydantic-settings==2.9.1",
-    "pyjwt==2.10.1",
-    "pynamodb==6.0.2",
-    "requests-toolbelt==1.0.0",
-    "types-hvac==2.3.0.20250429",
-    "uvicorn==0.34.2",
-    "watchdog==6.0.0",
+    "automated-actions-client",
+    "automated-actions-cli",
+    "pytest==8.3.5",
+    "pytest-order==1.3.0",
 ]
 
 [project.urls]
@@ -37,13 +23,6 @@ dev = [
     # Development dependencies
     "ruff==0.11.8",
     "mypy==1.15.0",
-    "pytest==8.3.5",
-    "pytest-cov==6.1.1",
-    "qenerate==0.7.0",
-    "pytest-asyncio==0.26.0",
-    "pytest-httpx==0.35.0",
-    "pytest-mock==3.14.0",
-    "requests-mock==1.12.1",
 ]
 
 [build-system]
@@ -51,29 +30,22 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
-only-include = ["automated_actions"]
+only-include = ["tests"]
 
 [tool.hatch.build.targets.wheel]
-only-include = ["automated_actions"]
+only-include = ["tests"]
 
 # Ruff configuration
 [tool.ruff]
 line-length = 88
-src = ["automated_actions"]
-extend-exclude = [
-    # exclude some common cache and tmp directories
-    ".local",
-    ".cache",
-    "tmp",
-    "automated_actions/gql_definitions",
-]
+src = ["tests"]
 fix = true
 
 [tool.ruff.lint]
 preview = true
 select = ["ALL"]
 ignore = [
-    "ANN401",  # allow typings.Any
+    "ANN401",  # allow ANY
     "CPY",     # Missing copyright header
     "D100",    # Missing docstring in public module
     "D101",    # Missing docstring in public class
@@ -81,7 +53,6 @@ ignore = [
     "D103",    # Missing docstring in public function
     "D104",    # Missing docstring in public package
     "D105",    # Missing docstring in magic method
-    "D106",    # Missing docstring in nested public class
     "D107",    # Missing docstring in __init__
     "D203",    # 1 blank line required before class docstring
     "D211",    # No blank lines allowed before class docstring
@@ -89,7 +60,6 @@ ignore = [
     "D213",    # multi-line-summary-second-line
     "D4",      # Doc string style
     "E501",    # Line too long
-    "FIX002",  # TODO comment found
     "G004",    # Logging statement uses f-string
     "PLR0904", # Too many public methods
     "PLR0913", # Too many arguments
@@ -98,10 +68,10 @@ ignore = [
     "S404",    # subprocess import
     "EM101",   # Exception must not use a string literal, assign to variable first
     "EM102",   # Exception must not use an f-string literal, assign to variable first
+    "S603",    # subprocess
+    "S607",    # subprocess.run w/o full path
     "TRY003",  # Avoid specifying long messages outside the exception class
     "TRY300",  # try-consider-else
-    "TC002",   # type-checking-block
-    "TC003",   # type-checking-block
     # pydoclint
     "DOC",
     # May conflict with the formatter, https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
@@ -116,34 +86,19 @@ ignore = [
     "COM819",
     "ISC001",
 ]
+
 [tool.ruff.format]
 preview = true
 
 [tool.ruff.lint.isort]
-known-first-party = ["automated_actions"]
+known-first-party = ["tests"]
 
-# Mypy configuration
 [tool.mypy]
-files = ["automated_actions"]
+files = ["tests"]
 enable_error_code = ["truthy-bool", "redundant-expr"]
-plugins = ["pydantic.mypy"]
 no_implicit_optional = true
 check_untyped_defs = true
 warn_unused_ignores = true
 show_error_codes = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
-
-[[tool.mypy.overrides]]
-# Below are all of the packages that don't implement stub packages. Mypy will throw an error if we don't ignore the
-# missing imports. See: https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
-module = ["celery.*", "kubernetes.*", "openshift.dynamic.*", "billiard.einfo.*"]
-ignore_missing_imports = true
-
-# Coverage configuration
-[tool.coverage.run]
-branch = true
-omit = ["*/tests/*"]
-
-# [tool.coverage.report]
-# fail_under = 90

@@ -7,8 +7,7 @@ from fastapi import HTTPException, status
 from pytest_httpx import HTTPXMock
 
 from automated_actions.auth import OPA
-
-from .conftest import MockUserModel
+from tests.conftest import MockUserModel
 
 
 @pytest.fixture
@@ -71,6 +70,10 @@ async def test_opa_user_is_authorized(
         match_json={
             "input": {
                 "username": "test_user",
+                "name": "test user",
+                "email": "test@example.com",
+                "created_at": 1,
+                "updated_at": 2,
                 "obj": "endpoint",
                 "params": {"foo": "bar"},
             }
@@ -146,6 +149,10 @@ async def test_opa_call(
         match_json={
             "input": {
                 "username": "test_user",
+                "name": "test user",
+                "email": "test@example.com",
+                "created_at": 1,
+                "updated_at": 2,
                 "obj": "endpoint",
                 "params": {"foo": "bar"},
             }
@@ -199,6 +206,10 @@ async def test_opa_call_not_authorized(
         match_json={
             "input": {
                 "username": "test_user",
+                "name": "test user",
+                "email": "test@example.com",
+                "created_at": 1,
+                "updated_at": 2,
                 "obj": "endpoint",
                 "params": {"foo": "bar"},
             }
