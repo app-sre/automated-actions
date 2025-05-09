@@ -82,35 +82,29 @@ parameters:
 
 - name: AA_URL
   description: URL of the automated-actions instance to test
-  value: ""
   required: true
 
 - name: AA_TOKEN
   description: Access token for the automated-actions instance
-  value: ""
   required: true
 
 - name: AA_ACTION_TIMEOUT_SECONDS
   description: Timeout for the action to complete
-  value: ""
+  value: "60"
   required: true
 
 - name: AA_CLUSTER
   description: Cluster name to use for the action
-  value: ""
   required: true
 
 - name: AA_NAMESPACE
   description: Namespace to use for the action
-  value: ""
   required: true
 
 - name: AA_KIND
   description: Kind of the resource to use for the action
-  value: ""
   required: true
 
 - name: AA_NAME
   description: OpenShift workload name to use for the action
-  value: ""
   required: true
