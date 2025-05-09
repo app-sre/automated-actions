@@ -27,6 +27,7 @@ class ActionSchemaIn(BaseModel):
 
 
 class ActionSchemaOut(ActionSchemaIn):
+    # Pydantic doesn't know about PynamoDB's DynamicMapAttribute
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     action_id: str
@@ -40,6 +41,10 @@ class ActionSchemaOut(ActionSchemaIn):
         if task_args is None:
             return {}
 
+        # "attribute_values" is an empty dict in DynamicMapAttribute(s). We remove it
+        # from the serialized version since it doesn't it doesn't relate to what we
+        # want to show from that database field. See
+        # https://github.com/pynamodb/PynamoDB/blob/a5c1f4e1b3201f01ee6d4cf759fc6dc494e67fd4/pynamodb/attributes.py#L1213
         return {
             k: task_args.attribute_values[k]
             for k in task_args.attribute_values
