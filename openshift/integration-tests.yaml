@@ -37,6 +37,16 @@ objects:
                 value: ${AA_URL}
               - name: AA_TOKEN
                 value: ${AA_TOKEN}
+              - name: AA_ACTION_TIMEOUT_SECONDS
+                value: ${AA_ACTION_TIMEOUT_SECONDS}
+              - name: AA_CLUSTER
+                value: ${AA_CLUSTER}
+              - name: AA_NAMESPACE
+                value: ${AA_NAMESPACE}
+              - name: AA_KIND
+                value: ${AA_KIND}
+              - name: AA_NAME
+                value: ${AA_NAME}
             resources:
               requests:
                 memory: ${MEMORY_REQUESTS}
@@ -77,5 +87,30 @@ parameters:
 
 - name: AA_TOKEN
   description: Access token for the automated-actions instance
+  value: ""
+  required: true
+
+- name: AA_ACTION_TIMEOUT_SECONDS
+  description: Timeout for the action to complete
+  value: ""
+  required: true
+
+- name: AA_CLUSTER
+  description: Cluster name to use for the action
+  value: ""
+  required: true
+
+- name: AA_NAMESPACE
+  description: Namespace to use for the action
+  value: ""
+  required: true
+
+- name: AA_KIND
+  description: Kind of the resource to use for the action
+  value: ""
+  required: true
+
+- name: AA_NAME
+  description: OpenShift workload name to use for the action
   value: ""
   required: true

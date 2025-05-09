@@ -9,6 +9,9 @@ class Config(BaseSettings):
 
     model_config = {"env_prefix": "aa_"}
 
+    # ATTENTION: You also need to add all required environment variables to the
+    # Openshift template (openshift/integration-tests.yaml)!
+
     # general
     url: HttpUrl = HttpUrl("http://localhost:8080")
     token: str
