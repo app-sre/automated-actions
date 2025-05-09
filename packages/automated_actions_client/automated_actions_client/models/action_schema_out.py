@@ -1,11 +1,15 @@
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar, Union, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.action_status import ActionStatus
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.action_schema_out_task_args import ActionSchemaOutTaskArgs
+
 
 T = TypeVar("T", bound="ActionSchemaOut")
 
@@ -21,6 +25,7 @@ class ActionSchemaOut:
         updated_at (float):
         status (Union[Unset, ActionStatus]):
         result (Union[None, Unset, str]):
+        task_args (Union[Unset, ActionSchemaOutTaskArgs]):
     """
 
     name: str
@@ -30,6 +35,7 @@ class ActionSchemaOut:
     updated_at: float
     status: Unset | ActionStatus = UNSET
     result: None | Unset | str = UNSET
+    task_args: Union[Unset, "ActionSchemaOutTaskArgs"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -53,6 +59,10 @@ class ActionSchemaOut:
         else:
             result = self.result
 
+        task_args: Unset | dict[str, Any] = UNSET
+        if not isinstance(self.task_args, Unset):
+            task_args = self.task_args.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({
@@ -66,11 +76,15 @@ class ActionSchemaOut:
             field_dict["status"] = status
         if result is not UNSET:
             field_dict["result"] = result
+        if task_args is not UNSET:
+            field_dict["task_args"] = task_args
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.action_schema_out_task_args import ActionSchemaOutTaskArgs
+
         d = dict(src_dict)
         name = d.pop("name")
 
@@ -98,6 +112,13 @@ class ActionSchemaOut:
 
         result = _parse_result(d.pop("result", UNSET))
 
+        _task_args = d.pop("task_args", UNSET)
+        task_args: Unset | ActionSchemaOutTaskArgs
+        if isinstance(_task_args, Unset):
+            task_args = UNSET
+        else:
+            task_args = ActionSchemaOutTaskArgs.from_dict(_task_args)
+
         action_schema_out = cls(
             name=name,
             owner=owner,
@@ -106,6 +127,7 @@ class ActionSchemaOut:
             updated_at=updated_at,
             status=status,
             result=result,
+            task_args=task_args,
         )
 
         action_schema_out.additional_properties = d
