@@ -16,6 +16,16 @@ objects:
       app.kubernetes.io/component: integration-tests
       app.kubernetes.io/name: automated-actions
 
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: integration-tests-config
+    labels:
+      app.kubernetes.io/component: integration-tests
+      app.kubernetes.io/name: automated-actions
+  data:
+    ${{AA_TEST_PARAMETERS}}
+
 - apiVersion: batch/v1
   kind: Job
   metadata:
@@ -39,14 +49,9 @@ objects:
                 value: ${AA_TOKEN}
               - name: AA_ACTION_TIMEOUT_SECONDS
                 value: ${AA_ACTION_TIMEOUT_SECONDS}
-              - name: AA_CLUSTER
-                value: ${AA_CLUSTER}
-              - name: AA_NAMESPACE
-                value: ${AA_NAMESPACE}
-              - name: AA_KIND
-                value: ${AA_KIND}
-              - name: AA_NAME
-                value: ${AA_NAME}
+            envFrom:
+            - configMapRef:
+                name: integration-tests-config
             resources:
               requests:
                 memory: ${MEMORY_REQUESTS}
@@ -93,18 +98,6 @@ parameters:
   value: "60"
   required: true
 
-- name: AA_CLUSTER
-  description: Cluster name to use for the action
-  required: true
-
-- name: AA_NAMESPACE
-  description: Namespace to use for the action
-  required: true
-
-- name: AA_KIND
-  description: Kind of the resource to use for the action
-  required: true
-
-- name: AA_NAME
-  description: OpenShift workload name to use for the action
+- name: AA_TEST_PARAMETERS
+  description: JSON object with parameters to pass to the integration tests
   required: true
