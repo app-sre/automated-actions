@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, field_serializer
 from pynamodb.attributes import DynamicMapAttribute, UnicodeAttribute
 from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
+from automated_actions.config import settings
 from automated_actions.db.models._base import Table
 
 
@@ -67,7 +68,7 @@ class Action(Table[ActionSchemaIn, ActionSchemaOut]):
     """Action."""
 
     class Meta(Table.Meta):
-        table_name = "aa-action"
+        table_name = f"aa-action-{settings.environment}"
         schema_out = ActionSchemaOut
 
     @staticmethod

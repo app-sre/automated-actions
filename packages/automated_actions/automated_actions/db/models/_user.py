@@ -3,6 +3,7 @@ from typing import Self
 from pydantic import BaseModel
 from pynamodb.attributes import ListAttribute, UnicodeAttribute
 
+from automated_actions.config import settings
 from automated_actions.db.models._base import Table
 
 
@@ -22,7 +23,7 @@ class User(Table[UserSchemaIn, UserSchemaOut]):
     """User."""
 
     class Meta(Table.Meta):
-        table_name = "aa-user"
+        table_name = f"aa-user-{settings.environment}"
         schema_out = UserSchemaOut
 
     @classmethod

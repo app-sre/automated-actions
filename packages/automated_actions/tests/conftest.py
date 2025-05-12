@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from pydantic import BaseModel, Field
 from pytest_httpx import HTTPXMock
 
+os.environ["AA_ENVIRONMENT"] = "unit_tests"
 os.environ["AA_OIDC_ISSUER"] = "http://dev.com"
 os.environ["AA_OIDC_CLIENT_ID"] = "test_client_id"
 os.environ["AA_OIDC_CLIENT_SECRET"] = "test_client_secret"
