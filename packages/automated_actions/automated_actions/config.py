@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     debug: bool = False
     url: str = "http://localhost:8080"
     root_path: str = ""
-    environment: str = "development"
+    environment: str
 
     # worker config
     broker_url: str = "sqs://localhost:4566"
