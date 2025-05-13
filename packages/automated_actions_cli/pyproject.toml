@@ -12,6 +12,8 @@ requires-python = "~= 3.12.0"
 dependencies = [
     "appdirs==1.4.4",
     "automated-actions-client",
+    # https://github.com/fastapi/typer/pull/1145
+    "click<8.2.0",
     "httpx-gssapi==0.4",
     "pydantic-settings==2.9.1",
     "rich==14.0.0",
