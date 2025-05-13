@@ -180,5 +180,5 @@ def action_detail(
     action_id: Annotated[str, typer.Option(help="", show_default=False)],
 ) -> None:
     result = sync(action_id=action_id, client=ctx.obj["client"])
-    if "console" in ctx.obj:
-        ctx.obj["console"].print(result)
+    if "formatter" in ctx.obj and result:
+        ctx.obj["formatter"](result.to_dict())

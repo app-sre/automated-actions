@@ -18,6 +18,7 @@ from rich import print as rich_print
 from rich.console import Console
 
 from automated_actions_cli.config import config
+from automated_actions_cli.formatter import JsonFormatter, OutputFormat, YamlFormatter
 from automated_actions_cli.utils import (
     blend_text,
     kerberos_available,
@@ -82,12 +83,29 @@ class ClientWithCookieJar(Client):
 def main(
     ctx: typer.Context,
     *,
-    debug: Annotated[bool, typer.Option(help="Enable debug")] = False,
-    screen_capture_file: Annotated[Path | None, typer.Option(writable=True)] = None,
+    debug: Annotated[
+        bool, typer.Option(help="Enable debug", envvar="AA_DEBUG")
+    ] = False,
+    screen_capture_file: Annotated[
+        Path | None,
+        typer.Option(
+            help="Capture screen recording as SVG",
+            writable=True,
+            envvar="AA_SCREEN_CAPTURE_FILE",
+        ),
+    ] = None,
     version: Annotated[  # noqa: ARG001
         bool | None, typer.Option(callback=version_callback, help="Display version")
     ] = None,
-    quiet: bool = typer.Option(default=False, help="Don't print anything"),
+    quiet: Annotated[
+        bool, typer.Option(help="Don't print anything", envvar="AA_QUIET")
+    ] = False,
+    output: Annotated[
+        OutputFormat, typer.Option(help="Output format", envvar="AA_OUTPUT")
+    ] = OutputFormat.yaml,
+    color: Annotated[
+        bool, typer.Option(help="Use colored output", envvar="AA_COLOR")
+    ] = True,
 ) -> None:
     if "--help" in sys.argv:
         rich_print(
@@ -96,7 +114,7 @@ def main(
         # do not initialize the client and everything else if --help is passed
         return
 
-    if not quiet:
+    if not quiet and not screen_capture_file:
         progress = progress_spinner(console=console)
         progress.start()
         progress.add_task(description="Processing...", total=None)
@@ -115,8 +133,7 @@ def main(
                 token=token,
                 raise_on_unexpected_status=True,
                 follow_redirects=True,
-            ),
-            "console": console,
+            )
         }
 
     elif kerberos_available():
@@ -129,8 +146,7 @@ def main(
                 httpx_args={
                     "auth": HTTPSPNEGOAuth(mutual_authentication=OPTIONAL),
                 },
-            ),
-            "console": console,
+            )
         }
     else:
         logger.error(
@@ -138,19 +154,27 @@ def main(
         )
         raise typer.Exit(1)
 
+    printer = console.print if color else print
+    match output:
+        case OutputFormat.json:
+            ctx.obj["formatter"] = JsonFormatter(printer=printer)
+        case OutputFormat.yaml:
+            ctx.obj["formatter"] = YamlFormatter(printer=printer)
+        case _:
+            raise ValueError("Invalid output format")
+
     # enforce the user to login
     api_v1_me(client=ctx.obj["client"])
 
     if screen_capture_file is not None:
+        screen_capture_file = screen_capture_file.with_suffix(".svg")
         rich_print(f"Screen recording: {screen_capture_file}")
         # strip $0 and screen_capture_file option
         args = sys.argv[3:]
         console.print(f"$ automated-actions {' '.join(args)}")
         # title = command sub_command
         title = " ".join(args[0:2])
-        atexit.register(
-            console.save_svg, str(screen_capture_file.with_suffix(".svg")), title=title
-        )
+        atexit.register(console.save_svg, str(screen_capture_file), title=title)
 
 
 def initialize_client_actions() -> None:

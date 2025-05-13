@@ -240,5 +240,5 @@ def openshift_workload_restart(
         name=name,
         client=ctx.obj["client"],
     )
-    if "console" in ctx.obj:
-        ctx.obj["console"].print(result)
+    if "formatter" in ctx.obj and result:
+        ctx.obj["formatter"](result.to_dict())

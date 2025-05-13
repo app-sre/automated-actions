@@ -148,5 +148,5 @@ def me(
     ctx: typer.Context,
 ) -> None:
     result = sync(client=ctx.obj["client"])
-    if "console" in ctx.obj:
-        ctx.obj["console"].print(result)
+    if "formatter" in ctx.obj and result:
+        ctx.obj["formatter"](result.to_dict())
