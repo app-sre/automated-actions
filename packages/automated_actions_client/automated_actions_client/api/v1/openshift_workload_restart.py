@@ -241,4 +241,4 @@ def openshift_workload_restart(
         client=ctx.obj["client"],
     )
     if "formatter" in ctx.obj and result:
-        ctx.obj["formatter"](result.to_dict())
+        ctx.obj["formatter"](result.to_dict() if hasattr(result, "to_dict") else result)

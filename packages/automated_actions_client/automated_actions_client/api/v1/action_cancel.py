@@ -181,4 +181,4 @@ def action_cancel(
 ) -> None:
     result = sync(action_id=action_id, client=ctx.obj["client"])
     if "formatter" in ctx.obj and result:
-        ctx.obj["formatter"](result.to_dict())
+        ctx.obj["formatter"](result.to_dict() if hasattr(result, "to_dict") else result)
