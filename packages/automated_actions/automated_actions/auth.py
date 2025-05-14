@@ -286,8 +286,10 @@ class OPA[UserModel: UserModelProtocol]:
             return
 
         # check if user is authorized to access endpoint
+        params = request.path_params.copy()
+        params.update(request.query_params)
         if not await self.user_is_authorized(
-            user, obj=request["route"].operation_id, params=request.path_params
+            user, obj=request["route"].operation_id, params=params
         ):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized"

@@ -35,7 +35,15 @@ object_matches(permission_obj, input_obj) if {
 }
 
 valid_params(expected, provided) if {
-	every k, v in expected {
-		regex.match(sprintf("(?i)%s", [v]), provided[k])
+	# Check that null values in expected mean that the key should not be present in provided
+	null_keys := {k | expected[k] == null}
+	every k in null_keys {
+		not provided[k]
+	}
+
+	# For non-null values, ensure they match using regex
+	non_null_keys := {k | expected[k] != null}
+	every k in non_null_keys {
+		regex.match(sprintf("(?i)%s", [expected[k]]), provided[k])
 	}
 }
