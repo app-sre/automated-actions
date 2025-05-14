@@ -19,8 +19,8 @@ class ActionStub(ActionSchemaOut):
         return self
 
     @classmethod
-    def find_by_owner_and_status(
-        cls, owner_email: str, status: str
+    def find_by_owner(
+        cls, username: str, status: ActionStatus | None
     ) -> list[ActionStub]:
         """Stub method to return a list of actions."""
         return [ACTION]
@@ -75,4 +75,8 @@ def test_model_action_action_manager_get_or_404(action_mgr: ActionManager) -> No
 
 
 def test_model_action_action_manager_create_action(action_mgr: ActionManager) -> None:
-    assert action_mgr.create_action("fake", "owner") == ACTION
+    class User:
+        username = "owner_email"
+
+    owner = User()
+    assert action_mgr.create_action("fake", owner) == ACTION

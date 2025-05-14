@@ -92,11 +92,13 @@ class Action(Table[ActionSchemaIn, ActionSchemaOut]):
         )
 
     @classmethod
-    def find_by_owner_and_status(
-        cls: type[Self], owner_email: str, status: ActionStatus
+    def find_by_owner(
+        cls: type[Self], username: str, status: ActionStatus | None = None
     ) -> Iterable[Action]:
-        """Returns actions by owner and status."""
-        return cls.owner_index.query(owner_email, cls.status == status.value)
+        """Returns actions for owner."""
+        if status is None:
+            return cls.owner_index.query(username)
+        return cls.owner_index.query(username, cls.status == status.value)
 
     action_id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
@@ -116,8 +118,8 @@ class ActionProtocol(Protocol[T_co]):
     status: Any
 
     @classmethod
-    def find_by_owner_and_status(
-        cls, owner_email: str, status: ActionStatus
+    def find_by_owner(
+        cls, username: str, status: ActionStatus | None
     ) -> Iterable[T_co]: ...
 
     @classmethod
@@ -127,6 +129,10 @@ class ActionProtocol(Protocol[T_co]):
     def create(cls, params: ActionSchemaIn) -> T_co: ...
 
 
+class User(Protocol):
+    username: UnicodeAttribute
+
+
 class ActionManager[ActionClass: ActionProtocol]:
     """Abstract class for the action model."""
 
@@ -134,16 +140,16 @@ class ActionManager[ActionClass: ActionProtocol]:
         self.klass = klass
 
     def get_user_actions(
-        self, email: str, status: ActionStatus
+        self, username: str, status: ActionStatus | None = None
     ) -> Iterable[ActionClass]:
-        return self.klass.find_by_owner_and_status(email, status)
+        return self.klass.find_by_owner(username, status)
 
     def get_or_404(self, pk: str) -> ActionClass:
         """Get an action by its primary key or raise a 404 error."""
         return self.klass.get_or_404(pk)
 
-    def create_action(self, name: str, owner: str) -> ActionClass:
-        return self.klass.create(ActionSchemaIn(name=name, owner=owner))
+    def create_action(self, name: str, owner: User) -> ActionClass:
+        return self.klass.create(ActionSchemaIn(name=name, owner=owner.username))
 
 
 def get_action_manager() -> ActionManager[Action]:

@@ -21,7 +21,7 @@ def get_action(
     action_mgr: Annotated[ActionManager, Depends(get_action_manager)], user: UserDep
 ) -> Action:
     """Get a new action object for the user."""
-    return action_mgr.create_action(name="openshift-workload-restart", owner=user.email)
+    return action_mgr.create_action(name="openshift-workload-restart", owner=user)
 
 
 @router.post(

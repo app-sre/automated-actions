@@ -18,11 +18,21 @@ log = logging.getLogger(__name__)
 def action_list(
     user: UserDep,
     action_mgr: Annotated[ActionManager, Depends(get_action_manager)],
-    status: Annotated[ActionStatus | None, Query()] = ActionStatus.RUNNING,
+    status: Annotated[
+        ActionStatus | None, Query(description="Filter actions by their status")
+    ] = None,
+    action_user: Annotated[
+        str | None,
+        Query(
+            description="Filter actions by username instead of the current authenticated user"
+        ),
+    ] = None,
 ) -> list[ActionSchemaOut]:
-    """List all user actions."""
-    status = status or ActionStatus.RUNNING
-    return [action.dump() for action in action_mgr.get_user_actions(user.email, status)]
+    """List actions."""
+    return [
+        action.dump()
+        for action in action_mgr.get_user_actions(action_user or user.username, status)
+    ]
 
 
 @router.get("/actions/{action_id}", operation_id="action-detail")

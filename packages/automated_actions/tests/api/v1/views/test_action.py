@@ -1,6 +1,8 @@
+# ruff: noqa: ARG003
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi import FastAPI, status
@@ -14,6 +16,9 @@ from automated_actions.db.models import (
     get_action_manager,
 )
 
+if TYPE_CHECKING:
+    from automated_actions.db.models._action import ActionSchemaIn
+
 
 class ActionStub(ActionSchemaOut):
     """Stub for Action model."""
@@ -22,17 +27,19 @@ class ActionStub(ActionSchemaOut):
         return self
 
     @classmethod
-    def find_by_owner_and_status(
-        cls, owner_email: str, status: str
+    def find_by_owner(
+        cls,
+        username: str,
+        status: ActionStatus | None = None,
     ) -> list[ActionStub]:
         """Stub method to return a list of actions."""
         return [
             ActionStub(
                 action_id="1",
                 name="test action",
-                status=status,
+                status=ActionStatus.SUCCESS,
                 result="test result",
-                owner=owner_email,
+                owner=username,
                 created_at=1.0,
                 updated_at=2.0,
                 task_args=None,
@@ -40,9 +47,9 @@ class ActionStub(ActionSchemaOut):
             ActionStub(
                 action_id="2",
                 name="test action 2",
-                status=status,
+                status=ActionStatus.FAILURE,
                 result="test result 2",
-                owner=owner_email,
+                owner=username,
                 created_at=1.0,
                 updated_at=2.0,
                 task_args=DynamicMapAttribute(
@@ -60,7 +67,7 @@ class ActionStub(ActionSchemaOut):
                 name="test action",
                 status=ActionStatus.RUNNING,
                 result="test result",
-                owner="test@example.com",
+                owner="test_user",
                 created_at=1.0,
                 updated_at=2.0,
                 task_args=None,
@@ -70,6 +77,19 @@ class ActionStub(ActionSchemaOut):
     def set_status(self, status: ActionStatus) -> None:
         """Stub method to set the status of an action."""
         self.status = status
+
+    @classmethod
+    def create(cls, params: ActionSchemaIn) -> ActionStub:
+        return ActionStub(
+            action_id="action_id",
+            name="test action",
+            status=ActionStatus.RUNNING,
+            result="test result",
+            owner="test_user",
+            created_at=1.0,
+            updated_at=2.0,
+            task_args=None,
+        )
 
 
 @pytest.fixture
@@ -90,8 +110,8 @@ def test_action_list(
     assert response.json() == [
         {
             "name": "test action",
-            "owner": "test@example.com",
-            "status": "RUNNING",
+            "owner": "test_user",
+            "status": "SUCCESS",
             "action_id": "1",
             "result": "test result",
             "created_at": 1.0,
@@ -100,8 +120,8 @@ def test_action_list(
         },
         {
             "name": "test action 2",
-            "owner": "test@example.com",
-            "status": "RUNNING",
+            "owner": "test_user",
+            "status": "FAILURE",
             "action_id": "2",
             "result": "test result 2",
             "created_at": 1.0,
@@ -120,7 +140,7 @@ def test_action_detail(
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "name": "test action",
-        "owner": "test@example.com",
+        "owner": "test_user",
         "status": "RUNNING",
         "action_id": "1",
         "result": "test result",
