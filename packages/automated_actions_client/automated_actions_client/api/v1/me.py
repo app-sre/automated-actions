@@ -149,4 +149,11 @@ def me(
 ) -> None:
     result = sync(client=ctx.obj["client"])
     if "formatter" in ctx.obj and result:
-        ctx.obj["formatter"](result.to_dict() if hasattr(result, "to_dict") else result)
+        output: Any = result
+        if isinstance(result, list):
+            output = [
+                item.to_dict() if hasattr(item, "to_dict") else item for item in result
+            ]
+        elif hasattr(result, "to_dict"):
+            output = result.to_dict()
+        ctx.obj["formatter"](output)

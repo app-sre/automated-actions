@@ -13,7 +13,8 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    status: ActionStatus | None | Unset = ActionStatus.RUNNING,
+    status: ActionStatus | None | Unset = UNSET,
+    action_user: None | Unset | str = UNSET,
 ) -> dict[str, Any]:
     params: dict[str, Any] = {}
 
@@ -25,6 +26,13 @@ def _get_kwargs(
     else:
         json_status = status
     params["status"] = json_status
+
+    json_action_user: None | Unset | str
+    if isinstance(action_user, Unset):
+        json_action_user = UNSET
+    else:
+        json_action_user = action_user
+    params["action_user"] = json_action_user
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -73,14 +81,17 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    status: ActionStatus | None | Unset = ActionStatus.RUNNING,
+    status: ActionStatus | None | Unset = UNSET,
+    action_user: None | Unset | str = UNSET,
 ) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
     """Action List
 
-     List all user actions.
+     List actions.
 
     Args:
-        status (Union[ActionStatus, None, Unset]):  Default: ActionStatus.RUNNING.
+        status (Union[ActionStatus, None, Unset]): Filter actions by their status
+        action_user (Union[None, Unset, str]): Filter actions by username instead of the current
+            authenticated user
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -92,6 +103,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         status=status,
+        action_user=action_user,
     )
 
     with client as _client:
@@ -105,14 +117,17 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    status: ActionStatus | None | Unset = ActionStatus.RUNNING,
+    status: ActionStatus | None | Unset = UNSET,
+    action_user: None | Unset | str = UNSET,
 ) -> HTTPValidationError | list["ActionSchemaOut"] | None:
     """Action List
 
-     List all user actions.
+     List actions.
 
     Args:
-        status (Union[ActionStatus, None, Unset]):  Default: ActionStatus.RUNNING.
+        status (Union[ActionStatus, None, Unset]): Filter actions by their status
+        action_user (Union[None, Unset, str]): Filter actions by username instead of the current
+            authenticated user
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -125,20 +140,24 @@ def sync(
     return sync_detailed(
         client=client,
         status=status,
+        action_user=action_user,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    status: ActionStatus | None | Unset = ActionStatus.RUNNING,
+    status: ActionStatus | None | Unset = UNSET,
+    action_user: None | Unset | str = UNSET,
 ) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
     """Action List
 
-     List all user actions.
+     List actions.
 
     Args:
-        status (Union[ActionStatus, None, Unset]):  Default: ActionStatus.RUNNING.
+        status (Union[ActionStatus, None, Unset]): Filter actions by their status
+        action_user (Union[None, Unset, str]): Filter actions by username instead of the current
+            authenticated user
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -150,6 +169,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         status=status,
+        action_user=action_user,
     )
 
     async with client as _client:
@@ -163,14 +183,17 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    status: ActionStatus | None | Unset = ActionStatus.RUNNING,
+    status: ActionStatus | None | Unset = UNSET,
+    action_user: None | Unset | str = UNSET,
 ) -> HTTPValidationError | list["ActionSchemaOut"] | None:
     """Action List
 
-     List all user actions.
+     List actions.
 
     Args:
-        status (Union[ActionStatus, None, Unset]):  Default: ActionStatus.RUNNING.
+        status (Union[ActionStatus, None, Unset]): Filter actions by their status
+        action_user (Union[None, Unset, str]): Filter actions by username instead of the current
+            authenticated user
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -184,6 +207,7 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             status=status,
+            action_user=action_user,
         )
     ).parsed
 
@@ -195,13 +219,26 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="List all user actions.")
+@app.command(help="List actions.")
 def action_list(
     ctx: typer.Context,
     status: Annotated[
-        ActionStatus | None, typer.Option(help="")
-    ] = ActionStatus.RUNNING,
+        ActionStatus | None, typer.Option(help="Filter actions by their status")
+    ] = None,
+    action_user: Annotated[
+        None | str,
+        typer.Option(
+            help="Filter actions by username instead of the current authenticated user"
+        ),
+    ] = None,
 ) -> None:
-    result = sync(status=status, client=ctx.obj["client"])
+    result = sync(status=status, action_user=action_user, client=ctx.obj["client"])
     if "formatter" in ctx.obj and result:
-        ctx.obj["formatter"](result.to_dict() if hasattr(result, "to_dict") else result)
+        output: Any = result
+        if isinstance(result, list):
+            output = [
+                item.to_dict() if hasattr(item, "to_dict") else item for item in result
+            ]
+        elif hasattr(result, "to_dict"):
+            output = result.to_dict()
+        ctx.obj["formatter"](output)
