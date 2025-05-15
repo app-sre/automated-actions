@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Protocol
 
 import hvac
 import hvac.exceptions
@@ -33,6 +34,13 @@ class VaultClientMissingArgsError(Exception):
 VERSION_1 = 1
 VERSION_2 = 2
 SECRET_VERSION_LATEST = "LATEST"  # noqa: S105
+
+
+class VaultSecret(Protocol):
+    path: str
+    field: str
+    version: int | None
+    q_format: str | None
 
 
 class VaultClient:

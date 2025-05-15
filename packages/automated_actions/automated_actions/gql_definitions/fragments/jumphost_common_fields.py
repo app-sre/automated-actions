@@ -17,6 +17,8 @@ from pydantic import (  # noqa: F401 # pylint: disable=W0611
     Json,
 )
 
+from packages.automated_actions.automated_actions.gql_definitions.fragments.vault_secret import VaultSecret
+
 
 class ConfiguredBaseModel(BaseModel):
     class Config:
@@ -24,8 +26,10 @@ class ConfiguredBaseModel(BaseModel):
         extra=Extra.forbid
 
 
-class VaultSecret(ConfiguredBaseModel):
-    path: str = Field(..., alias="path")
-    field: str = Field(..., alias="field")
-    version: Optional[int] = Field(..., alias="version")
-    q_format: Optional[str] = Field(..., alias="format")
+class CommonJumphostFields(ConfiguredBaseModel):
+    hostname: str = Field(..., alias="hostname")
+    known_hosts: str = Field(..., alias="knownHosts")
+    user: str = Field(..., alias="user")
+    port: Optional[int] = Field(..., alias="port")
+    remote_port: Optional[int] = Field(..., alias="remotePort")
+    identity: VaultSecret = Field(..., alias="identity")
