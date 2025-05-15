@@ -11,13 +11,13 @@ COPY packages/opa/authz /authz
 # Test image
 #
 FROM base AS test
-
+COPY --from=ghcr.io/styrainc/regal:0.33.1 /ko-app/regal /bin/regal
 USER 0
 RUN microdnf install -y make
 USER 1000:1000
 
 COPY packages/opa/Makefile /
-COPY packages/opa/tests /tests
+COPY .regal.yaml /
 
 # Image does not have make installed, so we run the tests directly
 RUN make -C / test

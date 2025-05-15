@@ -39,7 +39,11 @@ async def initialize_auth_components(app: FastAPI) -> None:
     app.state.token = BearerTokenAuth[User](  # type: ignore[type-var]
         issuer=settings.url, secret=settings.token_secret, user_model=User
     )
-    app.state.authz = OPA[User](opa_host=settings.opa_host, package_name="authz")  # type: ignore[type-var]
+    app.state.authz = OPA[User](  # type: ignore[type-var]
+        opa_host=settings.opa_host,
+        skip_users=settings.opa_skip_users,
+        package_name="authz",
+    )
     log.info("Auth components initialized.")
 
 

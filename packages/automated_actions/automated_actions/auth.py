@@ -217,15 +217,20 @@ class OPA[UserModel: UserModelProtocol]:
         self,
         opa_host: str,
         skip_endpoints: list[str] | None = None,
+        skip_users: list[str] | None = None,
         package_name: str = "authz",
     ) -> None:
         self.opa_url = (
             f"{opa_host.rstrip('/')}/v1/data/{package_name.replace('.', '/')}"
         )
         self.skip_endpoints = [re.compile(skip) for skip in skip_endpoints or []]
+        self.skip_users = skip_users
 
     def should_skip_endpoint(self, endpoint: str) -> bool:
         return any(skip.match(endpoint) for skip in self.skip_endpoints)
+
+    def should_skip_user(self, user: str) -> bool:
+        return bool(self.skip_users and user in self.skip_users)
 
     @staticmethod
     def get_opa_result(opa_decision: httpx.Response) -> bool | dict | list | None:
@@ -282,7 +287,9 @@ class OPA[UserModel: UserModelProtocol]:
 
     async def __call__(self, request: Request, user: UserModel) -> None:
         # allow endpoints without authorization
-        if self.should_skip_endpoint(request.url.path):
+        if self.should_skip_endpoint(request.url.path) or self.should_skip_user(
+            user.username
+        ):
             return
 
         # check if user is authorized to access endpoint

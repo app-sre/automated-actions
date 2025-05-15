@@ -15,6 +15,7 @@ def _get_kwargs(
     *,
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
+    max_age_minutes: None | Unset | int = UNSET,
 ) -> dict[str, Any]:
     params: dict[str, Any] = {}
 
@@ -33,6 +34,13 @@ def _get_kwargs(
     else:
         json_action_user = action_user
     params["action_user"] = json_action_user
+
+    json_max_age_minutes: None | Unset | int
+    if isinstance(max_age_minutes, Unset):
+        json_max_age_minutes = UNSET
+    else:
+        json_max_age_minutes = max_age_minutes
+    params["max_age_minutes"] = json_max_age_minutes
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -83,6 +91,7 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
+    max_age_minutes: None | Unset | int = UNSET,
 ) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
     """Action List
 
@@ -92,6 +101,8 @@ def sync_detailed(
         status (Union[ActionStatus, None, Unset]): Filter actions by their status
         action_user (Union[None, Unset, str]): Filter actions by username instead of the current
             authenticated user
+        max_age_minutes (Union[None, Unset, int]): Filter actions by their age in minutes. Actions
+            updated more than this many minutes ago will be excluded.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -104,6 +115,7 @@ def sync_detailed(
     kwargs = _get_kwargs(
         status=status,
         action_user=action_user,
+        max_age_minutes=max_age_minutes,
     )
 
     with client as _client:
@@ -119,6 +131,7 @@ def sync(
     client: AuthenticatedClient | Client,
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
+    max_age_minutes: None | Unset | int = UNSET,
 ) -> HTTPValidationError | list["ActionSchemaOut"] | None:
     """Action List
 
@@ -128,6 +141,8 @@ def sync(
         status (Union[ActionStatus, None, Unset]): Filter actions by their status
         action_user (Union[None, Unset, str]): Filter actions by username instead of the current
             authenticated user
+        max_age_minutes (Union[None, Unset, int]): Filter actions by their age in minutes. Actions
+            updated more than this many minutes ago will be excluded.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -141,6 +156,7 @@ def sync(
         client=client,
         status=status,
         action_user=action_user,
+        max_age_minutes=max_age_minutes,
     ).parsed
 
 
@@ -149,6 +165,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
+    max_age_minutes: None | Unset | int = UNSET,
 ) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
     """Action List
 
@@ -158,6 +175,8 @@ async def asyncio_detailed(
         status (Union[ActionStatus, None, Unset]): Filter actions by their status
         action_user (Union[None, Unset, str]): Filter actions by username instead of the current
             authenticated user
+        max_age_minutes (Union[None, Unset, int]): Filter actions by their age in minutes. Actions
+            updated more than this many minutes ago will be excluded.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -170,6 +189,7 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         status=status,
         action_user=action_user,
+        max_age_minutes=max_age_minutes,
     )
 
     async with client as _client:
@@ -185,6 +205,7 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
+    max_age_minutes: None | Unset | int = UNSET,
 ) -> HTTPValidationError | list["ActionSchemaOut"] | None:
     """Action List
 
@@ -194,6 +215,8 @@ async def asyncio(
         status (Union[ActionStatus, None, Unset]): Filter actions by their status
         action_user (Union[None, Unset, str]): Filter actions by username instead of the current
             authenticated user
+        max_age_minutes (Union[None, Unset, int]): Filter actions by their age in minutes. Actions
+            updated more than this many minutes ago will be excluded.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -208,6 +231,7 @@ async def asyncio(
             client=client,
             status=status,
             action_user=action_user,
+            max_age_minutes=max_age_minutes,
         )
     ).parsed
 
@@ -231,8 +255,19 @@ def action_list(
             help="Filter actions by username instead of the current authenticated user"
         ),
     ] = None,
+    max_age_minutes: Annotated[
+        None | int,
+        typer.Option(
+            help="Filter actions by their age in minutes. Actions updated more than this many minutes ago will be excluded."
+        ),
+    ] = None,
 ) -> None:
-    result = sync(status=status, action_user=action_user, client=ctx.obj["client"])
+    result = sync(
+        status=status,
+        action_user=action_user,
+        max_age_minutes=max_age_minutes,
+        client=ctx.obj["client"],
+    )
     if "formatter" in ctx.obj and result:
         output: Any = result
         if isinstance(result, list):

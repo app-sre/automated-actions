@@ -1,3 +1,4 @@
 .PHONY: test
 test:
-	opa test -v authz tests
+	opa test -v authz
+	regal lint authz

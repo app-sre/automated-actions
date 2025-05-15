@@ -29,10 +29,13 @@ services:
       - run
       - --server
       - --log-level=debug
+      - --log-format=text
       - --disable-telemetry
       - --addr=0.0.0.0:8181
       - /policies/
       - /roles/
+    env_file:
+      - settings.conf
     volumes:
       - ./packages/opa/authz:/policies
       - ./dev:/roles
