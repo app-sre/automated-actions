@@ -27,11 +27,22 @@ def action_list(
             description="Filter actions by username instead of the current authenticated user"
         ),
     ] = None,
+    max_age_minutes: Annotated[
+        int | None,
+        Query(
+            description="Filter actions by their age in minutes. Actions updated more than this many minutes ago will be excluded.",
+            ge=0,
+        ),
+    ] = None,
 ) -> list[ActionSchemaOut]:
     """List actions."""
     return [
         action.dump()
-        for action in action_mgr.get_user_actions(action_user or user.username, status)
+        for action in action_mgr.get_user_actions(
+            action_user or user.username,
+            status,
+            max_age=max_age_minutes * 60 if max_age_minutes else max_age_minutes,
+        )
     ]
 
 

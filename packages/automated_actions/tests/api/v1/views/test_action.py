@@ -31,6 +31,7 @@ class ActionStub(ActionSchemaOut):
         cls,
         username: str,
         status: ActionStatus | None = None,
+        max_age: int | None = None,
     ) -> list[ActionStub]:
         """Stub method to return a list of actions."""
         return [

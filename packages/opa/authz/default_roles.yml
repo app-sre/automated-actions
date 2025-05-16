@@ -5,11 +5,15 @@ users:
 roles:
   default:
   - obj: me
+    max_ops: null
     params: {}
   - obj: action-list
+    max_ops: null
     params:
       action_user: null
   - obj: action-detail
+    max_ops: null
     params: {}
   - obj: action-cancel
+    max_ops: null
     params: {}

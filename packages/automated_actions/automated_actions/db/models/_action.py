@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Iterable
+from datetime import UTC
+from datetime import datetime as dt
 from enum import StrEnum
 from typing import Any, Protocol, Self, TypeVar
 
 from pydantic import BaseModel, ConfigDict, field_serializer
-from pynamodb.attributes import DynamicMapAttribute, UnicodeAttribute
+from pynamodb.attributes import DynamicMapAttribute, NumberAttribute, UnicodeAttribute
 from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
 from automated_actions.config import settings
@@ -61,7 +63,7 @@ class OwnerIndex(GlobalSecondaryIndex["Action"]):
         projection = AllProjection()
 
     owner = UnicodeAttribute(hash_key=True)
-    status = UnicodeAttribute(range_key=True)
+    updated_at = NumberAttribute(range_key=True)
 
 
 class Action(Table[ActionSchemaIn, ActionSchemaOut]):
@@ -93,12 +95,43 @@ class Action(Table[ActionSchemaIn, ActionSchemaOut]):
 
     @classmethod
     def find_by_owner(
-        cls: type[Self], username: str, status: ActionStatus | None = None
+        cls: type[Self],
+        username: str,
+        status: ActionStatus | None = None,
+        max_age: int | None = None,
     ) -> Iterable[Action]:
         """Returns actions for owner."""
-        if status is None:
-            return cls.owner_index.query(username)
-        return cls.owner_index.query(username, cls.status == status.value)
+        match (status, max_age):
+            case (None, None):
+                # If no status or max_age is provided, return all actions for the user
+                return cls.owner_index.query(username)
+            case (None, max_age_val) if max_age_val is not None:
+                # If no status is provided, but max_age is, return actions
+                # for the user not older than max_age
+                return cls.owner_index.query(
+                    username,
+                    range_key_condition=cls.updated_at
+                    >= int(dt.now(tz=UTC).timestamp() - max_age_val),
+                )
+            case (status_val, None) if status_val is not None:
+                # If status is provided, but no max_age, return actions
+                # for the user with the given status
+                return cls.owner_index.query(
+                    username, filter_condition=cls.status == status_val.value
+                )
+            case (status_val, max_age_val) if (
+                status_val is not None and max_age_val is not None
+            ):
+                # If both status and max_age are provided, return actions
+                # for the user with the given status not older than max_age
+                return cls.owner_index.query(
+                    username,
+                    range_key_condition=cls.updated_at
+                    >= int(dt.now(tz=UTC).timestamp() - max_age_val),
+                    filter_condition=cls.status == status_val.value,
+                )
+            case _:
+                return []
 
     action_id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
@@ -119,7 +152,10 @@ class ActionProtocol(Protocol[T_co]):
 
     @classmethod
     def find_by_owner(
-        cls, username: str, status: ActionStatus | None
+        cls,
+        username: str,
+        status: ActionStatus | None,
+        max_age: int | None = None,
     ) -> Iterable[T_co]: ...
 
     @classmethod
@@ -140,9 +176,12 @@ class ActionManager[ActionClass: ActionProtocol]:
         self.klass = klass
 
     def get_user_actions(
-        self, username: str, status: ActionStatus | None = None
+        self,
+        username: str,
+        status: ActionStatus | None = None,
+        max_age: int | None = None,
     ) -> Iterable[ActionClass]:
-        return self.klass.find_by_owner(username, status)
+        return self.klass.find_by_owner(username, status, max_age)
 
     def get_or_404(self, pk: str) -> ActionClass:
         """Get an action by its primary key or raise a 404 error."""

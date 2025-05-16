@@ -20,7 +20,10 @@ class ActionStub(ActionSchemaOut):
 
     @classmethod
     def find_by_owner(
-        cls, username: str, status: ActionStatus | None
+        cls,
+        username: str,
+        status: ActionStatus | None,
+        max_age: int | None = None,
     ) -> list[ActionStub]:
         """Stub method to return a list of actions."""
         return [ACTION]

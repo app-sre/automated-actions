@@ -9,14 +9,21 @@ users:
 roles:
   admin:
   - obj: '*'
+    max_ops: null
     params: {}
   app-sre:
   - obj: openshift-workload-restart
+    max_ops: 5
     params:
       cluster: ^appsres09ue1$
       kind: Deployment|Pod
       name: glitchtip.*
       namespace: ^glitchtip-dev$
   - obj: another-action
+    max_ops: 5
     params:
       cluster: ^appsres09ue1$
+  - obj: create-token
+    max_ops: null
+    params: {}
+    sub: app-sre
