@@ -1,11 +1,13 @@
-from automated_actions.celery.app import app
-from automated_actions.celery.automated_action_task import AutomatedActionTask
-from automated_actions.db.models import Action
-from automated_actions.utils.cluster_connection import get_cluster_connection_data
-from automated_actions.utils.openshift_client import (
+from automated_actions_utils.cluster_connection import get_cluster_connection_data
+from automated_actions_utils.openshift_client import (
     OpenshiftClient,
     RollingRestartResource,
 )
+
+from automated_actions.celery.app import app
+from automated_actions.celery.automated_action_task import AutomatedActionTask
+from automated_actions.config import settings
+from automated_actions.db.models import Action
 
 
 class OpenshiftResourceKindNotSupportedError(Exception):
@@ -46,7 +48,7 @@ def openshift_workload_restart(
     name: str,
     action: Action,  # noqa: ARG001
 ) -> None:
-    cluster_connection = get_cluster_connection_data(cluster)
+    cluster_connection = get_cluster_connection_data(cluster, settings)
     oc = OpenshiftClient(
         server_url=cluster_connection.url, token=cluster_connection.token
     )

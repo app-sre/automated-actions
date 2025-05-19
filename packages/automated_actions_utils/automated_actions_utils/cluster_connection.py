@@ -1,10 +1,13 @@
 import logging
 from dataclasses import dataclass
 
-from automated_actions.config import settings
-from automated_actions.gql_definitions.tasks.clusters import query as clusters_query
-from automated_actions.utils.gql_client import GQLClient
-from automated_actions.utils.vault_client import SecretFieldNotFoundError, VaultClient
+from automated_actions.config import Settings
+
+from automated_actions_utils.gql_client import GQLClient
+from automated_actions_utils.gql_definitions.tasks.clusters import (
+    query as clusters_query,
+)
+from automated_actions_utils.vault_client import SecretFieldNotFoundError, VaultClient
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +26,9 @@ class ClusterConnectionData:
     token: str
 
 
-def get_cluster_connection_data(cluster_name: str) -> ClusterConnectionData:
+def get_cluster_connection_data(
+    cluster_name: str, settings: Settings
+) -> ClusterConnectionData:
     gql_client = GQLClient(
         url=settings.qontract_server_url, token=settings.qontract_server_token
     )

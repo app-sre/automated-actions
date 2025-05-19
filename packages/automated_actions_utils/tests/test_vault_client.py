@@ -6,7 +6,7 @@ import hvac.exceptions
 import pytest
 from pytest_mock import MockerFixture
 
-from automated_actions.utils.vault_client import (
+from automated_actions_utils.vault_client import (
     SECRET_VERSION_LATEST,
     VERSION_1,
     VERSION_2,
@@ -25,7 +25,7 @@ def mock_hvac_client(mocker: MockerFixture) -> MagicMock:
 
 @pytest.fixture
 def vault_client(mocker: MockerFixture, mock_hvac_client: MagicMock) -> VaultClient:
-    mocker.patch("automated_actions.utils.vault_client.Kubernetes", autospec=True)
+    mocker.patch("automated_actions_utils.vault_client.Kubernetes", autospec=True)
     return VaultClient(
         server_url="https://vault.example.com",
         role_id="test-role-id",
@@ -50,10 +50,10 @@ def test_vault_client_init_with_kubernetes(
     mock_hvac_client: MagicMock, mocker: MockerFixture
 ) -> None:
     auth_kubernetes = mocker.patch(
-        "automated_actions.utils.vault_client.Kubernetes", autospec=True
+        "automated_actions_utils.vault_client.Kubernetes", autospec=True
     )
     mocker.patch(
-        "automated_actions.utils.vault_client.Path.read_text", return_value="jwt-token"
+        "automated_actions_utils.vault_client.Path.read_text", return_value="jwt-token"
     )
     VaultClient(
         server_url="https://vault.example.com",

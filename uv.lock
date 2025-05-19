@@ -8,6 +8,7 @@ members = [
     "automated-actions-cli",
     "automated-actions-client",
     "automated-actions-project",
+    "automated-actions-utils",
     "integration-tests",
 ]
 
@@ -69,14 +70,13 @@ name = "automated-actions"
 version = "0.1.0"
 source = { editable = "packages/automated_actions" }
 dependencies = [
+    { name = "automated-actions-utils" },
     { name = "celery", extra = ["sqs"] },
     { name = "fastapi" },
-    { name = "gql" },
     { name = "httpx" },
     { name = "hvac" },
     { name = "itsdangerous" },
     { name = "kubernetes" },
-    { name = "openshift" },
     { name = "prometheus-fastapi-instrumentator" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -96,21 +96,19 @@ dev = [
     { name = "pytest-cov" },
     { name = "pytest-httpx" },
     { name = "pytest-mock" },
-    { name = "qenerate" },
     { name = "requests-mock" },
     { name = "ruff" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "automated-actions-utils", editable = "packages/automated_actions_utils" },
     { name = "celery", extras = ["sqs"], specifier = "==5.5.2" },
     { name = "fastapi", specifier = "==0.115.12" },
-    { name = "gql", specifier = "==3.5.0" },
     { name = "httpx", specifier = "==0.28.1" },
     { name = "hvac", specifier = "==2.3.0" },
     { name = "itsdangerous", specifier = "==2.2.0" },
     { name = "kubernetes", specifier = "==32.0.1" },
-    { name = "openshift", specifier = "==0.13.2" },
     { name = "prometheus-fastapi-instrumentator", specifier = "==7.1.0" },
     { name = "pydantic", specifier = "==2.11.4" },
     { name = "pydantic-settings", specifier = "==2.9.1" },
@@ -130,7 +128,6 @@ dev = [
     { name = "pytest-cov", specifier = "==6.1.1" },
     { name = "pytest-httpx", specifier = "==0.35.0" },
     { name = "pytest-mock", specifier = "==3.14.0" },
-    { name = "qenerate", specifier = "==0.7.0" },
     { name = "requests-mock", specifier = "==1.12.1" },
     { name = "ruff", specifier = "==0.11.10" },
 ]
@@ -221,6 +218,49 @@ dev = [
 name = "automated-actions-project"
 version = "0.1.0"
 source = { virtual = "." }
+
+[[package]]
+name = "automated-actions-utils"
+version = "0.1.0"
+source = { editable = "packages/automated_actions_utils" }
+dependencies = [
+    { name = "gql" },
+    { name = "hvac" },
+    { name = "kubernetes" },
+    { name = "openshift" },
+    { name = "pydantic" },
+    { name = "types-hvac" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "qenerate" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "gql", specifier = "==3.5.0" },
+    { name = "hvac", specifier = "==2.3.0" },
+    { name = "kubernetes", specifier = "==32.0.1" },
+    { name = "openshift", specifier = "==0.13.2" },
+    { name = "pydantic", specifier = "==2.11.4" },
+    { name = "types-hvac", specifier = "==2.3.0.20250516" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = "==1.15.0" },
+    { name = "pytest", specifier = "==8.3.5" },
+    { name = "pytest-cov", specifier = "==6.1.1" },
+    { name = "pytest-mock", specifier = "==3.14.0" },
+    { name = "qenerate", specifier = "==0.7.0" },
+    { name = "ruff", specifier = "==0.11.10" },
+]
 
 [[package]]
 name = "backoff"

@@ -1,29 +1,19 @@
 [project]
-name = "automated-actions"
+name = "automated-actions-utils"
 version = "0.1.0"
-description = "Automated Actions Server"
+description = "Automated Actions Utils"
 authors = [{ name = "AppSRE", email = "sd-app-sre@redhat.com" }]
 license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.12.0"
 dependencies = [
-    "automated-actions-utils",
-    "celery[sqs]==5.5.2",
-    "fastapi==0.115.12",
     # 3.5.2 needs newer graphql-core, but qenerate doesn't support it yet
-    "httpx==0.28.1",
+    "gql==3.5.0",
     "hvac==2.3.0",
-    "itsdangerous==2.2.0",
     "kubernetes==32.0.1",
-    "prometheus-fastapi-instrumentator==7.1.0",
+    "openshift==0.13.2",
     "pydantic==2.11.4",
-    "pydantic-settings==2.9.1",
-    "pyjwt==2.10.1",
-    "pynamodb==6.0.2",
-    "requests-toolbelt==1.0.0",
     "types-hvac==2.3.0.20250516",
-    "uvicorn==0.34.2",
-    "watchdog==6.0.0",
 ]
 
 [project.urls]
@@ -38,10 +28,8 @@ dev = [
     "mypy==1.15.0",
     "pytest==8.3.5",
     "pytest-cov==6.1.1",
-    "pytest-asyncio==0.26.0",
-    "pytest-httpx==0.35.0",
+    "qenerate==0.7.0",
     "pytest-mock==3.14.0",
-    "requests-mock==1.12.1",
 ]
 
 [build-system]
@@ -49,20 +37,21 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
-only-include = ["automated_actions"]
+only-include = ["automated_actions_utils"]
 
 [tool.hatch.build.targets.wheel]
-only-include = ["automated_actions"]
+only-include = ["automated_actions_utils"]
 
 # Ruff configuration
 [tool.ruff]
 line-length = 88
-src = ["automated_actions"]
+src = ["automated_actions_utils"]
 extend-exclude = [
     # exclude some common cache and tmp directories
     ".local",
     ".cache",
     "tmp",
+    "automated_actions_utils/gql_definitions",
 ]
 fix = true
 
@@ -117,11 +106,11 @@ ignore = [
 preview = true
 
 [tool.ruff.lint.isort]
-known-first-party = ["automated_actions"]
+known-first-party = ["automated_actions_utils"]
 
 # Mypy configuration
 [tool.mypy]
-files = ["automated_actions"]
+files = ["automated_actions_utils"]
 enable_error_code = ["truthy-bool", "redundant-expr"]
 plugins = ["pydantic.mypy"]
 no_implicit_optional = true
@@ -135,10 +124,9 @@ disallow_incomplete_defs = true
 # Below are all of the packages that don't implement stub packages. Mypy will throw an error if we don't ignore the
 # missing imports. See: https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
 module = [
-    "celery.*",
     "kubernetes.*",
-    "billiard.einfo.*",
-    "automated_actions_utils.*"  # TODO(rporres): fix
+    "openshift.dynamic.*",
+    "automated_actions.*",   # TODO: rporres - fix
 ]
 ignore_missing_imports = true
 

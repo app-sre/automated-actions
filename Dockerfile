@@ -35,14 +35,10 @@ ENV \
     # disable uv cache. it doesn't make sense in a container
     UV_NO_CACHE=true
 
-COPY packages/automated_actions/pyproject.toml uv.lock ./
-# Install the project dependencies
-RUN uv sync --frozen --no-install-project --no-group dev
-
-COPY README.md ./
+COPY --chown=1001:root packages/automated_actions_utils packages/automated_actions_utils
 COPY --chown=1001:root packages/automated_actions packages/automated_actions
-RUN uv sync --frozen --no-group dev
-
+COPY --chown=1001:root README.md pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --verbose
 
 #
 # Test image

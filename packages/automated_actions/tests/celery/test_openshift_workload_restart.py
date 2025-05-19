@@ -2,6 +2,12 @@ import uuid
 from unittest.mock import Mock, call
 
 import pytest
+from automated_actions_utils.cluster_connection import ClusterConnectionData
+from automated_actions_utils.openshift_client import (
+    OpenshiftClient,
+    OpenshiftClientResourceNotFoundError,
+    RollingRestartResource,
+)
 from kubernetes.client.exceptions import ApiException
 from pytest_mock import MockerFixture
 
@@ -12,12 +18,6 @@ from automated_actions.celery.openshift.tasks import (
     openshift_workload_restart,
 )
 from automated_actions.db.models import Action, ActionStatus
-from automated_actions.utils.cluster_connection import ClusterConnectionData
-from automated_actions.utils.openshift_client import (
-    OpenshiftClient,
-    OpenshiftClientResourceNotFoundError,
-    RollingRestartResource,
-)
 
 
 @pytest.fixture

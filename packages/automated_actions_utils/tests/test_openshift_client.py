@@ -6,8 +6,8 @@ import pytest
 from kubernetes.dynamic.exceptions import NotFoundError
 from pytest_mock import MockerFixture
 
-from automated_actions.utils import openshift_client as openshift_client_utils
-from automated_actions.utils.openshift_client import (
+from automated_actions_utils import openshift_client as openshift_client_utils
+from automated_actions_utils.openshift_client import (
     OpenshiftClient,
     OpenshiftClientPodDeletionNotSupportedError,
     OpenshiftClientResourceNotFoundError,
@@ -17,7 +17,7 @@ from automated_actions.utils.openshift_client import (
 
 @pytest.fixture(autouse=True)
 def mock_dynamic_client(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch("automated_actions.utils.openshift_client.DynamicClient")
+    return mocker.patch("automated_actions_utils.openshift_client.DynamicClient")
 
 
 @pytest.fixture(autouse=True)

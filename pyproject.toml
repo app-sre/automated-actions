@@ -9,11 +9,13 @@ license = { text = "Apache 2.0" }
 automated-actions = { workspace = true }
 automated-actions-client = { workspace = true }
 automated-actions-cli = { workspace = true }
+automated-actions-utils = { workspace = true }
 
 [tool.uv.workspace]
 members = [
     "packages/automated_actions",
     "packages/automated_actions_client",
     "packages/automated_actions_cli",
+    "packages/automated_actions_utils",
     "packages/integration_tests",
 ]

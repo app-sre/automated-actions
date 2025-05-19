@@ -35,7 +35,7 @@ generate-client:
 
 .PHONY: gql-introspection
 gql-introspection:
-	@uv run qenerate introspection http://localhost:4000/graphql > packages/automated_actions/automated_actions/gql_definitions/introspection.json
+	@uv run qenerate introspection http://localhost:4000/graphql > packages/automated_actions_utils/automated_actions_utils/gql_definitions/introspection.json
 
 .PHONY: gql-query-classes
 gql-query-classes:

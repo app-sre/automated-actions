@@ -1,7 +1,7 @@
 import pytest
 from requests_mock import Mocker
 
-from automated_actions.utils.gql_client import GQLClient
+from automated_actions_utils.gql_client import GQLClient
 
 
 @pytest.fixture
