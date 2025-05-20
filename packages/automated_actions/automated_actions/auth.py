@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from datetime import UTC
 from datetime import datetime as dt
 from json import JSONDecodeError
-from typing import Protocol, Self
+from typing import Any, Protocol, Self
 from urllib.parse import quote
 
 import httpx
@@ -217,94 +217,73 @@ class OPA[UserModel: UserModelProtocol]:
         self,
         opa_host: str,
         skip_endpoints: list[str] | None = None,
-        skip_users: list[str] | None = None,
         package_name: str = "authz",
     ) -> None:
         self.opa_url = (
             f"{opa_host.rstrip('/')}/v1/data/{package_name.replace('.', '/')}"
         )
         self.skip_endpoints = [re.compile(skip) for skip in skip_endpoints or []]
-        self.skip_users = skip_users
 
     def should_skip_endpoint(self, endpoint: str) -> bool:
         return any(skip.match(endpoint) for skip in self.skip_endpoints)
 
-    def should_skip_user(self, user: str) -> bool:
-        return bool(self.skip_users and user in self.skip_users)
-
-    @staticmethod
-    def get_opa_result(opa_decision: httpx.Response) -> bool | dict | list | None:
-        if opa_decision.status_code != status.HTTP_200_OK:
-            log.error(f"Returned with status {opa_decision.status_code}.")
-            return False
-        try:
-            return opa_decision.json().get("result")
-        except JSONDecodeError:
-            log.exception("Unable to decode OPA response.")
-            return False
-
-    async def user_is_authorized(
+    async def query_opa(
         self, user: UserModel, obj: str, params: dict[str, str]
-    ) -> bool:
-        """Check if user is authorized to access endpoint."""
+    ) -> dict:
+        """Query OPA data endpoint for authorization and other decisions."""
         data = {"input": user.dump().model_dump()}
         data["input"]["obj"] = obj
         data["input"]["params"] = params
 
         async with httpx.AsyncClient() as client:
-            opa_decision = await client.post(
-                f"{self.opa_url}/allow", json=data, timeout=5
+            opa_decision = await client.post(f"{self.opa_url}", json=data, timeout=5)
+
+        if opa_decision.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="OPA returned unexpected http status code",
             )
 
-        result = self.get_opa_result(opa_decision)
-        if not isinstance(result, bool):
+        try:
+            return opa_decision.json().get("result")
+        except JSONDecodeError as e:
+            log.exception("Unable to decode OPA response.")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="OPA returned unexpected result",
-            )
-        return result
+            ) from e
 
-    async def user_objects(self, user: UserModel) -> list[str]:
-        """Get objects for the user."""
-        async with httpx.AsyncClient() as client:
-            opa_decision = await client.post(
-                f"{self.opa_url}/objects",
-                json={
-                    "input": {
-                        "username": user.username,
-                    }
-                },
-                timeout=5,
-            )
-
-        result = self.get_opa_result(opa_decision)
-        if not isinstance(result, list):
+    @staticmethod
+    def user_is_authorized(opa_data: dict[str, Any]) -> None:
+        """Check if user is authorized to access endpoint."""
+        if not opa_data.get("authorized"):
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="OPA returned unexpected result",
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized"
             )
-        return result
+
+    @staticmethod
+    def user_is_within_rate_limits(opa_data: dict[str, Any]) -> None:
+        """Check if user is still in the rate limits."""
+        if not opa_data.get("within_rate_limits"):
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Action rate limit exceeded!",
+            )
 
     async def __call__(self, request: Request, user: UserModel) -> None:
         # allow endpoints without authorization
-        if self.should_skip_endpoint(request.url.path) or self.should_skip_user(
-            user.username
-        ):
+        if self.should_skip_endpoint(request.url.path):
             return
 
         # check if user is authorized to access endpoint
         params = request.path_params.copy()
         params.update(request.query_params)
-        if not await self.user_is_authorized(
+        opa_data = await self.query_opa(
             user, obj=request["route"].operation_id, params=params
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized"
-            )
-
-        # get user allowed_actions
-        allowed_actions = await self.user_objects(user)
-        user.set_allowed_actions(allowed_actions)
+        )
+        self.user_is_authorized(opa_data)
+        self.user_is_within_rate_limits(opa_data)
+        user.set_allowed_actions(allowed_actions=opa_data.get("objects", []))
 
 
 class BearerTokenAuth[UserModel: UserModelProtocol]:

@@ -1,7 +1,5 @@
-import re
 from unittest.mock import MagicMock
 
-import httpx
 import pytest
 from fastapi import HTTPException, status
 from pytest_httpx import HTTPXMock
@@ -26,42 +24,8 @@ def test_opa_should_skip_endpoint(opa: OPA, endpoint: str, *, expected: bool) ->
     assert opa.should_skip_endpoint(endpoint) == expected
 
 
-def test_opa_get_opa_result_bad_status_code(opa: OPA) -> None:
-    assert not opa.get_opa_result(httpx.Response(status_code=403))
-
-
-def test_opa_get_opa_result_bad_response(opa: OPA) -> None:
-    assert not opa.get_opa_result(httpx.Response(status_code=200, text="whatever"))
-
-
-def test_opa_get_opa_result_boolean(opa: OPA) -> None:
-    assert (
-        opa.get_opa_result(httpx.Response(status_code=200, json={"result": True}))
-        is True
-    )
-
-
-def test_opa_get_opa_result_dict(opa: OPA) -> None:
-    assert opa.get_opa_result(
-        httpx.Response(status_code=200, json={"result": {"foo": "bar"}})
-    ) == {"foo": "bar"}
-
-
-def test_opa_get_opa_result_list(opa: OPA) -> None:
-    assert opa.get_opa_result(
-        httpx.Response(status_code=200, json={"result": ["foo", "bar"]})
-    ) == ["foo", "bar"]
-
-
-def test_opa_get_opa_result_none(opa: OPA) -> None:
-    assert (
-        opa.get_opa_result(httpx.Response(status_code=200, json={"result": None}))
-        is None
-    )
-
-
 @pytest.mark.asyncio
-async def test_opa_user_is_authorized(
+async def test_opa_query_opa(
     opa: OPA, usermodel: MockUserModel, httpx_mock: HTTPXMock
 ) -> None:
     user = usermodel.load("test_user")
@@ -80,54 +44,40 @@ async def test_opa_user_is_authorized(
         },
         json={"result": True},
     )
-    user_is_authorized = await opa.user_is_authorized(
-        user=user, obj="endpoint", params={"foo": "bar"}
-    )
-    assert user_is_authorized is True
+    result = await opa.query_opa(user=user, obj="endpoint", params={"foo": "bar"})
+    assert result is True
 
 
-@pytest.mark.asyncio
-async def test_opa_user_is_authorized_exception(
-    opa: OPA, usermodel: MockUserModel, httpx_mock: HTTPXMock
-) -> None:
-    user = usermodel.load("test_user")
-    httpx_mock.add_response(
-        method="POST",
-        json={"result": {"whatever": "foo"}},
-    )
-    with pytest.raises(HTTPException):
-        await opa.user_is_authorized(user=user, obj="endpoint", params={"foo": "bar"})
+def test_opa_user_is_authorized(opa: OPA) -> None:
+    opa.user_is_authorized({"authorized": True})
 
 
-@pytest.mark.asyncio
-async def test_opa_user_objects(
-    opa: OPA, usermodel: MockUserModel, httpx_mock: HTTPXMock
-) -> None:
-    user = usermodel.load("test_user")
-    httpx_mock.add_response(
-        method="POST",
-        match_json={
-            "input": {
-                "username": "test_user",
-            }
-        },
-        json={"result": ["action-1", "action-2"]},
-    )
-    user_objects = await opa.user_objects(user=user)
-    assert user_objects == ["action-1", "action-2"]
+def test_opa_user_is_authorized_denied(opa: OPA) -> None:
+    with pytest.raises(HTTPException) as excinfo:
+        opa.user_is_authorized({"authorized": False})
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-@pytest.mark.asyncio
-async def test_opa_user_objects_exception(
-    opa: OPA, usermodel: MockUserModel, httpx_mock: HTTPXMock
-) -> None:
-    user = usermodel.load("test_user")
-    httpx_mock.add_response(
-        method="POST",
-        json={"result": {"whatever": "foo"}},
-    )
-    with pytest.raises(HTTPException):
-        await opa.user_objects(user=user)
+def test_opa_user_is_authorized_missing_result(opa: OPA) -> None:
+    with pytest.raises(HTTPException) as excinfo:
+        opa.user_is_authorized({"foobar": False})
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_opa_user_is_within_rate_limits(opa: OPA) -> None:
+    opa.user_is_within_rate_limits({"within_rate_limits": True})
+
+
+def test_opa_user_is_within_rate_limits_denied(opa: OPA) -> None:
+    with pytest.raises(HTTPException) as excinfo:
+        opa.user_is_within_rate_limits({"within_rate_limits": False})
+    assert excinfo.value.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+
+
+def test_opa_user_is_within_rate_limits_missing_result(opa: OPA) -> None:
+    with pytest.raises(HTTPException) as excinfo:
+        opa.user_is_within_rate_limits({"foobar": False})
+    assert excinfo.value.status_code == status.HTTP_429_TOO_MANY_REQUESTS
 
 
 @pytest.mark.asyncio
@@ -144,7 +94,6 @@ async def test_opa_call(
 
     # user_is_authorized
     httpx_mock.add_response(
-        url=re.compile(r".*allow"),
         method="POST",
         match_json={
             "input": {
@@ -157,19 +106,13 @@ async def test_opa_call(
                 "params": {"foo": "bar"},
             }
         },
-        json={"result": True},
-    )
-
-    # user_objects
-    httpx_mock.add_response(
-        url=re.compile(r".*objects"),
-        method="POST",
-        match_json={
-            "input": {
-                "username": "test_user",
+        json={
+            "result": {
+                "authorized": True,
+                "within_rate_limits": True,
+                "objects": ["action-1", "action-2"],
             }
         },
-        json={"result": ["action-1", "action-2"]},
     )
     await opa(request=mock_request, user=user)
     assert user.allowed_actions == ["action-1", "action-2"]
@@ -201,7 +144,6 @@ async def test_opa_call_not_authorized(
 
     # user_is_authorized
     httpx_mock.add_response(
-        url=re.compile(r".*allow"),
         method="POST",
         match_json={
             "input": {
@@ -214,11 +156,59 @@ async def test_opa_call_not_authorized(
                 "params": {"foo": "bar"},
             }
         },
-        json={"result": False},
+        json={
+            "result": {
+                "authorized": False,
+                "within_rate_limits": True,
+                "objects": ["action-1", "action-2"],
+            }
+        },
     )
 
     with pytest.raises(HTTPException) as excinfo:
         await opa(request=mock_request, user=user)
 
     assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert user.allowed_actions == []
+
+
+@pytest.mark.asyncio
+async def test_opa_call_rate_limit_exceeded(
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+) -> None:
+    user = usermodel.load("test_user")
+    route_mock = MagicMock()
+    route_mock.operation_id = "endpoint"
+    mock_request.__getitem__.return_value = route_mock
+    mock_request.path_params = {"foo": "bar"}
+    mock_request.url = MagicMock()
+    mock_request.url.path = "/endpoint"
+
+    # user_is_authorized
+    httpx_mock.add_response(
+        method="POST",
+        match_json={
+            "input": {
+                "username": "test_user",
+                "name": "test user",
+                "email": "test@example.com",
+                "created_at": 1,
+                "updated_at": 2,
+                "obj": "endpoint",
+                "params": {"foo": "bar"},
+            }
+        },
+        json={
+            "result": {
+                "authorized": True,
+                "within_rate_limits": False,
+                "objects": ["action-1", "action-2"],
+            }
+        },
+    )
+
+    with pytest.raises(HTTPException) as excinfo:
+        await opa(request=mock_request, user=user)
+
+    assert excinfo.value.status_code == status.HTTP_429_TOO_MANY_REQUESTS
     assert user.allowed_actions == []

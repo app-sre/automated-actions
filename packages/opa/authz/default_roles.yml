@@ -2,6 +2,8 @@
 users:
   '*':
   - default
+  open-policy-agent:
+  - opa
 roles:
   default:
   - obj: me
@@ -15,5 +17,10 @@ roles:
     max_ops: null
     params: {}
   - obj: action-cancel
+    max_ops: null
+    params: {}
+  opa:
+  # the OPA service account must be allowed to retrieve the actions for any user!
+  - obj: action-list
     max_ops: null
     params: {}

@@ -40,9 +40,7 @@ async def initialize_auth_components(app: FastAPI) -> None:
         issuer=settings.url, secret=settings.token_secret, user_model=User
     )
     app.state.authz = OPA[User](  # type: ignore[type-var]
-        opa_host=settings.opa_host,
-        skip_users=settings.opa_skip_users,
-        package_name="authz",
+        opa_host=settings.opa_host, package_name="authz", skip_endpoints=["/api/v1/me"]
     )
     log.info("Auth components initialized.")
 

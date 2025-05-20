@@ -36,7 +36,6 @@ class Settings(BaseSettings):
 
     # AuthZ
     opa_host: str = "http://opa:8181"
-    opa_skip_users: list[str] = ["open-policy-agent"]
 
     # worker metrics config
     worker_metrics_port: int = 8000
