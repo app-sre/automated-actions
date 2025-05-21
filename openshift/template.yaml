@@ -24,7 +24,7 @@ objects:
     AA_DEBUG: "${AA_DEBUG}"
     AA_ROOT_PATH: "${AA_ROOT_PATH}"
     AA_URL: "${AA_URL}"
-    OPA_ACTION_API_URL: "http://automated-actions:${{AA_APP_PORT}}"
+    OPA_ACTION_API_URL: "http://automated-actions:${AA_APP_PORT}"
     OPA_MAX_AGE_MINUTES: "60"
 
 # ------- API DEPLOYMENT --------------------
