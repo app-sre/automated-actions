@@ -11,7 +11,7 @@ COPY packages/opa/authz /authz
 # Test image
 #
 FROM base AS test
-COPY --from=ghcr.io/styrainc/regal:0.33.1 /ko-app/regal /bin/regal
+COPY --from=ghcr.io/styrainc/regal:0.33.1@sha256:5a662249f82b35e1f069a4ef612cd2420886c602195ae3ba1cd9ba9fb6b2b406 /ko-app/regal /bin/regal
 USER 0
 RUN microdnf install -y make
 USER 1000:1000
