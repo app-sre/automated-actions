@@ -7,6 +7,7 @@ _test_users_max_ops := {
 	"user_admin_max_ops": ["role_admin_max_ops_2"],
 	"user_no_max_ops_def": ["role_no_max_ops_def"],
 	"user_invalid_max_ops_type": ["role_max_ops_invalid_type"],
+	"user_max_ops_zero": ["role_max_ops_zero"],
 }
 
 _test_roles_max_ops := {
@@ -28,6 +29,11 @@ _test_roles_max_ops := {
 	"role_max_ops_invalid_type": [{
 		"obj": "action-invalid-maxops",
 		"max_ops": "not-a-number", # max_ops is not a number
+		"params": {},
+	}],
+	"role_max_ops_zero": [{
+		"obj": "action-maxops-zero",
+		"max_ops": 0,
 		"params": {},
 	}],
 }
@@ -198,8 +204,18 @@ test_max_ops_not_a_number_results_in_allowed if {
 	}
 		with data.users as _test_users_max_ops
 		with data.roles as _test_roles_max_ops
-		# No 'with http.send as ...' needed.
-with 		opa.runtime as mock_runtime_with_env
+		with opa.runtime as mock_runtime_with_env
+}
+
+test_max_ops_zero_results_in_allowed if {
+	authz.within_rate_limits with input as {
+		"username": "user_max_ops_zero",
+		"obj": "action-maxops-zero",
+		"params": {},
+	}
+		with data.users as _test_users_max_ops
+		with data.roles as _test_roles_max_ops
+		with opa.runtime as mock_runtime_with_env
 }
 
 # API call to action-list fails

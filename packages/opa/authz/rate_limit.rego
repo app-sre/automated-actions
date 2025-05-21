@@ -38,6 +38,9 @@ max_ops_limit_not_exceeded(current_obj, max_ops, username) if {
 	not is_number(max_ops)
 }
 
+# max_ops == 0 means no limit
+max_ops_limit_not_exceeded(_, 0, _) := true
+
 # Check if the max_ops limit is not exceeded for the given action and user.
 max_ops_limit_not_exceeded(current_obj, max_ops, username) if {
 	is_number(max_ops)
