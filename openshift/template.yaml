@@ -138,7 +138,7 @@ objects:
     name: automated-actions
   spec:
     ports:
-    - name: "8000"
+    - name: "http"
       port: ${{AA_APP_PORT}}
       targetPort: ${{AA_APP_PORT}}
     selector:
@@ -249,7 +249,7 @@ objects:
     name: automated-actions-worker
   spec:
     ports:
-    - name: "8000"
+    - name: "http"
       port: ${{AA_WORKER_METRICS_PORT}}
       targetPort: ${{AA_WORKER_METRICS_PORT}}
     selector:
