@@ -241,7 +241,7 @@ class OPA[UserModel: UserModelProtocol]:
         if opa_decision.status_code != status.HTTP_200_OK:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="OPA returned unexpected http status code",
+                detail=f"OPA returned unexpected http status code: {opa_decision.status_code}",
             )
 
         try:
