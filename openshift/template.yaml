@@ -1,3 +1,4 @@
+---
 apiVersion: template.openshift.io/v1
 kind: Template
 labels:
@@ -23,6 +24,8 @@ objects:
     AA_DEBUG: "${AA_DEBUG}"
     AA_ROOT_PATH: "${AA_ROOT_PATH}"
     AA_URL: "${AA_URL}"
+    OPA_ACTION_API_URL: "http://automated-actions:${{AA_APP_PORT}}"
+    OPA_MAX_AGE_MINUTES: "60"
 
 # ------- API DEPLOYMENT --------------------
 - apiVersion: policy/v1
@@ -84,12 +87,12 @@ objects:
           - name: AA_APP_PORT
             value: "${AA_APP_PORT}"
           envFrom:
-            - secretRef:
-                name: automated-actions-secret
-                optional: true
-            - configMapRef:
-                name: automated-actions-config
-                optional: true
+          - secretRef:
+              name: automated-actions-secret
+              optional: true
+          - configMapRef:
+              name: automated-actions-config
+              optional: true
           image: "${IMAGE}:${IMAGE_TAG}"
           name: web
           ports:
@@ -98,9 +101,9 @@ objects:
             preStop:
               exec:
                 command:
-                  - sh
-                  - "-c"
-                  - sleep 5
+                - sh
+                - "-c"
+                - sleep 5
           readinessProbe:
             httpGet:
               path: /healthz
@@ -202,12 +205,12 @@ objects:
           - name: AA_WORKER_METRICS_PORT
             value: "${AA_WORKER_METRICS_PORT}"
           envFrom:
-            - secretRef:
-                name: automated-actions-secret
-                optional: true
-            - configMapRef:
-                name: automated-actions-config
-                optional: true
+          - secretRef:
+              name: automated-actions-secret
+              optional: true
+          - configMapRef:
+              name: automated-actions-config
+              optional: true
           image: "${IMAGE}:${IMAGE_TAG}"
           name: worker
           ports:
@@ -317,18 +320,25 @@ objects:
           - --disable-telemetry
           - --addr=0.0.0.0:8181
           - --watch
-          - /authz        # rego policy and default roles
-          - /policies     # app-interface roles
+          - /authz # rego policy and default roles
+          - /policies # app-interface roles
           ports:
           - name: http
             containerPort: ${{AA_OPA_PORT}}
+          envFrom:
+          - secretRef:
+              name: automated-actions-secret
+              optional: true
+          - configMapRef:
+              name: automated-actions-config
+              optional: true
           lifecycle:
             preStop:
               exec:
                 command:
-                  - sh
-                  - "-c"
-                  - sleep 2
+                - sh
+                - "-c"
+                - sleep 2
           livenessProbe:
             httpGet:
               path: /health
@@ -338,7 +348,7 @@ objects:
             periodSeconds: 60
           readinessProbe:
             httpGet:
-              path: /health?bundle=true  # Include bundle activation in readiness
+              path: /health?bundle=true # Include bundle activation in readiness
               scheme: HTTP
               port: ${{AA_OPA_PORT}}
             initialDelaySeconds: 5
@@ -356,9 +366,9 @@ objects:
             limits:
               memory: ${{AA_OPA_MEMORY_LIMITS}}
           volumeMounts:
-            - name: policy-volume
-              mountPath: /policies
-              readOnly: true
+          - name: policy-volume
+            mountPath: /policies
+            readOnly: true
         volumes:
         - name: policy-volume
           configMap:
