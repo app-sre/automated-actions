@@ -621,8 +621,10 @@ name = "integration-tests"
 version = "0.1.0"
 source = { editable = "packages/integration_tests" }
 dependencies = [
+    { name = "automated-actions" },
     { name = "automated-actions-cli" },
     { name = "automated-actions-client" },
+    { name = "automated-actions-utils" },
     { name = "pydantic-settings" },
     { name = "pytest" },
     { name = "pytest-order" },
@@ -639,8 +641,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "automated-actions", editable = "packages/automated_actions" },
     { name = "automated-actions-cli", editable = "packages/automated_actions_cli" },
     { name = "automated-actions-client", editable = "packages/automated_actions_client" },
+    { name = "automated-actions-utils", editable = "packages/automated_actions_utils" },
     { name = "pydantic-settings", specifier = "==2.9.1" },
     { name = "pytest", specifier = "==8.3.5" },
     { name = "pytest-order", specifier = "==1.3.0" },

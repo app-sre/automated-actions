@@ -24,7 +24,7 @@ objects:
       app.kubernetes.io/component: integration-tests
       app.kubernetes.io/name: automated-actions
   data:
-    ${{AA_TEST_PARAMETERS}}
+    ${{AAIT_TEST_PARAMETERS}}
 
 - apiVersion: batch/v1
   kind: Job
@@ -43,12 +43,10 @@ objects:
             imagePullPolicy: Always
             name: integration-tests
             env:
-              - name: AA_URL
-                value: ${AA_URL}
-              - name: AA_TOKEN
-                value: ${AA_TOKEN}
-              - name: AA_ACTION_TIMEOUT_SECONDS
-                value: ${AA_ACTION_TIMEOUT_SECONDS}
+              - name: AAIT_URL
+                value: ${AAIT_URL}
+              - name: AAIT_TOKEN
+                value: ${AAIT_TOKEN}
             envFrom:
             - configMapRef:
                 name: integration-tests-config
@@ -85,19 +83,14 @@ parameters:
 - name: CPU_REQUESTS
   value: 300m
 
-- name: AA_URL
+- name: AAIT_URL
   description: URL of the automated-actions instance to test
   required: true
 
-- name: AA_TOKEN
+- name: AAIT_TOKEN
   description: Access token for the automated-actions instance
   required: true
 
-- name: AA_ACTION_TIMEOUT_SECONDS
-  description: Timeout for the action to complete
-  value: "60"
-  required: true
-
-- name: AA_TEST_PARAMETERS
+- name: AAIT_TEST_PARAMETERS
   description: JSON object with parameters to pass to the integration tests
   required: true

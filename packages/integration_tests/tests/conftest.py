@@ -1,13 +1,30 @@
 import pytest
 from automated_actions_client import AuthenticatedClient
-from pydantic import HttpUrl
+from pydantic import BaseModel, HttpUrl
 from pydantic_settings import BaseSettings
+
+
+class OpenshiftDeploymentRestartParameters(BaseModel):
+    cluster: str
+    namespace: str
+    name: str
+    retries: int = 10
+    sleep_time: int = 10
+
+
+class OpenshiftPodRestartParameters(BaseModel):
+    cluster: str
+    namespace: str
+    parent_kind: str
+    parent_kind_name: str
+    retries: int = 10
+    sleep_time: int = 10
 
 
 class Config(BaseSettings):
     """Configuration for the tests."""
 
-    model_config = {"env_prefix": "aa_"}
+    model_config = {"env_prefix": "aait_", "env_nested_delimiter": "__"}
 
     # ATTENTION: You also need to add all required environment variables to the
     # Openshift template (openshift/integration-tests.yaml)!
@@ -15,14 +32,9 @@ class Config(BaseSettings):
     # general
     url: HttpUrl = HttpUrl("http://localhost:8080")
     token: str
-    action_timeout_seconds: int = 30
-    retries: int = 10
 
-    # openshift
-    cluster: str
-    namespace: str
-    kind: str
-    name: str
+    openshift_deployment_restart: OpenshiftDeploymentRestartParameters
+    openshift_pod_restart: OpenshiftPodRestartParameters
 
 
 _config = Config()

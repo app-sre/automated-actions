@@ -41,8 +41,10 @@ USER 0
 
 COPY pyproject.toml uv.lock ./
 # automated_actions_client is a dependency of automated_actions_cli
+COPY packages/automated_actions ./packages/automated_actions
 COPY packages/automated_actions_client ./packages/automated_actions_client
 COPY packages/automated_actions_cli ./packages/automated_actions_cli
+COPY packages/automated_actions_utils ./packages/automated_actions_utils
 
 COPY packages/integration_tests/ ./packages/integration_tests/
 RUN cd ./packages/integration_tests/ && uv sync
