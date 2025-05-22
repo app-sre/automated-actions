@@ -70,7 +70,7 @@ class Action(Table[ActionSchemaIn, ActionSchemaOut]):
     """Action."""
 
     class Meta(Table.Meta):
-        table_name = f"aa-action-{settings.environment}"
+        table_name = f"aa-{settings.environment}-actions"
         schema_out = ActionSchemaOut
 
     @staticmethod

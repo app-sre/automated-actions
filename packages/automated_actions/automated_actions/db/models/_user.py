@@ -23,7 +23,7 @@ class User(Table[UserSchemaIn, UserSchemaOut]):
     """User."""
 
     class Meta(Table.Meta):
-        table_name = f"aa-user-{settings.environment}"
+        table_name = f"aa-{settings.environment}-user"
         schema_out = UserSchemaOut
 
     @classmethod
