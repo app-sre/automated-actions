@@ -1,16 +1,19 @@
+import json
 from collections.abc import Callable
 from subprocess import CalledProcessError, CompletedProcess, run
+from typing import Literal
 
 import pytest
+import yaml
 
 AACli = Callable[..., CompletedProcess]
 
 
 @pytest.fixture
 def cli() -> AACli:
-    def _run(*args: str) -> CompletedProcess:
+    def _run(output: Literal["json", "yaml"], *args: str) -> CompletedProcess:
         return run(
-            ["automated-actions", *args],
+            ["automated-actions", "--output", output, *args],
             capture_output=True,
             text=True,
             check=True,
@@ -20,37 +23,48 @@ def cli() -> AACli:
 
 
 def test_cli_help(cli: AACli) -> None:
-    result = cli("--help")
+    result = cli("json", "--help")
 
     assert "Usage:" in result.stdout
 
 
 def test_cli_me(cli: AACli) -> None:
-    result = cli("me")
+    result = json.loads(cli("json", "me").stdout)
 
-    assert "UserSchemaOut" in result.stdout
-    assert "allowed_actions=" in result.stdout
+    assert "allowed_actions" in result
+    assert "name" in result
+
+
+def test_cli_output_yaml(cli: AACli) -> None:
+    result = yaml.safe_load(cli("yaml", "me").stdout)
+
+    assert "allowed_actions" in result
+    assert "name" in result
 
 
 def test_cli_action_list(cli: AACli) -> None:
-    result = cli("action-list")
+    result = json.loads(cli("json", "action-list").stdout)
 
-    assert result.stdout.strip() == "[]" or "ActionSchemaOut" in result.stdout
+    assert result == [] or "action_id" in result[0]
 
 
 def test_cli_optional_option_in_help(cli: AACli) -> None:
-    result = cli("action-list", "--help")
+    result = cli("json", "action-list", "--help")
 
     assert "--status" in result.stdout
-    assert "[default: RUNNING]" in result.stdout
+    assert "[CANCELLED|FAILURE|PENDING|RUNNING|SUCCESS]" in result.stdout
+    assert "--action-user" in result.stdout
+    assert "--max-age-minutes" in result.stdout
 
 
 def test_cli_optional_option(cli: AACli) -> None:
-    cli("action-list", "--status", "SUCCESS")
+    result = json.loads(cli("json", "action-list", "--status", "SUCCESS").stdout)
+
+    assert result == [] or "action_id" in result[0]
 
 
 def test_cli_required_option_in_help(cli: AACli) -> None:
-    result = cli("action-detail", "--help")
+    result = cli("json", "action-detail", "--help")
 
     assert "--action-id" in result.stdout
     assert "[required]" in result.stdout
@@ -58,7 +72,7 @@ def test_cli_required_option_in_help(cli: AACli) -> None:
 
 def test_cli_required_option_not_given(cli: AACli) -> None:
     with pytest.raises(CalledProcessError) as e:
-        cli("action-detail")
+        cli("json", "action-detail")
 
     assert e.value.returncode == 2  # noqa: PLR2004
     assert "Missing option '--action-id'" in e.value.stderr
@@ -66,7 +80,7 @@ def test_cli_required_option_not_given(cli: AACli) -> None:
 
 def test_cli_required_option(cli: AACli) -> None:
     with pytest.raises(CalledProcessError) as e:
-        cli("action-detail", "--action-id", "this-id-does-not-exist")
+        cli("json", "action-detail", "--action-id", "this-id-does-not-exist")
 
     assert e.value.returncode == 1
     assert '{"detail":"Item not found"}' in e.value.stderr
