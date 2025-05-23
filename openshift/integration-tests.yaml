@@ -50,6 +50,9 @@ objects:
             envFrom:
             - configMapRef:
                 name: integration-tests-config
+            - secretRef:
+                name: automated-actions-secret
+                optional: true
             resources:
               requests:
                 memory: ${MEMORY_REQUESTS}
