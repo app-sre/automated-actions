@@ -83,6 +83,9 @@ class ClientWithCookieJar(Client):
 def main(
     ctx: typer.Context,
     *,
+    url: Annotated[
+        str, typer.Option(help="Automated Action Server URL", envvar="AA_URL")
+    ] = "https://automated-actions.devshift.net",
     debug: Annotated[
         bool, typer.Option(help="Enable debug", envvar="AA_DEBUG")
     ] = False,
@@ -121,7 +124,7 @@ def main(
         atexit.register(progress.stop)
 
     logging.basicConfig(
-        level="DEBUG" if config.debug or debug else "INFO",
+        level="DEBUG" if debug else "INFO",
         format="%(name)-20s: %(message)s",
     )
     logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -129,7 +132,7 @@ def main(
     if token := os.environ.get("AA_TOKEN"):
         ctx.obj = {
             "client": AuthenticatedClient(
-                base_url=str(config.url),
+                base_url=str(url),
                 token=token,
                 raise_on_unexpected_status=True,
                 follow_redirects=True,
@@ -140,7 +143,7 @@ def main(
         kinit()
         ctx.obj = {
             "client": ClientWithCookieJar(
-                base_url=str(config.url),
+                base_url=str(url),
                 raise_on_unexpected_status=True,
                 follow_redirects=True,
                 httpx_args={
