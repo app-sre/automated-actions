@@ -38,7 +38,7 @@ ENV \
 COPY --chown=1001:root packages/automated_actions_utils packages/automated_actions_utils
 COPY --chown=1001:root packages/automated_actions packages/automated_actions
 COPY --chown=1001:root README.md pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --verbose
+RUN cd packages/automated_actions && uv sync --frozen --no-group dev --verbose
 
 #
 # Test image
