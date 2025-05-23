@@ -41,7 +41,9 @@ def openshift_workload_restart(
     action: Annotated[Action, Depends(get_action)],
 ) -> ActionSchemaOut:
     """Restart an OpenShift workload."""
-    log.info(f"Restarting {kind}/{name} in {cluster}/{namespace}")
+    log.info(
+        f"Restarting {kind}/{name} in {cluster}/{namespace}: action_id={action.action_id}"
+    )
     openshift_workload_restart_task.apply_async(
         kwargs={
             "cluster": cluster,
