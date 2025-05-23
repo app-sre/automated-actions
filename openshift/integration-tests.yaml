@@ -90,7 +90,7 @@ parameters:
   description: URL of the automated-actions instance to test
   required: true
 
-- name: AAIT_TOKEN
+- name: AA_TOKEN
   description: Access token for the automated-actions instance
   required: true
 
