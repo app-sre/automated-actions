@@ -45,8 +45,8 @@ objects:
             env:
               - name: AAIT_URL
                 value: ${AAIT_URL}
-              - name: AAIT_TOKEN
-                value: ${AAIT_TOKEN}
+              - name: AA_TOKEN
+                value: ${AA_TOKEN}
             envFrom:
             - configMapRef:
                 name: integration-tests-config
