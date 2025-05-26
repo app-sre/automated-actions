@@ -1,34 +1,48 @@
-import sys
-
 from automated_actions.app_factory import create_app
 from automated_actions.config import settings
+
+log_level = "DEBUG" if settings.debug else "INFO"
 
 logging_config = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
-            "format": "%(levelname)-9s %(message)s",
+            "()": "uvicorn.logging.DefaultFormatter",
+            "fmt": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        },
+        "access": {
+            "()": "uvicorn.logging.AccessFormatter",
+            "fmt": "%(asctime)s [%(levelname)s] %(client_addr)s - %(request_line)s %(status_code)s",
         },
     },
     "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
+        "default": {
             "formatter": "default",
-            "stream": sys.stdout,
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stderr",
+        },
+        "access": {
+            "formatter": "access",
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",
         },
     },
-    "root": {
-        "handlers": ["console"],
-        "level": "INFO",
-    },
-    "automated-actions": {
-        "handlers": ["console"],
-        "level": "DEBUG" if settings.debug else "INFO",
-    },
     "loggers": {
-        "automated_actions": {
-            "handlers": ["console"],
+        "": {  # root logger
+            "level": log_level,
+            "handlers": ["default"],
+            "propagate": False,
+        },
+        "uvicorn": {
+            "handlers": ["default"],
+            "level": log_level,
+            "propagate": False,
+        },
+        "uvicorn.error": {"level": log_level},
+        "uvicorn.access": {
+            "handlers": ["access"],
+            "level": log_level,
             "propagate": False,
         },
     },
