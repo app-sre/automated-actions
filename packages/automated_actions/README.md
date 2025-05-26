@@ -37,10 +37,10 @@ The API is built using **FastAPI**. Key routers and views are typically found in
   * The Celery app instance is typically initialized in `automated_actions/celery/app.py`.
   * Configuration for brokers (SQS) and backends is managed here or via `automated_actions/config.py`.
 * **Task Definitions:**
-  * Individual Celery tasks representing specific automated actions (e.g., `restart_pod_task`, `run_db_migration_task`) are defined, often in `automated_actions/worker/tasks.py` or a `tasks/` subdirectory.
+  * Individual Celery tasks representing specific automated actions (e.g., `restart_pod_task`, `run_db_migration_task`) are defined on `tasks.py` modules under `automated_actions/celery` and added into `automated_actions/celery/app.py` `include` directive.
   * These tasks contain the core logic for interacting with target systems (OpenShift, AWS services, etc.).
   * They utilize utilities from [automated_actions_utils](/packages/automated_actions_utils/) for interacting with Vault, AWS APIs, etc.
-  * Tasks are responsible for updating the action's status in DynamoDB upon completion or failure.
+  * Tasks are responsible for updating the action's status in DynamoDB upon completion or failure. In order to do that, they take `automated_actions/automated_actions/celery/automated_action_task.py` as base, setting `base=AutomatedActionTask` in the task decorator, see `automated_actions/automated_actions/celery/openshift/tasks.py` as an example.
 
 ### Database Interaction (PynamoDB Models) 🗂️
 
