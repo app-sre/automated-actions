@@ -1,4 +1,5 @@
 import json
+import os
 from collections.abc import Callable
 from subprocess import CalledProcessError, CompletedProcess, run
 from typing import Literal
@@ -6,14 +7,18 @@ from typing import Literal
 import pytest
 import yaml
 
+from tests.conftest import Config
+
 AACli = Callable[..., CompletedProcess]
 
 
 @pytest.fixture
-def cli() -> AACli:
+def cli(config: Config) -> AACli:
+    os.environ["AA_TOKEN"] = config.token
+
     def _run(output: Literal["json", "yaml"], *args: str) -> CompletedProcess:
         return run(
-            ["automated-actions", "--output", output, *args],
+            ["automated-actions", "--url", str(config.url), "--output", output, *args],
             capture_output=True,
             text=True,
             check=True,
