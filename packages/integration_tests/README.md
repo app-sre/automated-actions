@@ -8,7 +8,7 @@ The primary purpose of these integration tests is to:
 
 1. **Validate End-to-End Flows:** Verify that actions can be successfully submitted via the API (often using the `automated_actions_client` or `automated_actions_cli`), processed by the `automated_actions` server and Celery workers, and that the expected outcomes occur in target systems.
 2. **Test CLI Functionality:** Directly invoke and test the `automated_actions_cli` commands to ensure they behave as expected, correctly interact with the API, and provide appropriate user feedback.
-3. **Execute Real Actions:** Unlike unit tests that mock dependencies, these tests often execute real, albeit controlled and maybe destructive, actions against live (but non-production) instances of dependent services (e.g., AppSRE staging applications, resources, and environments).
+3. **Execute Real Actions:** Unlike unit tests that mock dependencies, these tests often execute real, albeit controlled and potentially destructive, actions against live (but non-production) instances of dependent services (e.g., AppSRE staging applications, resources, and environments).
 4. **Build Confidence for Deployments:** Serve as a critical quality gate before promoting changes to stage and production environments.
 
 ## ✨ Key Characteristics
@@ -52,6 +52,10 @@ A dedicated Docker image is built for running these integration tests, typically
   * Provide initialized instances of `automated_actions_client`.
   * Helper functions for running CLI commands.
 * Test files might be organized by the feature or action type they are testing.
+
+> :information_source: **Note**:
+>
+> Crucially, integration tests must validate the *actual* effect of an action. For example, when testing an OpenShift workload restart, it's not enough to see the command was accepted; the test **must** confirm the workload was indeed restarted.
 
 ### Running Locally
 
