@@ -28,6 +28,9 @@ Welcome to the Automated Actions project! 👋 This system provides a toolset fo
   - [🛠️ `automated_actions_utils`](#️-automated_actions_utils)
 - [🛠️ Tech Stack](#️-tech-stack)
   - [⚙️ Configuration](#️-configuration)
+- [🎬 Action Overview](#-action-overview)
+  - [✅ Available Actions](#-available-actions)
+  - [📝 Planned Actions](#-planned-actions)
 - [🚀 Development Setup](#-development-setup)
   - [📋 Prerequisites](#-prerequisites)
   - [🛠️ Setting up the Environment](#️-setting-up-the-environment)
@@ -46,16 +49,7 @@ Welcome to the Automated Actions project! 👋 This system provides a toolset fo
 
 AppSRE tenants regularly require manual intervention from AppSRE for various operational tasks. This project aims to establish a toolset allowing a set of predefined actions to be either self-serviced by tenants or automatically triggered by events (e.g., alerts). This reduces manual workload and improves response times. ⏱️
 
-Examples of such actions include:
-
-- 📄 Getting application configuration and logs.
-- 🔄 Recycling pods.
-- 💾 Obtaining heap dumps.
-- ✅ Automatically fixing failing `cert-manager` CertificateRequests.
-- ⚙️ Automatically restarting stuck integrations.
-- 🤖 Recycling stuck Jenkins workers.
-
-**Note:** Actions are predefined and controlled, not arbitrary commands. 🚦
+See
 
 ## ✨ Goals
 
@@ -169,6 +163,23 @@ The shared toolbox! 🔧 This package provides **common utility functions and AP
 ### ⚙️ Configuration
 
 Action permissions and throttling limits are defined in the `app-interface`. This declarative approach allows for centralized management and easy auditing of system behavior.
+
+## 🎬 Action Overview
+
+This project provides a set of predefined actions that can be triggered by users or automatically by the system. Each action is designed to perform specific tasks on target systems, such as restarting workloads in OpenShift or rebooting AWS RDS instances.
+
+### ✅ Available Actions
+
+| Action Name                  | Description                                           | Trigger Type     | Example                                                                                                                           |
+| ---------------------------- | ----------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `openshift-workload-restart` | Restart an OpenShift workload (e.g., Pod, Deployment) | Automated Action | `automated-actions openshift-workload-restart --cluster <CLUSTER_NAME> --namespace <NAMESPACE_NAME> --kind Pod --name <POD_NAME>` |
+
+### 📝 Planned Actions
+
+- 📄 Getting application configuration and logs.
+- 💾 Obtaining heap dumps.
+- ⚙️ Automatically restarting stuck integrations.
+- 🤖 Recycling stuck Jenkins workers.
 
 ## 🚀 Development Setup
 
