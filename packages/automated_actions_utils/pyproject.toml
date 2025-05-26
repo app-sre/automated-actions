@@ -5,14 +5,14 @@ description = "Automated Actions Utils"
 authors = [{ name = "AppSRE", email = "sd-app-sre@redhat.com" }]
 license = { text = "Apache 2.0" }
 readme = "README.md"
-requires-python = "~= 3.12.0"
+requires-python = "~=3.13.3"
 dependencies = [
     # 3.5.2 needs newer graphql-core, but qenerate doesn't support it yet
-    "gql==3.5.0",
+    "gql==3.5.3",
     "hvac==2.3.0",
     "kubernetes==32.0.1",
     "openshift==0.13.2",
-    "pydantic==2.11.4",
+    "pydantic==2.11.5",
     "types-hvac==2.3.0.20250516",
 ]
 
@@ -24,7 +24,7 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "ruff==0.11.10",
+    "ruff==0.11.11",
     "mypy==1.15.0",
     "pytest==8.3.5",
     "pytest-cov==6.1.1",
