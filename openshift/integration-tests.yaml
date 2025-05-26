@@ -45,8 +45,8 @@ objects:
             env:
               - name: AAIT_URL
                 value: ${AAIT_URL}
-              - name: AA_TOKEN
-                value: ${AA_TOKEN}
+              - name: AAIT_TOKEN
+                value: ${AAIT_TOKEN}
             envFrom:
             - configMapRef:
                 name: integration-tests-config
@@ -90,7 +90,7 @@ parameters:
   description: URL of the automated-actions instance to test
   required: true
 
-- name: AA_TOKEN
+- name: AAIT_TOKEN
   description: Access token for the automated-actions instance
   required: true
 
