@@ -104,12 +104,12 @@ flowchart TD
 3. **Task Queue (Celery & SQS):**
     - Manages asynchronous execution of actions. FastAPI sends tasks to SQS, and Celery workers pick them up.
 4. **DynamoDB:**
-    - Used by FastAPI to store action requests, their status, and timestamps for throttling.
+    - Used by FastAPI and Celery to store action requests, their status, and timestamps for throttling.
 5. **Celery Workers:**
     - Execute the logic for each predefined action.
     - Fetch necessary configuration from **app-interface** and secrets/credentials from **Vault**.
     - Interact with target systems to perform actions (e.g., **AWS RDS reboot, OpenShift Pod restart**).
-    - Update action status in DynamoDB (likely via an API call back to FastAPI or directly if permitted).
+    - Update action status in DynamoDB.
 6. **Configuration (app-interface):**
     - Defines action permissions (authorization rules), and throttling parameters.
 
@@ -119,7 +119,7 @@ flowchart TD
 
 1. **Automated Actions:** Triggered by end-users (typically AppSRE tenants) via the CLI.
     - Example: Restarting a specific deployment.
-2. **Automatic Remediations:** Triggered by alerting systems (e.g., AlertManager webhooks).
+2. **Automatic Remediations:** (*not implemented yet*) Triggered by alerting systems (e.g., AlertManager webhooks).
     - Example: Automatically restarting a stuck integration based on an alert.
 
 ## 🧩 Packages Overview
@@ -128,7 +128,7 @@ This project is structured into several key packages, each with a distinct role:
 
 ### 📦 `automated_actions`
 
-The heart of the system! 💪 This package contains the **FastAPI server** application. It exposes the API endpoints, handles incoming requests, orchestrates task queuing, and manages the state of automated actions.
+The heart of the system! 💪 This package contains the **FastAPI server** application and the Celery task queue. It exposes the API endpoints, handles incoming requests, orchestrates task queuing, and manages the state of automated actions.
 
 ### 🤖 `automated_actions_client`
 
@@ -140,7 +140,7 @@ The command center for users! 🚀 This package provides the **Command Line Inte
 
 ### 🛡️ `opa`
 
-Guardian of the gates! 🗝️ This directory houses the **Open Policy Agent (OPA) Rego files**. These files define the authorization policies and rules that determine who can perform which actions under what conditions, ensuring secure and controlled operations.
+Guardian of the gates! 🗝️ This directory houses the **Open Policy Agent (OPA) Rego files**. These files define the authorization and throttling policies and rules that determine who can perform which actions under what conditions, ensuring secure and controlled operations.
 
 ### 🧪 `integration_test`
 
@@ -162,7 +162,7 @@ The shared toolbox! 🔧 This package provides **common utility functions and AP
 
 ### ⚙️ Configuration
 
-Action permissions and throttling limits are defined in the `app-interface`. This declarative approach allows for centralized management and easy auditing of system behavior.
+Action permissions and throttling limits are defined in the `app-interface`. This declarative approach allows for centralized management and easy auditing of system behavior. The qontract-reconcile [automated-actions-config integration](https://github.com/app-sre/qontract-reconcile/blob/4236821459c9d1bb833a1fc68c773cec53a781b1/reconcile/automated_actions/config/integration.py) transforms these configurations into the OPA policy files.
 
 ## 🎬 Action Overview
 
@@ -312,7 +312,7 @@ Contributions are welcome! 🎉 Please follow standard practices:
 2. Create a feature branch (`git checkout -b feature/your-amazing-feature`).
 3. Make your changes.
 4. Ensure tests pass (`make test`).
-5. Ensure code is linted and formatted (`make lint` and `make format`).
+5. Ensure code is linted and formatted (`make format`).
 6. Commit your changes (`git commit -m 'feat: Add some amazing feature'`).
 7. Push to the branch (`git push origin feature/your-amazing-feature`).
 8. Open a Pull Request.
