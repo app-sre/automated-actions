@@ -284,7 +284,6 @@ make format
     ```
 
 1. Update the version numbers in [automated_actions_client/pyproject.toml](/packages/automated_actions_client/pyproject.toml). [automated_actions_cli/pyproject.toml](/packages/automated_actions_cli/pyproject.toml).
-1. Update the changelog in [CHANGELOG.md](/CHANGELOG.md).
 1. Create and merge a PR.
 
 ## 💡 Usage Examples
