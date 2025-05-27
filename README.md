@@ -232,7 +232,9 @@ OPA_ACTION_API_TOKEN=<OPA_ACTION_API_TOKEN>
 OPA_MAX_AGE_MINUTES=10
 ```
 
-Ensure that the `AA_*` variables are set according to your local environment. The `OPA_ACTION_API_TOKEN` can be generated using the `create-token` command provided by the `automated_actions_cli` (once available and configured):
+Ensure that the `AA_*` variables are set according to your local environment.
+
+The `OPA_ACTION_API_TOKEN` can be generated using the `create-token` command provided by the `automated_actions_cli` (once available and configured):
 
 ```bash
 automated-actions create-token --name "OPA service account" --username "open-policy-agent" --email "not-used@example.com" --expiration "2200-09-30 20:15:00"
