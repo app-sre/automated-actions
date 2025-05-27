@@ -33,7 +33,7 @@ async def initialize_auth_components(app: FastAPI) -> None:
         client_secret=settings.oidc_client_secret,
         session_secret=settings.session_secret,
         session_timeout_secs=settings.session_timeout_secs,
-        enforce_https=not settings.debug,
+        enforce_https="https://" in settings.url,
         user_model=User,
     )
     app.state.token = BearerTokenAuth[User](  # type: ignore[type-var]
