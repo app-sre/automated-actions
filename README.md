@@ -170,9 +170,7 @@ This project provides a set of predefined actions that can be triggered by users
 
 ### ✅ Available Actions
 
-| Action Name                  | Description                                           | Trigger Type     | Example                                                                                                                           |
-| ---------------------------- | ----------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `openshift-workload-restart` | Restart an OpenShift workload (e.g., Pod, Deployment) | Automated Action | `automated-actions openshift-workload-restart --cluster <CLUSTER_NAME> --namespace <NAMESPACE_NAME> --kind Pod --name <POD_NAME>` |
+Refer to [actions.md](/actions.md) for a detailed list of available actions, their parameters, and usage examples.
 
 ### 📝 Planned Actions
 
