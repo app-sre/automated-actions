@@ -216,31 +216,15 @@ This project provides a set of predefined actions that can be triggered by users
 
 ### ⚙️ Local Configuration
 
-Configure all required settings in a local `settings.conf` file within the `packages/automated_actions` directory (or wherever your main application package expects it). Example:
+Configure all required settings in a local `settings.conf` file in the project root directory (ignored by git).
 
-```ini
-# packages/automated_actions/settings.conf (example)
-AA_DEBUG=1
-AA_WORKER_METRICS_PORT=8001
-AA_OIDC_CLIENT_ID=<RHSSO_CLIENT_ID>
-AA_OIDC_CLIENT_SECRET=<RHSSO_CLIENT_SECRET>
-# ... other AA_ variables ...
-AA_ENVIRONMENT="local-dev"
+Please find and use predefined setting files in Vault:
 
-OPA_ACTION_API_URL=http://localhost:8080/api/v1 # Adjust if your local API runs elsewhere
-OPA_ACTION_API_TOKEN=<OPA_ACTION_API_TOKEN>
-OPA_MAX_AGE_MINUTES=10
-```
+- **AppSRE**: Use [app-sre-only-settings](https://vault.devshift.net/ui/vault/secrets/app-interface/kv/automated-actions%2Fdevelopment%2Fapp-sre-only-settings/details?version=1)
+- **Other Red Hat employees**: TODO: Create a similar settings file in Vault for other Red Hat employees.
 
-Ensure that the `AA_*` variables are set according to your local environment.
+Refer to the [settings documentation](/settings.md) for details on all available automated-actions settings.
 
-The `OPA_ACTION_API_TOKEN` can be generated using the `create-token` command provided by the `automated_actions_cli` (once available and configured):
-
-```bash
-automated-actions create-token --name "OPA service account" --username "open-policy-agent" --email "not-used@example.com" --expiration "2200-09-30 20:15:00"
-```
-
-Ensure the username is `open-policy-agent` and the expiration date is set to a future date. This command will return a token that you can use in your local configuration.
 
 ### ▶️ Running the Application (Locally)
 
