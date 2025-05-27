@@ -117,6 +117,7 @@ def main(
         # do not initialize the client and everything else if --help is passed
         return
 
+    progress = None
     if not quiet and not screen_capture_file:
         progress = progress_spinner(console=console)
         progress.start()
@@ -140,7 +141,12 @@ def main(
         }
 
     elif kerberos_available():
+        if progress:
+            progress.stop()
         kinit()
+        if progress:
+            progress.start()
+
         ctx.obj = {
             "client": ClientWithCookieJar(
                 base_url=str(url),
