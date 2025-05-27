@@ -223,16 +223,15 @@ Please find and use predefined setting files in Vault:
 
 Refer to the [settings documentation](/settings.md) for details on all available automated-actions settings.
 
-
 ### ▶️ Running the Application (Locally)
 
-Use the provided `docker-compose.yml` file at the root of the project to run the application and its dependencies (like LocalStack for AWS services) locally.
+Use the provided [docker-compose.yml](/docker-compose.yml) file to run the application and its dependencies (like LocalStack for AWS services) locally.
 
 ```bash
 docker-compose up automated-actions # Or 'docker-compose up -d' for detached mode
 ```
 
-This will typically set up the FastAPI server, Celery workers, and mock AWS services. Check the `docker-compose.yml` for specific service names and configurations.
+This will typically start the FastAPI server, Celery workers, OPA, and mock AWS services. Check the `docker-compose.yml` for specific service names and configurations.
 
 ### 🔬 Testing
 
@@ -275,7 +274,7 @@ make format
 ### ⌨️ CLI Usage
 
 **Action:** Restart an OpenShift Deployment.
-(Assuming `automated-actions_cli` is installed and configured)
+(Assuming `automated-actions-cli` is installed or you entered your local development virtual environment)
 
 ```bash
 automated-actions openshift-workload-restart --cluster <CLUSTER_NAME> --namespace <NAMESPACE_NAME> --kind Pod --name <POD_NAME>
