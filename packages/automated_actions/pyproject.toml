@@ -16,7 +16,7 @@ dependencies = [
     "itsdangerous==2.2.0",
     "kubernetes==32.0.1",
     "prometheus-fastapi-instrumentator==7.1.0",
-    "pydantic==2.11.4",
+    "pydantic==2.11.5",
     "pydantic-settings==2.9.1",
     "pyjwt==2.10.1",
     "pynamodb==6.0.2",
@@ -34,13 +34,13 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "ruff==0.11.10",
+    "ruff==0.11.11",
     "mypy==1.15.0",
     "pytest==8.3.5",
     "pytest-cov==6.1.1",
-    "pytest-asyncio==0.26.0",
+    "pytest-asyncio==1.0.0",
     "pytest-httpx==0.35.0",
-    "pytest-mock==3.14.0",
+    "pytest-mock==3.14.1",
     "requests-mock==1.12.1",
 ]
 
@@ -138,7 +138,7 @@ module = [
     "celery.*",
     "kubernetes.*",
     "billiard.einfo.*",
-    "automated_actions_utils.*"  # TODO(rporres): fix
+    "automated_actions_utils.*", # TODO(rporres): fix
 ]
 ignore_missing_imports = true
 
