@@ -4,6 +4,7 @@ from . import (
     action_list,
     create_token,
     me,
+    no_op,
     openshift_workload_restart,
 )
 
@@ -13,5 +14,6 @@ __all__ = [
     "action_list",
     "create_token",
     "me",
+    "no_op",
     "openshift_workload_restart",
 ]
