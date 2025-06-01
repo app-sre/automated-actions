@@ -21,6 +21,11 @@ class OpenshiftPodRestartParameters(BaseModel):
     sleep_time: int = 10
 
 
+class NoOpParameters(BaseModel):
+    retries: int = 10
+    sleep_time: int = 2
+
+
 class Config(BaseSettings):
     """Configuration for the tests."""
 
@@ -35,6 +40,7 @@ class Config(BaseSettings):
 
     openshift_deployment_restart: OpenshiftDeploymentRestartParameters
     openshift_pod_restart: OpenshiftPodRestartParameters
+    no_op: NoOpParameters = NoOpParameters()
 
 
 _config = Config()
