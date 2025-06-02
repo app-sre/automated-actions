@@ -8,7 +8,7 @@ readme = "README.md"
 requires-python = "~= 3.12.0"
 dependencies = [
     "automated-actions-utils",
-    "celery[sqs]==5.5.2",
+    "celery[sqs]==5.5.3",
     "fastapi==0.115.12",
     # 3.5.2 needs newer graphql-core, but qenerate doesn't support it yet
     "httpx==0.28.1",
@@ -22,7 +22,7 @@ dependencies = [
     "pynamodb==6.0.2",
     "requests-toolbelt==1.0.0",
     "types-hvac==2.3.0.20250516",
-    "uvicorn==0.34.2",
+    "uvicorn==0.34.3",
     "watchdog==6.0.0",
 ]
 
@@ -34,8 +34,8 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "ruff==0.11.11",
-    "mypy==1.15.0",
+    "ruff==0.11.12",
+    "mypy==1.16.0",
     "pytest==8.3.5",
     "pytest-cov==6.1.1",
     "pytest-asyncio==1.0.0",
