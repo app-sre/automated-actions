@@ -42,6 +42,7 @@ objects:
           - image: ${IMAGE}:${IMAGE_TAG}
             imagePullPolicy: Always
             name: integration-tests
+            args: ${{ARGS}}
             env:
               - name: AAIT_URL
                 value: ${AAIT_URL}
@@ -97,3 +98,7 @@ parameters:
 - name: AAIT_TEST_PARAMETERS
   description: JSON object with parameters to pass to the integration tests
   required: true
+
+- name: ARGS
+  description: Override dockerfile args. Helpful if we just want to run scpecific tests instead of all (the default)
+  value: ["tests"]

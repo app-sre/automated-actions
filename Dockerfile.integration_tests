@@ -74,4 +74,5 @@ RUN find ${APP_ROOT} -type d -exec chmod 777 {} \;
 USER 1001
 
 WORKDIR ${APP_ROOT}/src/packages/integration_tests
-ENTRYPOINT [ "uv", "run", "pytest", "tests" ]
+ENTRYPOINT ["uv", "run", "pytest"]
+CMD ["tests"]
