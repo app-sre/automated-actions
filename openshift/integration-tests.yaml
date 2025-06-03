@@ -100,5 +100,5 @@ parameters:
   required: true
 
 - name: ARGS
-  description: Override dockerfile args. Helpful if we just want to run scpecific tests instead of all (the default)
-  value: ["tests"]
+  description: Override dockerfile args. Helpful if we just want to run specific tests instead of all (the default)
+  value: '["tests"]'
