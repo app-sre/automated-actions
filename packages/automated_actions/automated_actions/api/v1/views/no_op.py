@@ -20,13 +20,16 @@ NO_OP = "no-op"
 def get_action(
     action_mgr: Annotated[ActionManager, Depends(get_action_manager)], user: UserDep
 ) -> Action:
-    """Get a new action object for the user."""
+    """Creates a new action record for a no-op operation."""
     return action_mgr.create_action(name=NO_OP, owner=user)
 
 
 @router.post(f"/{NO_OP}", operation_id=NO_OP, status_code=202)
 def no_op(action: Annotated[Action, Depends(get_action)]) -> ActionSchemaOut:
-    """Inserts a no-op task in the queue."""
+    """Initiates a no-operation action.
+
+    This action performs no actual operation but can be used for testing.
+    """
     log.info(f"{NO_OP}: action_id={action.action_id}")
     no_op_task.apply_async(
         kwargs={"action": action},

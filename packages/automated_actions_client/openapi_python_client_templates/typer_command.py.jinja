@@ -6,7 +6,7 @@ app = typer.Typer()
 
 
 {% if parsed_responses %}
-@app.command(help="{{ endpoint.description }}")
+@app.command(help="""{{ endpoint.description }}""")
 
 def {{endpoint.name | replace("-", "_") }}(
     ctx: typer.Context,

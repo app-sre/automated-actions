@@ -56,7 +56,7 @@ def sync_detailed(
 ) -> Response[ActionSchemaOut | HTTPValidationError]:
     """Action Cancel
 
-     Cancel an action.
+     Cancels a pending or running action by its ID.
 
     Args:
         action_id (str):
@@ -88,7 +88,7 @@ def sync(
 ) -> ActionSchemaOut | HTTPValidationError | None:
     """Action Cancel
 
-     Cancel an action.
+     Cancels a pending or running action by its ID.
 
     Args:
         action_id (str):
@@ -114,7 +114,7 @@ async def asyncio_detailed(
 ) -> Response[ActionSchemaOut | HTTPValidationError]:
     """Action Cancel
 
-     Cancel an action.
+     Cancels a pending or running action by its ID.
 
     Args:
         action_id (str):
@@ -146,7 +146,7 @@ async def asyncio(
 ) -> ActionSchemaOut | HTTPValidationError | None:
     """Action Cancel
 
-     Cancel an action.
+     Cancels a pending or running action by its ID.
 
     Args:
         action_id (str):
@@ -174,7 +174,7 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="Cancel an action.")
+@app.command(help="""Cancels a pending or running action by its ID.""")
 def action_cancel(
     ctx: typer.Context,
     action_id: Annotated[str, typer.Option(help="", show_default=False)],

@@ -183,7 +183,7 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="Create a token for a service account.")
+@app.command(help="""Create a token for a service account.""")
 def create_token(
     ctx: typer.Context,
     name: Annotated[str, typer.Option(help="")],

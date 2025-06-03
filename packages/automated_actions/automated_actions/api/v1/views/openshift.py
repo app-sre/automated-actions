@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 def get_action(
     action_mgr: Annotated[ActionManager, Depends(get_action_manager)], user: UserDep
 ) -> Action:
-    """Get a new action object for the user."""
+    """Creates a new action record for an OpenShift operation."""
     return action_mgr.create_action(name="openshift-workload-restart", owner=user)
 
 
@@ -40,7 +40,11 @@ def openshift_workload_restart(
     name: Annotated[str, Path(description="OpenShift workload name")],
     action: Annotated[Action, Depends(get_action)],
 ) -> ActionSchemaOut:
-    """Restart an OpenShift workload."""
+    """Initiates a restart of a specified OpenShift workload.
+
+    This action triggers a restart of a workload (e.g., Pod, Deployment)
+    within a given OpenShift cluster and namespace.
+    """
     log.info(
         f"Restarting {kind}/{name} in {cluster}/{namespace}: action_id={action.action_id}"
     )

@@ -35,7 +35,7 @@ def action_list(
         ),
     ] = None,
 ) -> list[ActionSchemaOut]:
-    """List actions."""
+    """Lists actions, optionally filtered by status, user, or age."""
     return [
         action.dump()
         for action in action_mgr.get_user_actions(
@@ -50,7 +50,7 @@ def action_list(
 def action_detail(
     action_id: str, action_mgr: Annotated[ActionManager, Depends(get_action_manager)]
 ) -> ActionSchemaOut:
-    """Retrieve an action."""
+    """Retrieves the details of a specific action by its ID."""
     return action_mgr.get_or_404(action_id).dump()
 
 
@@ -58,7 +58,7 @@ def action_detail(
 def action_cancel(
     action_id: str, action_mgr: Annotated[ActionManager, Depends(get_action_manager)]
 ) -> ActionSchemaOut:
-    """Cancel an action."""
+    """Cancels a pending or running action by its ID."""
     action = action_mgr.get_or_404(action_id)
     action.set_status(ActionStatus.CANCELLED)
     return action.dump()

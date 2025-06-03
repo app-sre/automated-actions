@@ -63,7 +63,10 @@ def sync_detailed(
 ) -> Response[ActionSchemaOut | HTTPValidationError]:
     """Openshift Workload Restart
 
-     Restart an OpenShift workload.
+     Initiates a restart of a specified OpenShift workload.
+
+    This action triggers a restart of a workload (e.g., Pod, Deployment)
+    within a given OpenShift cluster and namespace.
 
     Args:
         cluster (str): OpenShift cluster name
@@ -104,7 +107,10 @@ def sync(
 ) -> ActionSchemaOut | HTTPValidationError | None:
     """Openshift Workload Restart
 
-     Restart an OpenShift workload.
+     Initiates a restart of a specified OpenShift workload.
+
+    This action triggers a restart of a workload (e.g., Pod, Deployment)
+    within a given OpenShift cluster and namespace.
 
     Args:
         cluster (str): OpenShift cluster name
@@ -139,7 +145,10 @@ async def asyncio_detailed(
 ) -> Response[ActionSchemaOut | HTTPValidationError]:
     """Openshift Workload Restart
 
-     Restart an OpenShift workload.
+     Initiates a restart of a specified OpenShift workload.
+
+    This action triggers a restart of a workload (e.g., Pod, Deployment)
+    within a given OpenShift cluster and namespace.
 
     Args:
         cluster (str): OpenShift cluster name
@@ -180,7 +189,10 @@ async def asyncio(
 ) -> ActionSchemaOut | HTTPValidationError | None:
     """Openshift Workload Restart
 
-     Restart an OpenShift workload.
+     Initiates a restart of a specified OpenShift workload.
+
+    This action triggers a restart of a workload (e.g., Pod, Deployment)
+    within a given OpenShift cluster and namespace.
 
     Args:
         cluster (str): OpenShift cluster name
@@ -214,7 +226,12 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="Restart an OpenShift workload.")
+@app.command(
+    help="""Initiates a restart of a specified OpenShift workload.
+
+This action triggers a restart of a workload (e.g., Pod, Deployment)
+within a given OpenShift cluster and namespace."""
+)
 def openshift_workload_restart(
     ctx: typer.Context,
     cluster: Annotated[

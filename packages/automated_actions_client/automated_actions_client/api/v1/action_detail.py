@@ -56,7 +56,7 @@ def sync_detailed(
 ) -> Response[ActionSchemaOut | HTTPValidationError]:
     """Action Detail
 
-     Retrieve an action.
+     Retrieves the details of a specific action by its ID.
 
     Args:
         action_id (str):
@@ -88,7 +88,7 @@ def sync(
 ) -> ActionSchemaOut | HTTPValidationError | None:
     """Action Detail
 
-     Retrieve an action.
+     Retrieves the details of a specific action by its ID.
 
     Args:
         action_id (str):
@@ -114,7 +114,7 @@ async def asyncio_detailed(
 ) -> Response[ActionSchemaOut | HTTPValidationError]:
     """Action Detail
 
-     Retrieve an action.
+     Retrieves the details of a specific action by its ID.
 
     Args:
         action_id (str):
@@ -146,7 +146,7 @@ async def asyncio(
 ) -> ActionSchemaOut | HTTPValidationError | None:
     """Action Detail
 
-     Retrieve an action.
+     Retrieves the details of a specific action by its ID.
 
     Args:
         action_id (str):
@@ -174,7 +174,7 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="Retrieve an action.")
+@app.command(help="""Retrieves the details of a specific action by its ID.""")
 def action_detail(
     ctx: typer.Context,
     action_id: Annotated[str, typer.Option(help="", show_default=False)],

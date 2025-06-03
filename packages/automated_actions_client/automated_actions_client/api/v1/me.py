@@ -143,7 +143,7 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="Get the current user information.")
+@app.command(help="""Get the current user information.""")
 def me(
     ctx: typer.Context,
 ) -> None:

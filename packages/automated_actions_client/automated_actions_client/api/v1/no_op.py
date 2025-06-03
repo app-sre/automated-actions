@@ -48,7 +48,9 @@ def sync_detailed(
 ) -> Response[ActionSchemaOut]:
     """No Op
 
-     Inserts a no-op task in the queue.
+     Initiates a no-operation action.
+
+    This action performs no actual operation but can be used for testing.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -74,7 +76,9 @@ def sync(
 ) -> ActionSchemaOut | None:
     """No Op
 
-     Inserts a no-op task in the queue.
+     Initiates a no-operation action.
+
+    This action performs no actual operation but can be used for testing.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -95,7 +99,9 @@ async def asyncio_detailed(
 ) -> Response[ActionSchemaOut]:
     """No Op
 
-     Inserts a no-op task in the queue.
+     Initiates a no-operation action.
+
+    This action performs no actual operation but can be used for testing.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -121,7 +127,9 @@ async def asyncio(
 ) -> ActionSchemaOut | None:
     """No Op
 
-     Inserts a no-op task in the queue.
+     Initiates a no-operation action.
+
+    This action performs no actual operation but can be used for testing.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -143,7 +151,11 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="Inserts a no-op task in the queue.")
+@app.command(
+    help="""Initiates a no-operation action.
+
+This action performs no actual operation but can be used for testing."""
+)
 def no_op(
     ctx: typer.Context,
 ) -> None:

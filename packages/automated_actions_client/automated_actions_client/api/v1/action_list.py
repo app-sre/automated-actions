@@ -95,7 +95,7 @@ def sync_detailed(
 ) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
     """Action List
 
-     List actions.
+     Lists actions, optionally filtered by status, user, or age.
 
     Args:
         status (Union[ActionStatus, None, Unset]): Filter actions by their status
@@ -135,7 +135,7 @@ def sync(
 ) -> HTTPValidationError | list["ActionSchemaOut"] | None:
     """Action List
 
-     List actions.
+     Lists actions, optionally filtered by status, user, or age.
 
     Args:
         status (Union[ActionStatus, None, Unset]): Filter actions by their status
@@ -169,7 +169,7 @@ async def asyncio_detailed(
 ) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
     """Action List
 
-     List actions.
+     Lists actions, optionally filtered by status, user, or age.
 
     Args:
         status (Union[ActionStatus, None, Unset]): Filter actions by their status
@@ -209,7 +209,7 @@ async def asyncio(
 ) -> HTTPValidationError | list["ActionSchemaOut"] | None:
     """Action List
 
-     List actions.
+     Lists actions, optionally filtered by status, user, or age.
 
     Args:
         status (Union[ActionStatus, None, Unset]): Filter actions by their status
@@ -243,7 +243,7 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="List actions.")
+@app.command(help="""Lists actions, optionally filtered by status, user, or age.""")
 def action_list(
     ctx: typer.Context,
     status: Annotated[
