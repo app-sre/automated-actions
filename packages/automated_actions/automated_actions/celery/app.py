@@ -31,6 +31,7 @@ app = Celery(
     accept_content=["application/json", "application/x-python-serialize"],
     result_accept_content=["application/json", "application/x-python-serialize"],
     include=[
+        "automated_actions.celery.external_resource.tasks",
         "automated_actions.celery.openshift.tasks",
         "automated_actions.celery.no_op.tasks",
     ],
