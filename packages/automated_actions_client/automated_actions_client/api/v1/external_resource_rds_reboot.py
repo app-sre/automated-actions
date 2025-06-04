@@ -1,0 +1,255 @@
+from http import HTTPStatus
+from typing import Any
+
+import httpx
+
+from ... import errors
+from ...client import AuthenticatedClient, Client
+from ...models.action_schema_out import ActionSchemaOut
+from ...models.http_validation_error import HTTPValidationError
+from ...types import UNSET, Response, Unset
+
+
+def _get_kwargs(
+    account: str,
+    identifier: str,
+    *,
+    force_failover: Unset | bool = False,
+) -> dict[str, Any]:
+    params: dict[str, Any] = {}
+
+    params["force_failover"] = force_failover
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
+
+    _kwargs: dict[str, Any] = {
+        "method": "post",
+        "url": f"/api/v1/external-resource/rds-reboot/{account}/{identifier}",
+        "params": params,
+    }
+
+    return _kwargs
+
+
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> ActionSchemaOut | HTTPValidationError | None:
+    if response.status_code == 202:
+        response_202 = ActionSchemaOut.from_dict(response.json())
+
+        return response_202
+    if response.status_code == 422:
+        response_422 = HTTPValidationError.from_dict(response.json())
+
+        return response_422
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    else:
+        return None
+
+
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[ActionSchemaOut | HTTPValidationError]:
+    return Response(
+        status_code=HTTPStatus(response.status_code),
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(client=client, response=response),
+    )
+
+
+def sync_detailed(
+    account: str,
+    identifier: str,
+    *,
+    client: AuthenticatedClient | Client,
+    force_failover: Unset | bool = False,
+) -> Response[ActionSchemaOut | HTTPValidationError]:
+    """External Resource Rds Reboot
+
+     Reboot an RDS instance.
+
+    This action initiates a reboot of a specified RDS instance in a given AWS account.
+
+    Args:
+        account (str): AWS account name
+        identifier (str): RDS instance identifier
+        force_failover (Union[Unset, bool]): Enforce DB failover. Your RDS must be confiugred for
+            Multi-AZ! Default: False.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Union[ActionSchemaOut, HTTPValidationError]]
+    """
+
+    kwargs = _get_kwargs(
+        account=account,
+        identifier=identifier,
+        force_failover=force_failover,
+    )
+
+    with client as _client:
+        response = _client.request(
+            **kwargs,
+        )
+
+    return _build_response(client=client, response=response)
+
+
+def sync(
+    account: str,
+    identifier: str,
+    *,
+    client: AuthenticatedClient | Client,
+    force_failover: Unset | bool = False,
+) -> ActionSchemaOut | HTTPValidationError | None:
+    """External Resource Rds Reboot
+
+     Reboot an RDS instance.
+
+    This action initiates a reboot of a specified RDS instance in a given AWS account.
+
+    Args:
+        account (str): AWS account name
+        identifier (str): RDS instance identifier
+        force_failover (Union[Unset, bool]): Enforce DB failover. Your RDS must be confiugred for
+            Multi-AZ! Default: False.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Union[ActionSchemaOut, HTTPValidationError]
+    """
+
+    return sync_detailed(
+        account=account,
+        identifier=identifier,
+        client=client,
+        force_failover=force_failover,
+    ).parsed
+
+
+async def asyncio_detailed(
+    account: str,
+    identifier: str,
+    *,
+    client: AuthenticatedClient | Client,
+    force_failover: Unset | bool = False,
+) -> Response[ActionSchemaOut | HTTPValidationError]:
+    """External Resource Rds Reboot
+
+     Reboot an RDS instance.
+
+    This action initiates a reboot of a specified RDS instance in a given AWS account.
+
+    Args:
+        account (str): AWS account name
+        identifier (str): RDS instance identifier
+        force_failover (Union[Unset, bool]): Enforce DB failover. Your RDS must be confiugred for
+            Multi-AZ! Default: False.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Union[ActionSchemaOut, HTTPValidationError]]
+    """
+
+    kwargs = _get_kwargs(
+        account=account,
+        identifier=identifier,
+        force_failover=force_failover,
+    )
+
+    async with client as _client:
+        response = await _client.request(
+            **kwargs,
+        )
+
+    return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    account: str,
+    identifier: str,
+    *,
+    client: AuthenticatedClient | Client,
+    force_failover: Unset | bool = False,
+) -> ActionSchemaOut | HTTPValidationError | None:
+    """External Resource Rds Reboot
+
+     Reboot an RDS instance.
+
+    This action initiates a reboot of a specified RDS instance in a given AWS account.
+
+    Args:
+        account (str): AWS account name
+        identifier (str): RDS instance identifier
+        force_failover (Union[Unset, bool]): Enforce DB failover. Your RDS must be confiugred for
+            Multi-AZ! Default: False.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Union[ActionSchemaOut, HTTPValidationError]
+    """
+
+    return (
+        await asyncio_detailed(
+            account=account,
+            identifier=identifier,
+            client=client,
+            force_failover=force_failover,
+        )
+    ).parsed
+
+
+from typing import Annotated
+
+import typer
+
+app = typer.Typer()
+
+
+@app.command(
+    help="""Reboot an RDS instance.
+
+This action initiates a reboot of a specified RDS instance in a given AWS account."""
+)
+def external_resource_rds_reboot(
+    ctx: typer.Context,
+    account: Annotated[str, typer.Option(help="AWS account name", show_default=False)],
+    identifier: Annotated[
+        str, typer.Option(help="RDS instance identifier", show_default=False)
+    ],
+    force_failover: Annotated[
+        bool,
+        typer.Option(
+            help="Enforce DB failover. Your RDS must be confiugred for Multi-AZ!"
+        ),
+    ] = False,
+) -> None:
+    result = sync(
+        account=account,
+        identifier=identifier,
+        force_failover=force_failover,
+        client=ctx.obj["client"],
+    )
+    if "formatter" in ctx.obj and result:
+        output: Any = result
+        if isinstance(result, list):
+            output = [
+                item.to_dict() if hasattr(item, "to_dict") else item for item in result
+            ]
+        elif hasattr(result, "to_dict"):
+            output = result.to_dict()
+        ctx.obj["formatter"](output)
