@@ -12,6 +12,12 @@ These are the core operations that users can request the system to perform.
   * **Required Parameters**: Cluster name, namespace name, workload kind (e.g., `Deployment`, `Pod`), workload name.
   * **Usage Example (CLI)**: `automated-actions openshift-workload-restart --cluster my-cluster --namespace my-namespace --kind Deployment --name my-app-deployment`
 
+* **`external-resource-rds-reboot`**:
+  * **Description**: Reboots an Amazon RDS instance.
+  * **Use Case**: Typically used for maintenance, applying updates, or resolving performance issues.
+  * **Required Parameters**: The AWS account name and the RDS instance identifier.
+  * **Usage Example (CLI)**: `automated-actions external-resource-rds-reboot --account aws-account-name --identifier my-rds-instance`
+
 ## Administrative & Utility Commands
 
 These commands are typically used for managing actions, retrieving information, or system administration rather than performing an automated task on an external system.

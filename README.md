@@ -39,6 +39,7 @@ Welcome to the Automated Actions project! 👋 This system provides a toolset fo
   - [🔬 Testing](#-testing)
   - [Linting and Formatting](#linting-and-formatting)
   - [Release](#release)
+  - [📚 Development Guides](#-development-guides)
 - [💡 Usage Examples](#-usage-examples)
   - [⌨️ CLI Usage](#️-cli-usage)
 - [☁️ Deployment](#️-deployment)
@@ -268,6 +269,10 @@ make format
 
 1. Update the version numbers in [automated_actions_client/pyproject.toml](/packages/automated_actions_client/pyproject.toml). [automated_actions_cli/pyproject.toml](/packages/automated_actions_cli/pyproject.toml).
 1. Create and merge a PR.
+
+### 📚 Development Guides
+
+Feel free to explore our [development guides](/docs/development-guides/) to enhance your understanding and contribution to the Automated Actions project!
 
 ## 💡 Usage Examples
 
