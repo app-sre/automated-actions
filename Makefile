@@ -39,8 +39,8 @@ gql-introspection:
 
 .PHONY: gql-query-classes
 gql-query-classes:
-	@uv run qenerate code -i packages/automated_actions/automated_actions/gql_definitions/introspection.json packages/automated_actions/automated_actions/gql_definitions
-	@find packages/automated_actions/automated_actions/gql_definitions -path '*/__pycache__' -prune -o -type d -exec touch "{}/__init__.py" \;
+	@cd packages/automated_actions_utils/ && uv run qenerate code -i automated_actions_utils/gql_definitions/introspection.json automated_actions_utils/gql_definitions
+	@find packages/automated_actions_utils/automated_actions_utils/gql_definitions -path '*/__pycache__' -prune -o -type d -exec touch "{}/__init__.py" \;
 
 .PHONY: qenerate
 qenerate: gql-introspection gql-query-classes
