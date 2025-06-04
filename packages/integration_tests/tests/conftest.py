@@ -15,6 +15,11 @@ class BaseParameters(BaseModel):
     sleep_time: int = 10
 
 
+class ExternalResourceRDSReboot(BaseParameters):
+    account: str
+    identifier: str
+
+
 class NoOpParameters(BaseParameters):
     pass
 
@@ -44,6 +49,7 @@ class Config(BaseSettings):
     url: HttpUrl = HttpUrl("http://localhost:8080")
     token: str
 
+    external_resource_rds_reboot: ExternalResourceRDSReboot
     no_op: NoOpParameters = NoOpParameters(sleep_time=2)
     openshift_deployment_restart: OpenshiftDeploymentRestartParameters
     openshift_pod_restart: OpenshiftPodRestartParameters
