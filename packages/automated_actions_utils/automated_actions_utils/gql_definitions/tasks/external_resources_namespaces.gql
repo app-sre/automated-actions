@@ -1,0 +1,49 @@
+# qenerate: plugin=pydantic_v1
+
+query ExternalResourcesNamespaces {
+  namespaces: namespaces_v1 {
+    name
+    delete
+    externalResources {
+      provider
+      ... on NamespaceTerraformProviderResourceAWS_v1 {
+        provisioner {
+          name
+          automationToken {
+            ...VaultSecret
+          }
+          resourcesDefaultRegion
+        }
+        resources {
+          provider
+          identifier
+          ... on NamespaceTerraformResourceRDS_v1 {
+            region
+            delete
+          }
+        }
+      }
+    }
+    cluster {
+      name
+      serverUrl
+      insecureSkipTLSVerify
+      jumpHost {
+        ...CommonJumphostFields
+      }
+      automationToken {
+        ...VaultSecret
+      }
+      clusterAdminAutomationToken {
+        ...VaultSecret
+      }
+      spec {
+        region
+      }
+      internal
+      disable {
+        integrations
+      }
+    }
+  }
+}
