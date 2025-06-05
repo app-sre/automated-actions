@@ -113,7 +113,7 @@ requires-dist = [
     { name = "pydantic", specifier = "==2.11.5" },
     { name = "pydantic-settings", specifier = "==2.9.1" },
     { name = "pyjwt", specifier = "==2.10.1" },
-    { name = "pynamodb", specifier = "==6.0.2" },
+    { name = "pynamodb", specifier = "==6.1.0" },
     { name = "requests-toolbelt", specifier = "==1.0.0" },
     { name = "types-hvac", specifier = "==2.3.0.20250516" },
     { name = "uvicorn", specifier = "==0.34.3" },
@@ -123,7 +123,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = "==1.16.0" },
-    { name = "pytest", specifier = "==8.3.5" },
+    { name = "pytest", specifier = "==8.4.0" },
     { name = "pytest-asyncio", specifier = "==1.0.0" },
     { name = "pytest-cov", specifier = "==6.1.1" },
     { name = "pytest-httpx", specifier = "==0.35.0" },
@@ -169,7 +169,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = "==1.16.0" },
-    { name = "pytest", specifier = "==8.3.5" },
+    { name = "pytest", specifier = "==8.4.0" },
     { name = "pytest-cov", specifier = "==6.1.1" },
     { name = "ruff", specifier = "==0.11.12" },
     { name = "types-pyyaml", specifier = "==6.0.12.20250516" },
@@ -208,7 +208,7 @@ requires-dist = [
 dev = [
     { name = "mypy", specifier = "==1.16.0" },
     { name = "openapi-python-client", git = "https://github.com/openapi-generators/openapi-python-client?rev=13bf2e852c8cc68fff4b8c19abc2ae42bceff319" },
-    { name = "pytest", specifier = "==8.3.5" },
+    { name = "pytest", specifier = "==8.4.0" },
     { name = "pytest-cov", specifier = "==6.1.1" },
     { name = "ruff", specifier = "==0.11.12" },
     { name = "types-python-dateutil", specifier = "==2.9.0.20250516" },
@@ -255,7 +255,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = "==1.16.0" },
-    { name = "pytest", specifier = "==8.3.5" },
+    { name = "pytest", specifier = "==8.4.0" },
     { name = "pytest-cov", specifier = "==6.1.1" },
     { name = "pytest-mock", specifier = "==3.14.1" },
     { name = "qenerate", specifier = "==0.7.0" },
@@ -646,7 +646,7 @@ requires-dist = [
     { name = "automated-actions-client", editable = "packages/automated_actions_client" },
     { name = "automated-actions-utils", editable = "packages/automated_actions_utils" },
     { name = "pydantic-settings", specifier = "==2.9.1" },
-    { name = "pytest", specifier = "==8.3.5" },
+    { name = "pytest", specifier = "==8.4.0" },
     { name = "pytest-order", specifier = "==1.3.0" },
     { name = "pytest-rerunfailures", specifier = "==15.1" },
     { name = "pyyaml", specifier = "==6.0.2" },
@@ -1047,29 +1047,30 @@ wheels = [
 
 [[package]]
 name = "pynamodb"
-version = "6.0.2"
+version = "6.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cf/65/f630ff2f593a33de44825962dd05a2643f5e01a410ca335bcf8891fa9d09/pynamodb-6.0.2.tar.gz", hash = "sha256:a85ea1ee42d6cb53128ec910507406e7901532f605d28e2680016e25bcbd6828", size = 94837, upload-time = "2025-01-24T21:38:22.92Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/af/0b/35d24cdfe532fd9c774c184fbd09118b0a8c94eb51ca9598c0c5ef21174d/pynamodb-6.1.0.tar.gz", hash = "sha256:c7d09700ace9f428e67ecf73fa867633c632de3acf402b2c7c136be695afda79", size = 96283, upload-time = "2025-06-02T17:32:59.367Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/52/5c/3d806c8764c05f51d1a5bca8169dc45264666bec6b9106a8599f4c5cebcf/pynamodb-6.0.2-py3-none-any.whl", hash = "sha256:12befe0ed8132b6d77b9212c0af9c894977443ef826b60fe5ef185c2f2f4126b", size = 61189, upload-time = "2025-01-24T21:38:21.124Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/86/71e355d232f28adb50c89b806b018548c095a6cf3d631b645918f415212a/pynamodb-6.1.0-py3-none-any.whl", hash = "sha256:9c0f1a0f177208640b2336ed56c557c5187b0012d356e9c7399c3923c5f93c7f", size = 61685, upload-time = "2025-06-02T17:32:57.488Z" },
 ]
 
 [[package]]
 name = "pytest"
-version = "8.3.5"
+version = "8.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "iniconfig" },
     { name = "packaging" },
     { name = "pluggy" },
+    { name = "pygments" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ae/3c/c9d525a414d506893f0cd8a8d0de7706446213181570cdbd766691164e40/pytest-8.3.5.tar.gz", hash = "sha256:f4efe70cc14e511565ac476b57c279e12a855b11f48f212af1080ef2263d3845", size = 1450891, upload-time = "2025-03-02T12:54:54.503Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fb/aa/405082ce2749be5398045152251ac69c0f3578c7077efc53431303af97ce/pytest-8.4.0.tar.gz", hash = "sha256:14d920b48472ea0dbf68e45b96cd1ffda4705f33307dcc86c676c1b5104838a6", size = 1515232, upload-time = "2025-06-02T17:36:30.03Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/30/3d/64ad57c803f1fa1e963a7946b6e0fea4a70df53c1a7fed304586539c2bac/pytest-8.3.5-py3-none-any.whl", hash = "sha256:c69214aa47deac29fad6c2a4f590b9c4a9fdb16a403176fe154b79c0b4d4d820", size = 343634, upload-time = "2025-03-02T12:54:52.069Z" },
+    { url = "https://files.pythonhosted.org/packages/2f/de/afa024cbe022b1b318a3d224125aa24939e99b4ff6f22e0ba639a2eaee47/pytest-8.4.0-py3-none-any.whl", hash = "sha256:f40f825768ad76c0977cbacdf1fd37c6f7a468e460ea6a0636078f8972d4517e", size = 363797, upload-time = "2025-06-02T17:36:27.859Z" },
 ]
 
 [[package]]
