@@ -36,7 +36,7 @@ dev = [
     # Development dependencies
     "ruff==0.11.12",
     "mypy==1.16.0",
-    "pytest==8.3.5",
+    "pytest==8.4.0",
     "pytest-cov==6.1.1",
     "pytest-asyncio==1.0.0",
     "pytest-httpx==0.35.0",
