@@ -11,3 +11,9 @@ rules:
   style:
     messy-rule:
       level: ignore
+
+  imports:
+    unresolved-reference:
+      level: ignore
+      except-paths:
+      - data.*
