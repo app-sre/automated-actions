@@ -10,7 +10,7 @@ These are the core operations that users can request the system to perform.
   * **Description**: Restarts a specified workload (e.g., Deployment, StatefulSet, Pod) in an OpenShift cluster.
   * **Use Case**: Useful for resolving issues with applications by restarting their components, applying new configurations that require a restart, or clearing a stuck state.
   * **Required Parameters**: Cluster name, namespace name, workload kind (e.g., `Deployment`, `Pod`), workload name.
-  * **Usage Example (CLI)**: `automated-actions run openshift-workload-restart --cluster my-cluster --namespace my-namespace --kind Deployment --name my-app-deployment`
+  * **Usage Example (CLI)**: `automated-actions openshift-workload-restart --cluster my-cluster --namespace my-namespace --kind Deployment --name my-app-deployment`
 
 ## Administrative & Utility Commands
 

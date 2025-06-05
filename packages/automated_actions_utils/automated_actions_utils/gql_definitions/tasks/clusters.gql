@@ -5,7 +5,7 @@ query Clusters($filter: JSON) {
     name
     serverUrl
     automationToken {
-      ... VaultSecret
+      ...VaultSecret
     }
   }
 }
