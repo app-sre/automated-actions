@@ -28,7 +28,7 @@ dev = [
     "mypy==1.16.0",
     "pytest==8.4.0",
     "pytest-cov==6.1.1",
-    "qenerate==0.7.0",
+    "qenerate==0.8.0",
     "pytest-mock==3.14.1",
 ]
 
