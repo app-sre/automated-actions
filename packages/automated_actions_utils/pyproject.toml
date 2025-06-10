@@ -11,7 +11,7 @@ dependencies = [
     # 3.5.2 needs newer graphql-core, but qenerate doesn't support it yet
     "gql==3.5.0",
     "hvac==2.3.0",
-    "kubernetes==32.0.1",
+    "kubernetes==33.1.0",
     "openshift==0.13.2",
     "pydantic==2.11.5",
     "types-hvac==2.3.0.20250516",
