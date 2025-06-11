@@ -18,6 +18,12 @@ These are the core operations that users can request the system to perform.
   * **Required Parameters**: The AWS account name and the RDS instance identifier.
   * **Usage Example (CLI)**: `automated-actions external-resource-rds-reboot --account aws-account-name --identifier my-rds-instance`
 
+* **`no-op`**:
+  * **Description**: It does nothing, it is just enqueued and immediately succeeds.
+  * **Use Case**: It is used for monitoring purposes, to have and action that tests the whole automated actions stack without any external dependency.
+  * **Required Parameters**: none
+  * **Usage Example (CLI)**: `automated-actions no-op`
+
 ## Administrative & Utility Commands
 
 These commands are typically used for managing actions, retrieving information, or system administration rather than performing an automated task on an external system.
