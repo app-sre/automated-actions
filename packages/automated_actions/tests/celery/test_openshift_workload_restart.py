@@ -1,4 +1,5 @@
 import uuid
+from time import time
 from unittest.mock import Mock, call
 
 import pytest
@@ -27,7 +28,7 @@ def mock_oc(mocker: MockerFixture) -> Mock:
 
 @pytest.fixture
 def mock_action(mocker: MockerFixture) -> Mock:
-    return mocker.Mock(spec=Action)
+    return mocker.Mock(spec=Action, created_at=time())
 
 
 @pytest.fixture

@@ -1,4 +1,5 @@
 import uuid
+from time import time
 from unittest.mock import Mock
 
 import pytest
@@ -24,7 +25,7 @@ def mock_aws(mocker: MockerFixture) -> Mock:
 
 @pytest.fixture
 def mock_action(mocker: MockerFixture) -> Mock:
-    return mocker.Mock(spec=Action)
+    return mocker.Mock(spec=Action, created_at=time())
 
 
 @pytest.fixture

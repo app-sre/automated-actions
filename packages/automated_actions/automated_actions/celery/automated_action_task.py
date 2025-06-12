@@ -1,10 +1,12 @@
 import logging
+from time import time
 from typing import Any
 
 from billiard.einfo import ExceptionInfo
 from hvac.exceptions import VaultError
 from kubernetes.client.exceptions import ApiException
 
+from automated_actions.celery.metrics import action_elapsed_time
 from automated_actions.db.models import ActionStatus
 from celery import Task
 
@@ -44,6 +46,10 @@ class AutomatedActionTask(Task):
             ActionStatus.SUCCESS,
             result,
         )
+        elapsed_time = time() - kwargs["action"].created_at
+        action_elapsed_time.labels(
+            name=kwargs["action"].name, status=ActionStatus.SUCCESS
+        ).observe(amount=elapsed_time)
 
     def on_failure(  # noqa: PLR6301
         self,
@@ -65,6 +71,10 @@ class AutomatedActionTask(Task):
             ActionStatus.FAILURE,
             result,
         )
+        elapsed_time = time() - kwargs["action"].created_at
+        action_elapsed_time.labels(
+            name=kwargs["action"].name, status=ActionStatus.FAILURE
+        ).observe(amount=elapsed_time)
 
     def on_retry(  # noqa: PLR6301
         self,

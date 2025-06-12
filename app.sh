@@ -12,6 +12,14 @@ if [ -r "settings.conf" ]; then
     set +a
 fi
 
+if [ -n "$AA_WORKER_TEMP_DIR" ]; then
+    PROMETHEUS_MULTIPROC_DIR=$(mktemp -d - p "$AA_WORKER_TEMP_DIR")
+else
+    PROMETHEUS_MULTIPROC_DIR=$(mktemp -d)
+fi
+export PROMETHEUS_MULTIPROC_DIR
+trap "rm -rf $PROMETHEUS_MULTIPROC_DIR" INT TERM EXIT
+
 START_MODE="${AA_START_MODE:-api}"
 APP_PORT="${AA_APP_PORT:-8080}"
 UVICORN_OPTS="${AA_UVICORN_OPTS:- --host 0.0.0.0 --proxy-headers --forwarded-allow-ips=*}"

@@ -204,6 +204,8 @@ objects:
             value: worker
           - name: AA_WORKER_METRICS_PORT
             value: "${AA_WORKER_METRICS_PORT}"
+          - name: AA_WORKER_TEMP_DIR
+            value: /worker-temp-dir
           envFrom:
           - secretRef:
               name: automated-actions-secret
@@ -238,6 +240,13 @@ objects:
               memory: ${{AA_WORKER_MEMORY_REQUESTS}}
             limits:
               memory: ${{AA_WORKER_MEMORY_LIMITS}}
+          volumeMounts:
+          - mountPath: /worker-temp-dir
+            name: worker-temp-dir
+        volumes:
+        - name: worker-temp-dir
+          emptyDir:
+            sizeLimit: 50Mi
 
 # ---------- WORKER SERVICE (PROMETHEUS) -----------
 - apiVersion: v1
