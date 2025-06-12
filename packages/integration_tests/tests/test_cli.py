@@ -17,12 +17,26 @@ def cli(config: Config) -> AACli:
     os.environ["AA_TOKEN"] = config.token
 
     def _run(output: Literal["json", "yaml"], *args: str) -> CompletedProcess:
-        return run(
-            ["automated-actions", "--url", str(config.url), "--output", output, *args],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        try:
+            return run(
+                [
+                    "automated-actions",
+                    "--url",
+                    str(config.url),
+                    "--output",
+                    output,
+                    *args,
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+        except CalledProcessError as e:
+            # If the command fails, we want to print the stderr for debugging.
+            print(  # noqa: T201
+                f"Command failed with return code {e.returncode}: {e.stdout}\n {e.stderr}"
+            )
+            raise
 
     return _run
 
