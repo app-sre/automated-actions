@@ -206,7 +206,7 @@ def create_token(
         ),
         client=ctx.obj["client"],
     )
-    if "formatter" in ctx.obj and result:
+    if "formatter" in ctx.obj and result is not None:
         output: Any = result
         if isinstance(result, list):
             output = [
