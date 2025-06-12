@@ -2,9 +2,15 @@ import logging
 import shutil
 import subprocess
 
+import httpx
+from diskcache import Cache
+from packaging.version import Version
+from packaging.version import parse as parse_version
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.text import Text
+
+from automated_actions_cli.config import config
 
 logger = logging.getLogger(__name__)
 
@@ -49,3 +55,30 @@ def kinit() -> None:
     except subprocess.CalledProcessError:
         # If the ticket is not valid, acquire a new one
         subprocess.run(["kinit"], check=True, capture_output=False)
+
+
+def get_latest_pypi_version(package_name: str) -> Version:
+    """Get the latest version of a package from PyPI."""
+    pypi_version_cache = Cache(directory=str(config.pypi_version_cache))
+    version_str = "0.0.0"
+    if package_name not in pypi_version_cache:
+        try:
+            response = httpx.get(
+                f"https://pypi.org/pypi/{package_name}/json", timeout=5
+            )
+            response.raise_for_status()
+            version_str = response.json().get("info", {}).get("version", version_str)
+        except httpx.RequestError:
+            # ignore network errors
+            pass
+    else:
+        version_str = pypi_version_cache[package_name]
+
+    # cache the version string
+    pypi_version_cache.set(
+        package_name,
+        version_str,
+        expire=config.pypi_version_cache_expire_minutes * 60,
+    )
+
+    return parse_version(version_str)
