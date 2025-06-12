@@ -2,7 +2,7 @@ from collections.abc import Callable
 
 import pytest
 from automated_actions_client import AuthenticatedClient
-from automated_actions_client.api.v1 import external_resource_rds_reboot
+from automated_actions_client.api.actions import external_resource_rds_reboot
 from automated_actions_client.models.action_schema_out import ActionSchemaOut
 from automated_actions_client.models.action_status import ActionStatus
 from automated_actions_utils.aws_api import AWSApi, get_aws_credentials

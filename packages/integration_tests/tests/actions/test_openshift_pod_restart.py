@@ -4,7 +4,8 @@ from time import sleep
 import pytest
 from automated_actions.config import settings
 from automated_actions_client import AuthenticatedClient
-from automated_actions_client.api.v1 import action_detail, openshift_workload_restart
+from automated_actions_client.api.actions import openshift_workload_restart
+from automated_actions_client.api.general import action_detail
 from automated_actions_client.models.action_schema_out import ActionSchemaOut
 from automated_actions_client.models.action_status import ActionStatus
 from automated_actions_client.models.openshift_workload_restart_kind import (
