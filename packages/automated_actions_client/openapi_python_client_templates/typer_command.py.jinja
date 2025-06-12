@@ -6,8 +6,10 @@ app = typer.Typer()
 
 
 {% if parsed_responses %}
-@app.command(help="""{{ endpoint.description }}""")
-
+@app.command(
+    help="""{{ endpoint.description }}""",
+    rich_help_panel="{{ endpoint.tags[0].title() if endpoint.tags else 'General' }}",
+)
 def {{endpoint.name | replace("-", "_") }}(
     ctx: typer.Context,
 

@@ -61,5 +61,5 @@ def configure_routers(app: FastAPI) -> None:
             "OIDC component or its router not found in app.state. Skipping OIDC router inclusion in v1_router."
         )
 
-    api_router.include_router(v1_router, prefix="/v1", tags=["v1"])
+    api_router.include_router(v1_router, prefix="/v1")
     log.info("API routers configured.")

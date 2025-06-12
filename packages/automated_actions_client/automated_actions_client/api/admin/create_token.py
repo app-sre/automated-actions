@@ -2,32 +2,47 @@
 # Do not edit manually.
 
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.user_schema_out import UserSchemaOut
+from ...models.create_token_param import CreateTokenParam
+from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
 
-def _get_kwargs() -> dict[str, Any]:
+def _get_kwargs(
+    *,
+    body: CreateTokenParam,
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
+
     _kwargs: dict[str, Any] = {
-        "method": "get",
-        "url": "/api/v1/me",
+        "method": "post",
+        "url": "/api/v1/admin/token",
     }
 
+    _body = body.to_dict()
+
+    _kwargs["json"] = _body
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> UserSchemaOut | None:
+) -> HTTPValidationError | str | None:
     if response.status_code == 200:
-        response_200 = UserSchemaOut.from_dict(response.json())
-
+        response_200 = cast(str, response.json())
         return response_200
+    if response.status_code == 422:
+        response_422 = HTTPValidationError.from_dict(response.json())
+
+        return response_422
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -36,7 +51,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[UserSchemaOut]:
+) -> Response[HTTPValidationError | str]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -48,20 +63,26 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[UserSchemaOut]:
-    """Me
+    body: CreateTokenParam,
+) -> Response[HTTPValidationError | str]:
+    """Create Token
 
-     Get the current user information.
+     Create a token for a service account.
+
+    Args:
+        body (CreateTokenParam):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[UserSchemaOut]
+        Response[Union[HTTPValidationError, str]]
     """
 
-    kwargs = _get_kwargs()
+    kwargs = _get_kwargs(
+        body=body,
+    )
 
     with client as _client:
         response = _client.request(
@@ -74,41 +95,52 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-) -> UserSchemaOut | None:
-    """Me
+    body: CreateTokenParam,
+) -> HTTPValidationError | str | None:
+    """Create Token
 
-     Get the current user information.
+     Create a token for a service account.
+
+    Args:
+        body (CreateTokenParam):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        UserSchemaOut
+        Union[HTTPValidationError, str]
     """
 
     return sync_detailed(
         client=client,
+        body=body,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[UserSchemaOut]:
-    """Me
+    body: CreateTokenParam,
+) -> Response[HTTPValidationError | str]:
+    """Create Token
 
-     Get the current user information.
+     Create a token for a service account.
+
+    Args:
+        body (CreateTokenParam):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[UserSchemaOut]
+        Response[Union[HTTPValidationError, str]]
     """
 
-    kwargs = _get_kwargs()
+    kwargs = _get_kwargs(
+        body=body,
+    )
 
     async with client as _client:
         response = await _client.request(
@@ -121,36 +153,59 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-) -> UserSchemaOut | None:
-    """Me
+    body: CreateTokenParam,
+) -> HTTPValidationError | str | None:
+    """Create Token
 
-     Get the current user information.
+     Create a token for a service account.
+
+    Args:
+        body (CreateTokenParam):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        UserSchemaOut
+        Union[HTTPValidationError, str]
     """
 
     return (
         await asyncio_detailed(
             client=client,
+            body=body,
         )
     ).parsed
 
+
+import datetime
+from typing import Annotated
 
 import typer
 
 app = typer.Typer()
 
 
-@app.command(help="""Get the current user information.""")
-def me(
+@app.command(
+    help="""Create a token for a service account.""",
+    rich_help_panel="Admin",
+)
+def create_token(
     ctx: typer.Context,
+    name: Annotated[str, typer.Option(help="")],
+    username: Annotated[str, typer.Option(help="")],
+    email: Annotated[str, typer.Option(help="")],
+    expiration: Annotated[datetime.datetime, typer.Option(help="")],
 ) -> None:
-    result = sync(client=ctx.obj["client"])
+    result = sync(
+        body=CreateTokenParam(
+            name=name,
+            username=username,
+            email=email,
+            expiration=expiration,
+        ),
+        client=ctx.obj["client"],
+    )
     if "formatter" in ctx.obj and result:
         output: Any = result
         if isinstance(result, list):

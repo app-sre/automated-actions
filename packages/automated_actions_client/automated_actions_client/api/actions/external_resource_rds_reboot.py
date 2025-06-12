@@ -10,15 +10,25 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.action_schema_out import ActionSchemaOut
 from ...models.http_validation_error import HTTPValidationError
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
-    action_id: str,
+    account: str,
+    identifier: str,
+    *,
+    force_failover: Unset | bool = False,
 ) -> dict[str, Any]:
+    params: dict[str, Any] = {}
+
+    params["force_failover"] = force_failover
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
+
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": f"/api/v1/actions/{action_id}",
+        "url": f"/api/v1/external-resource/rds-reboot/{account}/{identifier}",
+        "params": params,
     }
 
     return _kwargs
@@ -53,16 +63,23 @@ def _build_response(
 
 
 def sync_detailed(
-    action_id: str,
+    account: str,
+    identifier: str,
     *,
     client: AuthenticatedClient | Client,
+    force_failover: Unset | bool = False,
 ) -> Response[ActionSchemaOut | HTTPValidationError]:
-    """Action Cancel
+    """External Resource Rds Reboot
 
-     Cancels a pending or running action by its ID.
+     Reboot an RDS instance.
+
+    This action initiates a reboot of a specified RDS instance in a given AWS account.
 
     Args:
-        action_id (str):
+        account (str): AWS account name
+        identifier (str): RDS instance identifier
+        force_failover (Union[Unset, bool]): Enforce DB failover. Your RDS must be confiugred for
+            Multi-AZ! Default: False.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -73,7 +90,9 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        action_id=action_id,
+        account=account,
+        identifier=identifier,
+        force_failover=force_failover,
     )
 
     with client as _client:
@@ -85,16 +104,23 @@ def sync_detailed(
 
 
 def sync(
-    action_id: str,
+    account: str,
+    identifier: str,
     *,
     client: AuthenticatedClient | Client,
+    force_failover: Unset | bool = False,
 ) -> ActionSchemaOut | HTTPValidationError | None:
-    """Action Cancel
+    """External Resource Rds Reboot
 
-     Cancels a pending or running action by its ID.
+     Reboot an RDS instance.
+
+    This action initiates a reboot of a specified RDS instance in a given AWS account.
 
     Args:
-        action_id (str):
+        account (str): AWS account name
+        identifier (str): RDS instance identifier
+        force_failover (Union[Unset, bool]): Enforce DB failover. Your RDS must be confiugred for
+            Multi-AZ! Default: False.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -105,22 +131,31 @@ def sync(
     """
 
     return sync_detailed(
-        action_id=action_id,
+        account=account,
+        identifier=identifier,
         client=client,
+        force_failover=force_failover,
     ).parsed
 
 
 async def asyncio_detailed(
-    action_id: str,
+    account: str,
+    identifier: str,
     *,
     client: AuthenticatedClient | Client,
+    force_failover: Unset | bool = False,
 ) -> Response[ActionSchemaOut | HTTPValidationError]:
-    """Action Cancel
+    """External Resource Rds Reboot
 
-     Cancels a pending or running action by its ID.
+     Reboot an RDS instance.
+
+    This action initiates a reboot of a specified RDS instance in a given AWS account.
 
     Args:
-        action_id (str):
+        account (str): AWS account name
+        identifier (str): RDS instance identifier
+        force_failover (Union[Unset, bool]): Enforce DB failover. Your RDS must be confiugred for
+            Multi-AZ! Default: False.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -131,7 +166,9 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        action_id=action_id,
+        account=account,
+        identifier=identifier,
+        force_failover=force_failover,
     )
 
     async with client as _client:
@@ -143,16 +180,23 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    action_id: str,
+    account: str,
+    identifier: str,
     *,
     client: AuthenticatedClient | Client,
+    force_failover: Unset | bool = False,
 ) -> ActionSchemaOut | HTTPValidationError | None:
-    """Action Cancel
+    """External Resource Rds Reboot
 
-     Cancels a pending or running action by its ID.
+     Reboot an RDS instance.
+
+    This action initiates a reboot of a specified RDS instance in a given AWS account.
 
     Args:
-        action_id (str):
+        account (str): AWS account name
+        identifier (str): RDS instance identifier
+        force_failover (Union[Unset, bool]): Enforce DB failover. Your RDS must be confiugred for
+            Multi-AZ! Default: False.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -164,8 +208,10 @@ async def asyncio(
 
     return (
         await asyncio_detailed(
-            action_id=action_id,
+            account=account,
+            identifier=identifier,
             client=client,
+            force_failover=force_failover,
         )
     ).parsed
 
@@ -177,12 +223,31 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="""Cancels a pending or running action by its ID.""")
-def action_cancel(
+@app.command(
+    help="""Reboot an RDS instance.
+
+This action initiates a reboot of a specified RDS instance in a given AWS account.""",
+    rich_help_panel="Actions",
+)
+def external_resource_rds_reboot(
     ctx: typer.Context,
-    action_id: Annotated[str, typer.Option(help="", show_default=False)],
+    account: Annotated[str, typer.Option(help="AWS account name", show_default=False)],
+    identifier: Annotated[
+        str, typer.Option(help="RDS instance identifier", show_default=False)
+    ],
+    force_failover: Annotated[
+        bool,
+        typer.Option(
+            help="Enforce DB failover. Your RDS must be confiugred for Multi-AZ!"
+        ),
+    ] = False,
 ) -> None:
-    result = sync(action_id=action_id, client=ctx.obj["client"])
+    result = sync(
+        account=account,
+        identifier=identifier,
+        force_failover=force_failover,
+        client=ctx.obj["client"],
+    )
     if "formatter" in ctx.obj and result:
         output: Any = result
         if isinstance(result, list):

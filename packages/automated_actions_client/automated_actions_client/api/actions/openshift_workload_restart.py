@@ -233,7 +233,8 @@ app = typer.Typer()
     help="""Initiates a restart of a specified OpenShift workload.
 
 This action triggers a restart of a workload (e.g., Pod, Deployment)
-within a given OpenShift cluster and namespace."""
+within a given OpenShift cluster and namespace.""",
+    rich_help_panel="Actions",
 )
 def openshift_workload_restart(
     ctx: typer.Context,

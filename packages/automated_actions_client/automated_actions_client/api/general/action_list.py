@@ -246,7 +246,10 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="""Lists actions, optionally filtered by status, user, or age.""")
+@app.command(
+    help="""Lists actions, optionally filtered by status, user, or age.""",
+    rich_help_panel="General",
+)
 def action_list(
     ctx: typer.Context,
     status: Annotated[

@@ -14,7 +14,11 @@ router = APIRouter()
 log = logging.getLogger(__name__)
 
 
-@router.get("/actions", operation_id="action-list")
+@router.get(
+    "/actions",
+    operation_id="action-list",
+    tags=["General"],
+)
 def action_list(
     user: UserDep,
     action_mgr: Annotated[ActionManager, Depends(get_action_manager)],
@@ -46,7 +50,11 @@ def action_list(
     ]
 
 
-@router.get("/actions/{action_id}", operation_id="action-detail")
+@router.get(
+    "/actions/{action_id}",
+    operation_id="action-detail",
+    tags=["General"],
+)
 def action_detail(
     action_id: str, action_mgr: Annotated[ActionManager, Depends(get_action_manager)]
 ) -> ActionSchemaOut:
@@ -54,7 +62,12 @@ def action_detail(
     return action_mgr.get_or_404(action_id).dump()
 
 
-@router.post("/actions/{action_id}", operation_id="action-cancel", status_code=202)
+@router.post(
+    "/actions/{action_id}",
+    operation_id="action-cancel",
+    status_code=202,
+    tags=["General"],
+)
 def action_cancel(
     action_id: str, action_mgr: Annotated[ActionManager, Depends(get_action_manager)]
 ) -> ActionSchemaOut:

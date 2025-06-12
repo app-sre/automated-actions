@@ -17,7 +17,11 @@ class CreateTokenParam(BaseModel):
     expiration: dt
 
 
-@router.post("/admin/token", operation_id="create-token")
+@router.post(
+    "/admin/token",
+    operation_id="create-token",
+    tags=["Admin"],
+)
 def create_token(
     param: CreateTokenParam, user: UserDep, token_auth: BearerTokenAuthDep
 ) -> str:

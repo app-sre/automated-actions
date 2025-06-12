@@ -13,7 +13,7 @@ from typing import Annotated, Any
 import httpx
 import typer
 from automated_actions_client import AuthenticatedClient, Client
-from automated_actions_client.api.v1.me import sync as api_v1_me
+from automated_actions_client.api.general.me import sync as api_v1_me
 from httpx_gssapi import OPTIONAL, HTTPSPNEGOAuth
 from rich import print as rich_print
 from rich.console import Console
@@ -26,6 +26,9 @@ from automated_actions_cli.utils import (
     kinit,
     progress_spinner,
 )
+
+# Keep in sync with the tags used by automated-actions FastAPI endpoints.
+OPENAPI_TAGS = ["actions", "general", "admin"]
 
 app = typer.Typer(
     pretty_exceptions_show_locals=False,
@@ -199,11 +202,16 @@ def main(  # noqa: C901
 
 def initialize_client_actions() -> None:
     """Initialize typer commands from all available automated-actions-client actions."""
-    for action in dir(importlib.import_module("automated_actions_client.api.v1")):
-        if not action.startswith("_"):
-            app.add_typer(
-                importlib.import_module(f"automated_actions_client.api.v1.{action}").app
-            )
+    for module in OPENAPI_TAGS:
+        for action in dir(
+            importlib.import_module(f"automated_actions_client.api.{module}")
+        ):
+            if not action.startswith("_"):
+                app.add_typer(
+                    importlib.import_module(
+                        f"automated_actions_client.api.{module}.{action}"
+                    ).app
+                )
 
 
 initialize_client_actions()

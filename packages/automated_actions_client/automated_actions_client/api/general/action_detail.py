@@ -177,7 +177,10 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="""Retrieves the details of a specific action by its ID.""")
+@app.command(
+    help="""Retrieves the details of a specific action by its ID.""",
+    rich_help_panel="General",
+)
 def action_detail(
     ctx: typer.Context,
     action_id: Annotated[str, typer.Option(help="", show_default=False)],

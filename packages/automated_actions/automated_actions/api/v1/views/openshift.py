@@ -28,6 +28,7 @@ def get_action(
     "/openshift/workload-restart/{cluster}/{namespace}/{kind}/{name}",
     operation_id="openshift-workload-restart",
     status_code=202,
+    tags=["Actions"],
 )
 def openshift_workload_restart(
     cluster: Annotated[str, Path(description="OpenShift cluster name")],

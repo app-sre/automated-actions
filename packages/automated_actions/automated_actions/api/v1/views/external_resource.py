@@ -38,6 +38,7 @@ def get_action(
     "/external-resource/rds-reboot/{account}/{identifier}",
     operation_id=ACTION_ID,
     status_code=202,
+    tags=["Actions"],
 )
 def external_resource_rds_reboot(
     account: Annotated[str, Path(description="AWS account name")],

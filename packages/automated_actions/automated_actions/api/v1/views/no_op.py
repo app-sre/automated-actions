@@ -24,7 +24,13 @@ def get_action(
     return action_mgr.create_action(name=NO_OP, owner=user)
 
 
-@router.post(f"/{NO_OP}", operation_id=NO_OP, status_code=202)
+@router.post(
+    f"/{NO_OP}",
+    operation_id=NO_OP,
+    status_code=202,
+    response_model_exclude_unset=True,
+    tags=["Actions"],
+)
 def no_op(action: Annotated[Action, Depends(get_action)]) -> ActionSchemaOut:
     """Initiates a no-operation action.
 

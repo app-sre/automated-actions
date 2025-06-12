@@ -8,14 +8,14 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.action_schema_out import ActionSchemaOut
+from ...models.user_schema_out import UserSchemaOut
 from ...types import Response
 
 
 def _get_kwargs() -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
-        "method": "post",
-        "url": "/api/v1/no-op",
+        "method": "get",
+        "url": "/api/v1/me",
     }
 
     return _kwargs
@@ -23,11 +23,11 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> ActionSchemaOut | None:
-    if response.status_code == 202:
-        response_202 = ActionSchemaOut.from_dict(response.json())
+) -> UserSchemaOut | None:
+    if response.status_code == 200:
+        response_200 = UserSchemaOut.from_dict(response.json())
 
-        return response_202
+        return response_200
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -36,7 +36,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[ActionSchemaOut]:
+) -> Response[UserSchemaOut]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -48,19 +48,17 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[ActionSchemaOut]:
-    """No Op
+) -> Response[UserSchemaOut]:
+    """Me
 
-     Initiates a no-operation action.
-
-    This action performs no actual operation but can be used for testing.
+     Get the current user information.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ActionSchemaOut]
+        Response[UserSchemaOut]
     """
 
     kwargs = _get_kwargs()
@@ -76,19 +74,17 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-) -> ActionSchemaOut | None:
-    """No Op
+) -> UserSchemaOut | None:
+    """Me
 
-     Initiates a no-operation action.
-
-    This action performs no actual operation but can be used for testing.
+     Get the current user information.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ActionSchemaOut
+        UserSchemaOut
     """
 
     return sync_detailed(
@@ -99,19 +95,17 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[ActionSchemaOut]:
-    """No Op
+) -> Response[UserSchemaOut]:
+    """Me
 
-     Initiates a no-operation action.
-
-    This action performs no actual operation but can be used for testing.
+     Get the current user information.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ActionSchemaOut]
+        Response[UserSchemaOut]
     """
 
     kwargs = _get_kwargs()
@@ -127,19 +121,17 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-) -> ActionSchemaOut | None:
-    """No Op
+) -> UserSchemaOut | None:
+    """Me
 
-     Initiates a no-operation action.
-
-    This action performs no actual operation but can be used for testing.
+     Get the current user information.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ActionSchemaOut
+        UserSchemaOut
     """
 
     return (
@@ -155,11 +147,10 @@ app = typer.Typer()
 
 
 @app.command(
-    help="""Initiates a no-operation action.
-
-This action performs no actual operation but can be used for testing."""
+    help="""Get the current user information.""",
+    rich_help_panel="General",
 )
-def no_op(
+def me(
     ctx: typer.Context,
 ) -> None:
     result = sync(client=ctx.obj["client"])

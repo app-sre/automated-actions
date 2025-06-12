@@ -2,43 +2,35 @@
 # Do not edit manually.
 
 from http import HTTPStatus
-from typing import Any, cast
+from typing import Any
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.create_token_param import CreateTokenParam
+from ...models.action_schema_out import ActionSchemaOut
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
 
 def _get_kwargs(
-    *,
-    body: CreateTokenParam,
+    action_id: str,
 ) -> dict[str, Any]:
-    headers: dict[str, Any] = {}
-
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/api/v1/admin/token",
+        "url": f"/api/v1/actions/{action_id}",
     }
 
-    _body = body.to_dict()
-
-    _kwargs["json"] = _body
-    headers["Content-Type"] = "application/json"
-
-    _kwargs["headers"] = headers
     return _kwargs
 
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> HTTPValidationError | str | None:
-    if response.status_code == 200:
-        response_200 = cast(str, response.json())
-        return response_200
+) -> ActionSchemaOut | HTTPValidationError | None:
+    if response.status_code == 202:
+        response_202 = ActionSchemaOut.from_dict(response.json())
+
+        return response_202
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -51,7 +43,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | str]:
+) -> Response[ActionSchemaOut | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -61,27 +53,27 @@ def _build_response(
 
 
 def sync_detailed(
+    action_id: str,
     *,
     client: AuthenticatedClient | Client,
-    body: CreateTokenParam,
-) -> Response[HTTPValidationError | str]:
-    """Create Token
+) -> Response[ActionSchemaOut | HTTPValidationError]:
+    """Action Cancel
 
-     Create a token for a service account.
+     Cancels a pending or running action by its ID.
 
     Args:
-        body (CreateTokenParam):
+        action_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, str]]
+        Response[Union[ActionSchemaOut, HTTPValidationError]]
     """
 
     kwargs = _get_kwargs(
-        body=body,
+        action_id=action_id,
     )
 
     with client as _client:
@@ -93,53 +85,53 @@ def sync_detailed(
 
 
 def sync(
+    action_id: str,
     *,
     client: AuthenticatedClient | Client,
-    body: CreateTokenParam,
-) -> HTTPValidationError | str | None:
-    """Create Token
+) -> ActionSchemaOut | HTTPValidationError | None:
+    """Action Cancel
 
-     Create a token for a service account.
+     Cancels a pending or running action by its ID.
 
     Args:
-        body (CreateTokenParam):
+        action_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, str]
+        Union[ActionSchemaOut, HTTPValidationError]
     """
 
     return sync_detailed(
+        action_id=action_id,
         client=client,
-        body=body,
     ).parsed
 
 
 async def asyncio_detailed(
+    action_id: str,
     *,
     client: AuthenticatedClient | Client,
-    body: CreateTokenParam,
-) -> Response[HTTPValidationError | str]:
-    """Create Token
+) -> Response[ActionSchemaOut | HTTPValidationError]:
+    """Action Cancel
 
-     Create a token for a service account.
+     Cancels a pending or running action by its ID.
 
     Args:
-        body (CreateTokenParam):
+        action_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, str]]
+        Response[Union[ActionSchemaOut, HTTPValidationError]]
     """
 
     kwargs = _get_kwargs(
-        body=body,
+        action_id=action_id,
     )
 
     async with client as _client:
@@ -151,34 +143,33 @@ async def asyncio_detailed(
 
 
 async def asyncio(
+    action_id: str,
     *,
     client: AuthenticatedClient | Client,
-    body: CreateTokenParam,
-) -> HTTPValidationError | str | None:
-    """Create Token
+) -> ActionSchemaOut | HTTPValidationError | None:
+    """Action Cancel
 
-     Create a token for a service account.
+     Cancels a pending or running action by its ID.
 
     Args:
-        body (CreateTokenParam):
+        action_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, str]
+        Union[ActionSchemaOut, HTTPValidationError]
     """
 
     return (
         await asyncio_detailed(
+            action_id=action_id,
             client=client,
-            body=body,
         )
     ).parsed
 
 
-import datetime
 from typing import Annotated
 
 import typer
@@ -186,23 +177,15 @@ import typer
 app = typer.Typer()
 
 
-@app.command(help="""Create a token for a service account.""")
-def create_token(
+@app.command(
+    help="""Cancels a pending or running action by its ID.""",
+    rich_help_panel="General",
+)
+def action_cancel(
     ctx: typer.Context,
-    name: Annotated[str, typer.Option(help="")],
-    username: Annotated[str, typer.Option(help="")],
-    email: Annotated[str, typer.Option(help="")],
-    expiration: Annotated[datetime.datetime, typer.Option(help="")],
+    action_id: Annotated[str, typer.Option(help="", show_default=False)],
 ) -> None:
-    result = sync(
-        body=CreateTokenParam(
-            name=name,
-            username=username,
-            email=email,
-            expiration=expiration,
-        ),
-        client=ctx.obj["client"],
-    )
+    result = sync(action_id=action_id, client=ctx.obj["client"])
     if "formatter" in ctx.obj and result:
         output: Any = result
         if isinstance(result, list):
