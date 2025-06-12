@@ -7,6 +7,7 @@ import sys
 from http.cookiejar import MozillaCookieJar
 from importlib.metadata import version
 from pathlib import Path
+from types import TracebackType
 from typing import Annotated, Any
 
 import httpx
@@ -47,6 +48,15 @@ BANNER = """
 """
 
 
+def no_traceback_exception_hook(
+    exc_type: type[BaseException],
+    exc_value: BaseException,
+    tb: TracebackType | None,  # noqa: ARG001
+) -> None:
+    """Custom exception hook to display exceptions without traceback."""
+    rich_print(f"{exc_type.__name__}: {exc_value}", file=sys.stderr)
+
+
 def version_callback(*, value: bool) -> None:
     if value:
         rich_print(f"Version: {version('automated-actions-cli')}")
@@ -80,7 +90,7 @@ class ClientWithCookieJar(Client):
 
 
 @app.callback(no_args_is_help=True)
-def main(
+def main(  # noqa: C901
     ctx: typer.Context,
     *,
     url: Annotated[
@@ -123,12 +133,13 @@ def main(
         progress.start()
         progress.add_task(description="Processing...", total=None)
         atexit.register(progress.stop)
-
     logging.basicConfig(
         level="DEBUG" if debug else "INFO",
         format="%(name)-20s: %(message)s",
     )
     logging.getLogger("httpx").setLevel(logging.WARNING)
+    if not debug:
+        sys.excepthook = no_traceback_exception_hook
 
     if token := os.environ.get("AA_TOKEN"):
         ctx.obj = {
