@@ -13,7 +13,7 @@ if [ -r "settings.conf" ]; then
 fi
 
 if [ -n "$AA_WORKER_TEMP_DIR" ]; then
-    PROMETHEUS_MULTIPROC_DIR=$(mktemp -d - p "$AA_WORKER_TEMP_DIR")
+    PROMETHEUS_MULTIPROC_DIR=$(mktemp -d -p "$AA_WORKER_TEMP_DIR")
 else
     PROMETHEUS_MULTIPROC_DIR=$(mktemp -d)
 fi
