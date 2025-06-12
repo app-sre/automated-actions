@@ -67,7 +67,7 @@ def no_traceback_exception_hook(
 
 def version_callback(*, value: bool) -> None:
     if value:
-        rich_print(f"Version: {CURRENT_VERSION}")
+        rich_print(f"Version: {LOCAL_VERSION}")
         raise typer.Exit
 
 
