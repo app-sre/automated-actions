@@ -6,11 +6,11 @@ This document outlines the available automated actions that can be triggered and
 
 These are the core operations that users can request the system to perform.
 
-* **`openshift-workload-restart`**:
-  * **Description**: Restarts a specified workload (e.g., Deployment, StatefulSet, Pod) in an OpenShift cluster.
-  * **Use Case**: Useful for resolving issues with applications by restarting their components, applying new configurations that require a restart, or clearing a stuck state.
-  * **Required Parameters**: Cluster name, namespace name, workload kind (e.g., `Deployment`, `Pod`), workload name.
-  * **Usage Example (CLI)**: `automated-actions openshift-workload-restart --cluster my-cluster --namespace my-namespace --kind Deployment --name my-app-deployment`
+* **`external-resource-flush-elasticache`**:
+  * **Description**: Flushes an Amazon ElastiCache cluster.
+  * **Use Case**: Typically used to clear cache data, which can help resolve issues with stale or corrupted cache entries.
+  * **Required Parameters**: The AWS account name and the ElastiCache cluster identifier.
+  * **Usage Example (CLI)**: `automated-actions external-resource-flush-elasticache --account aws-account-name --identifier my-elasticache-cluster`
 
 * **`external-resource-rds-reboot`**:
   * **Description**: Reboots an Amazon RDS instance.
@@ -23,6 +23,12 @@ These are the core operations that users can request the system to perform.
   * **Use Case**: It is used for monitoring purposes, to have and action that tests the whole automated actions stack without any external dependency.
   * **Required Parameters**: none
   * **Usage Example (CLI)**: `automated-actions no-op`
+
+* **`openshift-workload-restart`**:
+  * **Description**: Restarts a specified workload (e.g., Deployment, StatefulSet, Pod) in an OpenShift cluster.
+  * **Use Case**: Useful for resolving issues with applications by restarting their components, applying new configurations that require a restart, or clearing a stuck state.
+  * **Required Parameters**: Cluster name, namespace name, workload kind (e.g., `Deployment`, `Pod`), workload name.
+  * **Usage Example (CLI)**: `automated-actions openshift-workload-restart --cluster my-cluster --namespace my-namespace --kind Deployment --name my-app-deployment`
 
 ## Administrative & Utility Commands
 
