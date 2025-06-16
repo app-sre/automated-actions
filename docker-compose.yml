@@ -94,6 +94,7 @@ services:
         condition: service_healthy
     volumes:
       - ./packages/automated_actions:/opt/app-root/src/packages/automated_actions
+      - ./packages/automated_actions_utils:/opt/app-root/src/packages/automated_actions_utils
 
   generate-automated-actions-client:
     restart: never
