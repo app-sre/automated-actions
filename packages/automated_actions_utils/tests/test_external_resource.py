@@ -7,6 +7,7 @@ from automated_actions_utils.external_resource import (
     AwsAccount,
     ExternalResource,
     ExternalResourceAppInterfaceError,
+    ExternalResourceProvider,
     VaultSecret,
     get_external_resource,
 )
@@ -40,34 +41,42 @@ def mock_gql_client(mocker: MockerFixture) -> MagicMock:
                                 "identifier": "test-rds",
                                 "region": None,
                                 "delete": None,
-                            },
-                            {
-                                "provider": "elasticache",
-                                "identifier": "test-elasticache",
+                                "output_resource_name": "test-rds-output-resource-name",
                             },
                         ],
                     }
                 ],
                 "cluster": {
                     "name": "test-cluster",
-                    "serverUrl": "https://cluster.example.com",
-                    "insecureSkipTLSVerify": None,
-                    "jumpHost": None,
-                    "automationToken": {
-                        "path": "wherever/test-cluster",
-                        "field": "token",
-                        "version": None,
-                        "format": None,
-                    },
-                    "clusterAdminAutomationToken": {
-                        "path": "wherever/test-cluster-admin",
-                        "field": "token",
-                        "version": None,
-                        "format": None,
-                    },
-                    "spec": {"region": "us-east-1"},
-                    "internal": True,
-                    "disable": None,
+                },
+            },
+            {
+                "name": "another-namespace",
+                "delete": None,
+                "externalResources": [
+                    {
+                        "provider": "aws",
+                        "provisioner": {
+                            "name": "test-account",
+                            "automationToken": {
+                                "path": "wherever/test-account",
+                                "field": "all",
+                                "version": None,
+                                "format": None,
+                            },
+                            "resourcesDefaultRegion": "us-east-1",
+                        },
+                        "resources": [
+                            {
+                                "provider": "elasticache",
+                                "identifier": "test-elasticache",
+                                "output_resource_name": "test-elasticache-output-resource-name",
+                            },
+                        ],
+                    }
+                ],
+                "cluster": {
+                    "name": "test-cluster",
                 },
             },
         ]
@@ -77,7 +86,11 @@ def mock_gql_client(mocker: MockerFixture) -> MagicMock:
 
 def test_get_external_resource_success(mock_gql_client: MagicMock) -> None:
     """Tests successful retrieval of an external resource."""
-    result = get_external_resource(account="test-account", identifier="test-rds")
+    result = get_external_resource(
+        account="test-account",
+        identifier="test-rds",
+        provider=ExternalResourceProvider.RDS,
+    )
     assert result == ExternalResource(
         identifier="test-rds",
         region=None,
@@ -88,6 +101,33 @@ def test_get_external_resource_success(mock_gql_client: MagicMock) -> None:
             ),
             region="us-east-1",
         ),
+        cluster="test-cluster",
+        namespace="test-namespace",
+        output_resource_name="test-rds-output-resource-name",
+    )
+    mock_gql_client.return_value.query.assert_called_once()
+
+
+def test_get_external_resource_success_elasticache(mock_gql_client: MagicMock) -> None:
+    """Tests successful retrieval of an external resource."""
+    result = get_external_resource(
+        account="test-account",
+        identifier="test-elasticache",
+        provider=ExternalResourceProvider.ELASTICACHE,
+    )
+    assert result == ExternalResource(
+        identifier="test-elasticache",
+        region=None,
+        account=AwsAccount(
+            name="test-account",
+            automation_token=VaultSecret(
+                path="wherever/test-account", field="all", version=None, q_format=None
+            ),
+            region="us-east-1",
+        ),
+        cluster="test-cluster",
+        namespace="another-namespace",
+        output_resource_name="test-elasticache-output-resource-name",
     )
     mock_gql_client.return_value.query.assert_called_once()
 
@@ -95,7 +135,11 @@ def test_get_external_resource_success(mock_gql_client: MagicMock) -> None:
 def test_get_external_resource_missing(mock_gql_client: MagicMock) -> None:
     """Tests retrieval of a non-existent external resource."""
     with pytest.raises(ExternalResourceAppInterfaceError):
-        get_external_resource(account="test-account", identifier="does-not-exist")
+        get_external_resource(
+            account="test-account",
+            identifier="does-not-exist",
+            provider=ExternalResourceProvider.RDS,
+        )
 
     mock_gql_client.return_value.query.assert_called_once()
 
@@ -104,6 +148,10 @@ def test_get_external_resource_no_namespaces(mock_gql_client: MagicMock) -> None
     """Tests retrieval when no namespaces are returned from app-interface."""
     mock_gql_client.return_value.query.return_value = {"namespaces": []}
     with pytest.raises(ExternalResourceAppInterfaceError):
-        get_external_resource(account="test-account", identifier="does-not-exist")
+        get_external_resource(
+            account="test-account",
+            identifier="does-not-exist",
+            provider=ExternalResourceProvider.RDS,
+        )
 
     mock_gql_client.return_value.query.assert_called_once()

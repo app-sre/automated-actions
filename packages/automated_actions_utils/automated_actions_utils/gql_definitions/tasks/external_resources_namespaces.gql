@@ -1,4 +1,4 @@
-# qenerate: plugin=pydantic_v1
+# qenerate: plugin=pydantic_v2
 
 query ExternalResourcesNamespaces {
   namespaces: namespaces_v1 {
@@ -17,7 +17,12 @@ query ExternalResourcesNamespaces {
         resources {
           provider
           identifier
+          output_resource_name
           ... on NamespaceTerraformResourceRDS_v1 {
+            region
+            delete
+          }
+          ... on NamespaceTerraformResourceElastiCache_v1 {
             region
             delete
           }
@@ -26,24 +31,6 @@ query ExternalResourcesNamespaces {
     }
     cluster {
       name
-      serverUrl
-      insecureSkipTLSVerify
-      jumpHost {
-        ...CommonJumphostFields
-      }
-      automationToken {
-        ...VaultSecret
-      }
-      clusterAdminAutomationToken {
-        ...VaultSecret
-      }
-      spec {
-        region
-      }
-      internal
-      disable {
-        integrations
-      }
     }
   }
 }

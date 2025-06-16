@@ -1,4 +1,5 @@
 import logging
+from enum import StrEnum
 
 from automated_actions.config import settings
 from pydantic import BaseModel
@@ -6,6 +7,7 @@ from pydantic import BaseModel
 from automated_actions_utils.gql_client import GQLClient
 from automated_actions_utils.gql_definitions.tasks.external_resources_namespaces import (
     NamespaceTerraformProviderResourceAWSV1,
+    NamespaceTerraformResourceAWSV1,
 )
 from automated_actions_utils.gql_definitions.tasks.external_resources_namespaces import (
     query as external_resources_namespaces,
@@ -41,9 +43,34 @@ class ExternalResource(BaseModel):
     identifier: str
     region: str | None
     account: AwsAccount
+    cluster: str
+    namespace: str
+    output_resource_name: str | None
 
 
-def get_external_resource(account: str, identifier: str) -> ExternalResource:
+class ExternalResourceProvider(StrEnum):
+    """Enum representing the provider of an external resource."""
+
+    RDS = "rds"
+    ELASTICACHE = "elasticache"
+
+
+def is_searched_resource(
+    identifier: str,
+    provider: ExternalResourceProvider,
+    resource: NamespaceTerraformResourceAWSV1,
+) -> bool:
+    """Determines if the current resource is the one being searched for."""
+    return (
+        resource.identifier == identifier
+        and resource.provider == provider.value
+        and not getattr(resource, "delete", False)
+    )
+
+
+def get_external_resource(
+    account: str, identifier: str, provider: ExternalResourceProvider
+) -> ExternalResource:
     """Retrieves external resource information from app-interface.
 
     Args:
@@ -68,12 +95,18 @@ def get_external_resource(account: str, identifier: str) -> ExternalResource:
         )
 
     for namespace in namespaces:
+        if namespace.delete:
+            # exclude deleted namespaces
+            continue
+
         for er in namespace.external_resources or []:
             if not isinstance(er, NamespaceTerraformProviderResourceAWSV1):
                 continue
             if er.provisioner.name == account:
                 for r in er.resources:
-                    if r.identifier != identifier:
+                    if not is_searched_resource(
+                        identifier=identifier, provider=provider, resource=r
+                    ):
                         continue
 
                     return ExternalResource(
@@ -89,6 +122,9 @@ def get_external_resource(account: str, identifier: str) -> ExternalResource:
                             ),
                             region=er.provisioner.resources_default_region,
                         ),
+                        cluster=namespace.cluster.name,
+                        namespace=namespace.name,
+                        output_resource_name=r.output_resource_name,
                     )
 
     raise ExternalResourceAppInterfaceError(
