@@ -5,6 +5,9 @@ from fastapi import APIRouter, Depends, Path, Query
 
 from automated_actions.api.v1.dependencies import UserDep
 from automated_actions.celery.external_resource.tasks import (
+    external_resource_flush_elasticache as external_resource_flush_elasticache_task,
+)
+from automated_actions.celery.external_resource.tasks import (
     external_resource_rds_reboot as external_resource_rds_reboot_task,
 )
 from automated_actions.db.models import (
@@ -16,10 +19,11 @@ from automated_actions.db.models._action import ActionManager, get_action_manage
 router = APIRouter()
 log = logging.getLogger(__name__)
 
-ACTION_ID = "external-resource-rds-reboot"
+EXTERNAL_RESOURCE_RDS_REBOOT_ACTION_ID = "external-resource-rds-reboot"
+EXTERNAL_RESOURCE_FLUSH_ELASTICACHE_ACTION_ID = "external-resource-flush-elasticache"
 
 
-def get_action(
+def get_action_external_resource_rds_reboot(
     action_mgr: Annotated[ActionManager, Depends(get_action_manager)], user: UserDep
 ) -> Action:
     """Get a new action object for the user.
@@ -31,19 +35,21 @@ def get_action(
     Returns:
         A new Action object.
     """
-    return action_mgr.create_action(name=ACTION_ID, owner=user)
+    return action_mgr.create_action(
+        name=EXTERNAL_RESOURCE_RDS_REBOOT_ACTION_ID, owner=user
+    )
 
 
 @router.post(
     "/external-resource/rds-reboot/{account}/{identifier}",
-    operation_id=ACTION_ID,
+    operation_id=EXTERNAL_RESOURCE_RDS_REBOOT_ACTION_ID,
     status_code=202,
     tags=["Actions"],
 )
 def external_resource_rds_reboot(
     account: Annotated[str, Path(description="AWS account name")],
     identifier: Annotated[str, Path(description="RDS instance identifier")],
-    action: Annotated[Action, Depends(get_action)],
+    action: Annotated[Action, Depends(get_action_external_resource_rds_reboot)],
     *,
     force_failover: Annotated[
         bool,
@@ -64,6 +70,52 @@ def external_resource_rds_reboot(
             "account": account,
             "identifier": identifier,
             "force_failover": force_failover,
+            "action": action,
+        },
+        task_id=action.action_id,
+    )
+    return action.dump()
+
+
+def get_action_external_resource_flush_elasticache(
+    action_mgr: Annotated[ActionManager, Depends(get_action_manager)], user: UserDep
+) -> Action:
+    """Get a new action object for the user.
+
+    Args:
+        action_mgr: The action manager dependency.
+        user: The user dependency.
+
+    Returns:
+        A new Action object.
+    """
+    return action_mgr.create_action(
+        name=EXTERNAL_RESOURCE_FLUSH_ELASTICACHE_ACTION_ID, owner=user
+    )
+
+
+@router.post(
+    "/external-resource/flush-elasticache/{account}/{identifier}",
+    operation_id=EXTERNAL_RESOURCE_FLUSH_ELASTICACHE_ACTION_ID,
+    status_code=202,
+    tags=["Actions"],
+)
+def external_resource_flush_elasticache(
+    account: Annotated[str, Path(description="AWS account name")],
+    identifier: Annotated[str, Path(description="RDS instance identifier")],
+    action: Annotated[Action, Depends(get_action_external_resource_flush_elasticache)],
+) -> ActionSchemaOut:
+    """Flush an ElastiCache instance.
+
+    This action initiates a flush of a specified ElastiCache instance in a given AWS account.
+    """
+    log.info(
+        f"Flushing ElastiCache {identifier} in AWS account {account}. action_id={action.action_id}"
+    )
+    external_resource_flush_elasticache_task.apply_async(
+        kwargs={
+            "account": account,
+            "identifier": identifier,
             "action": action,
         },
         task_id=action.action_id,

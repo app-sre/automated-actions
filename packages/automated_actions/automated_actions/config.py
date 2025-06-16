@@ -1,9 +1,31 @@
 from pydantic_settings import BaseSettings
 
 
+class ExternalResourceElastiCacheConfig(BaseSettings):
+    """Configuration for the external resource elasticache related actions."""
+
+    image: str = "quay.io/app-sre/debug-container"
+    image_tag: str = "latest"
+    memory_request: str = "128Mi"
+    memory_limit: str = "1Gi"
+    cpu_request: str = "100m"
+    cpu_limit: str = "1"
+    flush_command: list[str] = ["bash"]
+    flush_command_args: list[str] = ["-c", 'echo "FLUSHALL" | redis-cli-ext']
+    # ERv2 connection secret mapping
+    env_secret_mappings: dict[str, str] = {
+        "REDISCLI_HOST": "db.endpoint",
+        "REDISCLI_PORT": "db.port",
+        "REDISCLI_AUTH": "db.auth_token",
+    }
+
+
 class Settings(BaseSettings):
     # pydantic config
-    model_config = {"env_prefix": "aa_"}
+    model_config = {
+        "env_prefix": "aa_",
+        "env_nested_delimiter": "__",
+    }
 
     # app config
     debug: bool = False
@@ -50,6 +72,11 @@ class Settings(BaseSettings):
     vault_secret_id: str | None = None
     vault_kube_auth_role: str | None = None
     vault_kube_auth_mount: str | None = None
+
+    # external resources - ElastiCache
+    external_resource_elasticache: ExternalResourceElastiCacheConfig = (
+        ExternalResourceElastiCacheConfig()
+    )
 
 
 settings = Settings()
