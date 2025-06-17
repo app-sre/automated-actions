@@ -1,0 +1,259 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-automated-actions-logs
+  labels:
+    grafana_dashboard: "true"
+  annotations:
+    grafana-folder: /grafana-dashboard-definitions/automated-actions
+data:
+  dashboard.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "grafana",
+              "uid": "-- Grafana --"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 1024973,
+      "links": [],
+      "panels": [
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 8,
+          "panels": [],
+          "title": "API",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P1A97A9592CB7F392"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 1
+          },
+          "id": 7,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": true,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P1A97A9592CB7F392"
+              },
+              "dimensions": {},
+              "expression": "fields @timestamp, message | filter kubernetes.container_name == \"web\" | sort @timestamp asc",
+              "id": "",
+              "label": "",
+              "logGroups": [
+                {
+                  "accountId": "744086762512",
+                  "arn": "arn:aws:logs:us-east-1:744086762512:log-group:appsrep09ue1.automated-actions-production:*",
+                  "name": "appsrep09ue1.automated-actions-production"
+                }
+              ],
+              "matchExact": true,
+              "metricEditorMode": 1,
+              "metricName": "",
+              "metricQueryType": 0,
+              "namespace": "",
+              "period": "",
+              "queryMode": "Logs",
+              "refId": "A",
+              "region": "default",
+              "sqlExpression": "",
+              "statistic": "Average",
+              "statsGroups": []
+            }
+          ],
+          "title": "API Logs",
+          "type": "logs"
+        },
+        {
+          "collapsed": true,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 9
+          },
+          "id": 4,
+          "panels": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P1A97A9592CB7F392"
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 10
+              },
+              "id": 1,
+              "options": {
+                "dedupStrategy": "none",
+                "enableLogDetails": true,
+                "prettifyLogMessage": true,
+                "showCommonLabels": false,
+                "showLabels": false,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "wrapLogMessage": true
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "cloudwatch",
+                    "uid": "P1A97A9592CB7F392"
+                  },
+                  "dimensions": {},
+                  "expression": "fields @timestamp, message | filter kubernetes.container_name == \"worker\" | sort @timestamp asc",
+                  "id": "",
+                  "label": "",
+                  "logGroups": [
+                    {
+                      "accountId": "744086762512",
+                      "arn": "arn:aws:logs:us-east-1:744086762512:log-group:appsrep09ue1.automated-actions-production:*",
+                      "name": "appsrep09ue1.automated-actions-production"
+                    }
+                  ],
+                  "matchExact": true,
+                  "metricEditorMode": 1,
+                  "metricName": "",
+                  "metricQueryType": 0,
+                  "namespace": "",
+                  "period": "",
+                  "queryMode": "Logs",
+                  "refId": "A",
+                  "region": "default",
+                  "sqlExpression": "",
+                  "statistic": "Average",
+                  "statsGroups": []
+                }
+              ],
+              "title": "Worker Logs",
+              "type": "logs"
+            }
+          ],
+          "title": "Worker",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 10
+          },
+          "id": 5,
+          "panels": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P1A97A9592CB7F392"
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 19
+              },
+              "id": 6,
+              "options": {
+                "dedupStrategy": "none",
+                "enableLogDetails": true,
+                "prettifyLogMessage": false,
+                "showCommonLabels": false,
+                "showLabels": false,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "wrapLogMessage": true
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "cloudwatch",
+                    "uid": "P1A97A9592CB7F392"
+                  },
+                  "dimensions": {},
+                  "expression": "fields @timestamp, message | filter kubernetes.container_name == \"opa\" | sort @timestamp asc",
+                  "id": "",
+                  "label": "",
+                  "logGroups": [
+                    {
+                      "accountId": "744086762512",
+                      "arn": "arn:aws:logs:us-east-1:744086762512:log-group:appsrep09ue1.automated-actions-production:*",
+                      "name": "appsrep09ue1.automated-actions-production"
+                    }
+                  ],
+                  "matchExact": true,
+                  "metricEditorMode": 1,
+                  "metricName": "",
+                  "metricQueryType": 0,
+                  "namespace": "",
+                  "period": "",
+                  "queryMode": "Logs",
+                  "refId": "A",
+                  "region": "default",
+                  "sqlExpression": "",
+                  "statistic": "Average",
+                  "statsGroups": []
+                }
+              ],
+              "title": "OPA Logs",
+              "type": "logs"
+            }
+          ],
+          "title": "OPA",
+          "type": "row"
+        }
+      ],
+      "schemaVersion": 39,
+      "tags": [],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-3h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Automated Actions Production Logs",
+      "uid": "fep8shlyllypsb",
+      "version": 4,
+      "weekStart": ""
+    }
