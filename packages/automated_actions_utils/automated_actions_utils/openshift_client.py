@@ -58,6 +58,7 @@ def job_builder(
     args: list[str] | None = None,
     job_name_prefix: str = "temp-job-",
     backoff_limit: int = 4,
+    annotations: dict[str, str] | None = None,
     env: dict[str, str] | None = None,
     env_secrets: dict[str, SecretKeyRef] | None = None,
     auto_cleanup_after_seconds: int | None = 3600,
@@ -110,7 +111,10 @@ def job_builder(
     return V1Job(
         api_version="batch/v1",
         kind="Job",
-        metadata=V1ObjectMeta(name=f"{job_name_prefix}{uuid.uuid4().hex[:8]}"),
+        metadata=V1ObjectMeta(
+            name=f"{job_name_prefix}{uuid.uuid4().hex[:8]}",
+            annotations=annotations,
+        ),
         spec=job_spec,
     )
 

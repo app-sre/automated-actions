@@ -146,9 +146,13 @@ def test_external_resource_rds_reboot_task_non_retryable_failure(
 
 
 def test_external_resource_flush_elasticache_run(
-    mock_oc: Mock, er: ExternalResource
+    mock_oc: Mock,
+    er: ExternalResource,
+    mock_action: Mock,
 ) -> None:
-    automated_action = ExternalResourceFlushElastiCache(oc=mock_oc, elasticache=er)
+    automated_action = ExternalResourceFlushElastiCache(
+        action=mock_action, oc=mock_oc, elasticache=er
+    )
 
     automated_action.run(
         image="test-image",

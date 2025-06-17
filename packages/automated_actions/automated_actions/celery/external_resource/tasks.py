@@ -50,7 +50,10 @@ def external_resource_rds_reboot(
 
 
 class ExternalResourceFlushElastiCache:
-    def __init__(self, oc: OpenshiftClient, elasticache: ExternalResource) -> None:
+    def __init__(
+        self, action: Action, oc: OpenshiftClient, elasticache: ExternalResource
+    ) -> None:
+        self.action = action
         self.oc = oc
         self.elasticache = elasticache
 
@@ -67,6 +70,9 @@ class ExternalResourceFlushElastiCache:
             command=command,
             args=args,
             job_name_prefix="flush-elasticache-",
+            annotations={
+                "automated-actions.action_id": str(self.action.action_id),
+            },
             env_secrets={
                 key: SecretKeyRef(
                     secret=secret_name,
@@ -83,7 +89,7 @@ def external_resource_flush_elasticache(
     account: str,
     identifier: str,
     *,
-    action: Action,  # noqa: ARG001
+    action: Action,
 ) -> None:
     elasticache = get_external_resource(
         account=account,
@@ -99,7 +105,11 @@ def external_resource_flush_elasticache(
         raise ValueError(
             f"Output resource name not defined for {elasticache.identifier} in {elasticache.namespace} namespace.",
         )
-    ExternalResourceFlushElastiCache(oc=oc, elasticache=elasticache).run(
+    ExternalResourceFlushElastiCache(
+        action=action,
+        oc=oc,
+        elasticache=elasticache,
+    ).run(
         image=settings.external_resource_elasticache.image,
         command=settings.external_resource_elasticache.flush_command,
         args=settings.external_resource_elasticache.flush_command_args,
