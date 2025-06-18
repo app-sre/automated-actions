@@ -6,7 +6,10 @@ from automated_actions_client.api.actions import external_resource_rds_reboot
 from automated_actions_client.models.action_schema_out import ActionSchemaOut
 from automated_actions_client.models.action_status import ActionStatus
 from automated_actions_utils.aws_api import AWSApi, get_aws_credentials
-from automated_actions_utils.external_resource import get_external_resource
+from automated_actions_utils.external_resource import (
+    ExternalResourceProvider,
+    get_external_resource,
+)
 
 from tests.conftest import Config
 
@@ -16,6 +19,7 @@ def aws_api(config: Config) -> AWSApi:
     rds = get_external_resource(
         account=config.external_resource_rds_reboot.account,
         identifier=config.external_resource_rds_reboot.identifier,
+        provider=ExternalResourceProvider.RDS,
     )
     credentials = get_aws_credentials(
         vault_secret=rds.account.automation_token, region=rds.account.region
