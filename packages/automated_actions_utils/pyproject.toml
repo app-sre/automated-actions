@@ -125,11 +125,7 @@ disallow_incomplete_defs = true
 [[tool.mypy.overrides]]
 # Below are all of the packages that don't implement stub packages. Mypy will throw an error if we don't ignore the
 # missing imports. See: https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
-module = [
-    "kubernetes.*",
-    "openshift.dynamic.*",
-    "automated_actions.*", # TODO: rporres - fix
-]
+module = ["kubernetes.*", "openshift.dynamic.*"]
 ignore_missing_imports = true
 
 # Coverage configuration
