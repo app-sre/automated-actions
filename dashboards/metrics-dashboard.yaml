@@ -859,7 +859,7 @@ data:
                 "uid": "P7B77307D2CE073BC"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.5, sum by (name, le) (rate(automated_actions_action_elapsed_seconds_bucket{namespace=\"$namespace\"}[60m])))",
+              "expr": "histogram_quantile(0.5, sum by (name, le) (rate(automated_actions_action_elapsed_seconds_bucket{namespace=\"$namespace\"}[10m])))",
               "instant": false,
               "legendFormat": "{{name}}-p50",
               "range": true,
@@ -871,7 +871,7 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.99, sum by (name, le) (rate(automated_actions_action_elapsed_seconds_bucket{namespace=\"$namespace\"}[60m])))",
+              "expr": "histogram_quantile(0.99, sum by (name, le) (rate(automated_actions_action_elapsed_seconds_bucket{namespace=\"$namespace\"}[10m])))",
               "hide": false,
               "instant": false,
               "legendFormat": "{{name}}-p99",
