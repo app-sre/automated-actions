@@ -31,8 +31,8 @@ dev = [
     # Development dependencies
     "ruff==0.11.12",
     "mypy==1.16.0",
-    "pytest==8.4.0",
-    "pytest-cov==6.1.1",
+    "pytest==8.4.1",
+    "pytest-cov==6.2.1",
     "types-pyyaml==6.0.12.20250516",
 ]
 
