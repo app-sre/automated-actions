@@ -1,4 +1,5 @@
 from prometheus_client import CollectorRegistry, Histogram
+from prometheus_client.utils import INF
 
 CELERY_REGISTRY = CollectorRegistry()
 
