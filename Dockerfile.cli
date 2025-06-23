@@ -9,6 +9,11 @@ ENV \
     # disable uv cache. it doesn't make sense in a container
     UV_NO_CACHE=true
 
+USER root
+# install the kerberos bindings to support Kerberos if the user runs the CLI via docker
+RUN dnf install -y krb5-libs krb5-workstation
+USER 1001
+
 COPY pyproject.toml uv.lock ./
 # automated_actions_client is a dependency of automated_actions_cli
 COPY packages/automated_actions_client ./packages/automated_actions_client
