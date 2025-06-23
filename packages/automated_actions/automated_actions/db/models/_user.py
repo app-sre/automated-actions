@@ -30,12 +30,18 @@ class User(Table[UserSchemaIn, UserSchemaOut]):
     def load(cls, username: str, name: str, email: str) -> Self:
         try:
             user = cls.get(email)
+            if user.username == username and user.name == name:
+                # avoid unnecessary updates
+                return user
             user.update(actions=[cls.name.set(name), cls.username.set(username)])
             return user
         except cls.DoesNotExist:
             return cls.create(UserSchemaIn(name=name, username=username, email=email))
 
     def set_allowed_actions(self, allowed_actions: list[str]) -> None:
+        if set(allowed_actions) == set(self.allowed_actions):
+            # avoid unnecessary update
+            return
         self.update(actions=[User.allowed_actions.set(allowed_actions)])
 
     email = UnicodeAttribute(hash_key=True)
