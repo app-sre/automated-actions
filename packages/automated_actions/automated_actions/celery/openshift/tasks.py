@@ -1,3 +1,5 @@
+import logging
+
 from automated_actions_utils.cluster_connection import get_cluster_connection_data
 from automated_actions_utils.openshift_client import (
     OpenshiftClient,
@@ -8,6 +10,8 @@ from automated_actions.celery.app import app
 from automated_actions.celery.automated_action_task import AutomatedActionTask
 from automated_actions.config import settings
 from automated_actions.db.models import Action
+
+log = logging.getLogger(__name__)
 
 
 class OpenshiftResourceKindNotSupportedError(Exception):
@@ -28,6 +32,9 @@ class OpenshiftWorkloadRestart:
         self.kind = kind
 
     def run(self) -> None:
+        log.info(
+            f"Restarting OpenShift workload {self.kind} {self.name} in namespace {self.namespace}"
+        )
         if self.kind in RollingRestartResource:
             self.oc.rolling_restart(
                 kind=RollingRestartResource(self.kind),

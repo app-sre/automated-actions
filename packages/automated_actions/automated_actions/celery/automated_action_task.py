@@ -20,17 +20,17 @@ class AutomatedActionTask(Task):
 
     def before_start(  # noqa: PLR6301
         self,
-        task_id: str,
+        task_id: str,  # noqa: ARG002
         args: tuple,  # noqa: ARG002
         kwargs: dict,
     ) -> None:
         kwargs["action"].set_status(ActionStatus.RUNNING)
-        log.info("action_id=%s status=%s", task_id, ActionStatus.RUNNING)
+        log.info("status=%s", ActionStatus.RUNNING)
 
     def on_success(  # noqa: PLR6301
         self,
         retval: Any,  # noqa: ARG002
-        task_id: str,
+        task_id: str,  # noqa: ARG002
         args: tuple,  # noqa: ARG002
         kwargs: dict,
     ) -> None:
@@ -41,8 +41,7 @@ class AutomatedActionTask(Task):
             task_args=_task_kwargs_to_store(kwargs),
         )
         log.info(
-            "action_id=%s status=%s - %s",
-            task_id,
+            "status=%s - %s",
             ActionStatus.SUCCESS,
             result,
         )
@@ -54,7 +53,7 @@ class AutomatedActionTask(Task):
     def on_failure(  # noqa: PLR6301
         self,
         exc: Exception,
-        task_id: str,
+        task_id: str,  # noqa: ARG002
         args: tuple,  # noqa: ARG002
         kwargs: dict,
         einfo: ExceptionInfo,  # noqa: ARG002
@@ -66,8 +65,7 @@ class AutomatedActionTask(Task):
             task_args=_task_kwargs_to_store(kwargs),
         )
         log.error(
-            "action_id=%s status=%s - %s",
-            task_id,
+            "status=%s - %s",
             ActionStatus.FAILURE,
             result,
         )
@@ -79,12 +77,12 @@ class AutomatedActionTask(Task):
     def on_retry(  # noqa: PLR6301
         self,
         exc: Exception,
-        task_id: str,
+        task_id: str,  # noqa: ARG002
         args: tuple,  # noqa: ARG002
         kwargs: dict,  # noqa: ARG002
         einfo: ExceptionInfo,  # noqa: ARG002
     ) -> None:
-        log.debug("action_id=%s retrying due to %s", task_id, exc)
+        log.debug("retrying due to %s", exc)
 
 
 def _task_kwargs_to_store(kwargs: dict) -> dict:
