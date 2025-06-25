@@ -15,7 +15,7 @@ These settings control the general behavior of the Automated Actions application
   * **Impact**: Incorrect configuration can lead to issues with client communication and OIDC redirects.
 
 * **`AA_ROOT_PATH`**:
-  * **Description**: If the application is served under a sub-path (e.g., `/automated-actions`), this setting specifies that path. Onyl needed when running behind a reverse proxy.
+  * **Description**: If the application is served under a sub-path (e.g., `/automated-actions`), this setting specifies that path. Only needed when running behind a reverse proxy.
   * **Default**: `""` (empty string)
   * **Impact**: Misconfiguration can lead to 404 errors as FastAPI won't be able to match routes correctly.
 
@@ -24,9 +24,39 @@ These settings control the general behavior of the Automated Actions application
   * **Required**: Yes
   * **Impact**: Critical for differentiating between environments. Used in naming resources (like DynamoDB tables).
 
+* **`AA_START_MODE`**:
+  * **Description**: Determines the start mode of the application. Use `api` to start the FastAPI server, or `worker` to start a Celery worker.
+  * **Default**: `api`
+  * **Impact**: Controls whether the container runs the API server or a Celery worker.
+
+* **`AA_APP_PORT`**:
+  * **Description**: The port on which the FastAPI application will listen.
+  * **Default**: `8080`
+  * **Impact**: Change if you need the API to listen on a different port.
+
+* **`AA_AUTO_RELOAD`**:
+  * **Description**: Enables auto-reload for development. When set to `1`, the API server or worker will automatically restart on code changes.
+  * **Default**: `0`
+  * **Impact**: Useful for development, should be disabled in production.
+
+* **`AA_UVICORN_OPTS`**:
+  * **Description**: Additional options to pass to the Uvicorn server when starting the API.
+  * **Default**: `--host 0.0.0.0 --proxy-headers --forwarded-allow-ips=*`
+  * **Impact**: Allows customization of the Uvicorn server.
+
+* **`AA_WORKER_TEMP_DIR`**:
+  * **Description**: Directory to use for temporary files created by Celery workers (e.g., for Prometheus multiprocess metrics).
+  * **Default**: System default temp directory
+  * **Impact**: Set this if you want worker temp files in a specific location.
+
 ## Celery Worker Configuration
 
 These settings configure the Celery workers responsible for asynchronous task processing.
+
+* **`AA_CELERY_OPTS`**:
+  * **Description**: Additional options to pass to the Celery worker process.
+  * **Default**: `--pool solo`
+  * **Impact**: Controls Celery worker behavior. The default ensures only one worker per pod for metrics compatibility.
 
 * **`AA_BROKER_URL`**:
   * **Description**: The URL of the message broker used by Celery (e.g., SQS, Redis, RabbitMQ).
