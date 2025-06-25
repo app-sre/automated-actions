@@ -33,7 +33,7 @@ def setup_loggers(logger: logging.Logger, **_: Any) -> None:
     handler = logging.StreamHandler()
     handler.setFormatter(
         TaskFormatter(
-            "%(asctime)s [%(levelname)s] %(task_name)s: %(message)s action_id=%(task_id)s"
+            "%(asctime)s [%(levelname)s] %(task_name)s action_id=%(task_id)s: %(message)s"
         )
     )
     logger.addHandler(handler)
