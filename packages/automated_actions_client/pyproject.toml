@@ -8,9 +8,9 @@ readme = "README.md"
 requires-python = "~= 3.12.0"
 dependencies = ["httpx", "attrs", "typer", "python-dateutil"]
 
-[tool.uv.sources]
-# use this unreleased version because of typer 0.16.0 update
-openapi-python-client = { git = "https://github.com/openapi-generators/openapi-python-client", rev = "13bf2e852c8cc68fff4b8c19abc2ae42bceff319" }
+# [tool.uv.sources]
+# # use this unreleased version because of typer 0.16.0 update
+# openapi-python-client = { git = "https://github.com/openapi-generators/openapi-python-client", rev = "13bf2e852c8cc68fff4b8c19abc2ae42bceff319" }
 
 [project.urls]
 homepage = "https://github.com/app-sre/automated-actions"
@@ -20,11 +20,11 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "ruff==0.11.12",
-    "mypy==1.16.0",
-    "pytest==8.4.0",
-    "pytest-cov==6.1.1",
-    "openapi-python-client==0.24.3",
+    "mypy==1.16.1",
+    "openapi-python-client==0.25.1",
+    "pytest-cov==6.2.1",
+    "pytest==8.4.1",
+    "ruff==0.12.1",
     "types-python-dateutil==2.9.0.20250516",
 ]
 

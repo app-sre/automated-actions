@@ -9,20 +9,20 @@ requires-python = "~= 3.12.0"
 dependencies = [
     "automated-actions-utils",
     "celery[sqs]==5.5.3",
-    "fastapi==0.115.12",
+    "fastapi==0.115.14",
     # 3.5.2 needs newer graphql-core, but qenerate doesn't support it yet
     "httpx==0.28.1",
     "hvac==2.3.0",
     "itsdangerous==2.2.0",
-    "kubernetes==32.0.1",
+    "kubernetes==33.1.0",
     "prometheus-fastapi-instrumentator==7.1.0",
-    "pydantic==2.11.5",
-    "pydantic-settings==2.9.1",
+    "pydantic-settings==2.10.1",
+    "pydantic==2.11.7",
     "pyjwt==2.10.1",
     "pynamodb==6.1.0",
     "requests-toolbelt==1.0.0",
     "types-hvac==2.3.0.20250516",
-    "uvicorn==0.34.3",
+    "uvicorn==0.35.0",
     "watchdog==6.0.0",
 ]
 
@@ -34,14 +34,14 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "ruff==0.11.12",
-    "mypy==1.16.0",
-    "pytest==8.4.0",
-    "pytest-cov==6.1.1",
+    "mypy==1.16.1",
     "pytest-asyncio==1.0.0",
+    "pytest-cov==6.2.1",
     "pytest-httpx==0.35.0",
     "pytest-mock==3.14.1",
+    "pytest==8.4.1",
     "requests-mock==1.12.1",
+    "ruff==0.12.1",
 ]
 
 [build-system]

@@ -25,7 +25,7 @@ prod:
 
 .PHONY: dev-env
 dev-env:
-	uv sync --all-packages
+	uv sync --all-packages -U
 
 .PHONY: generate-client
 generate-client:
