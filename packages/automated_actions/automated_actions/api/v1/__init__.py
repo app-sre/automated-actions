@@ -1,8 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from automated_actions.db.models import UserSchemaOut as UserSchemaOut  # noqa: PLC0414
-
-from .dependencies import UserDep as UserDep  # noqa: PLC0414
 from .dependencies import get_authz, get_user
 from .views.action import router as action_router
 from .views.admin import router as admin_router
