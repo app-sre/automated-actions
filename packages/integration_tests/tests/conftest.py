@@ -25,6 +25,12 @@ class ExternalResourceRDSReboot(BaseParameters):
     identifier: str
 
 
+class ExternalResourceRDSSnapshot(BaseParameters):
+    account: str
+    identifier: str
+    snapshot_identifier: str
+
+
 class NoOpParameters(BaseParameters):
     pass
 
@@ -56,6 +62,7 @@ class Config(BaseSettings):
 
     external_resource_flush_elasticache: ExternalResourceFlushElasticache
     external_resource_rds_reboot: ExternalResourceRDSReboot
+    external_resource_rds_snapshot: ExternalResourceRDSSnapshot
     no_op: NoOpParameters = NoOpParameters(sleep_time=2)
     openshift_deployment_restart: OpenshiftDeploymentRestartParameters
     openshift_pod_restart: OpenshiftPodRestartParameters

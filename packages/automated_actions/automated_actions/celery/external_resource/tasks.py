@@ -49,6 +49,43 @@ def external_resource_rds_reboot(
         ExternalResourceRDSReboot(aws_api, rds).run(force_failover=force_failover)
 
 
+class ExternalResourceRDSSnapshot:
+    """Create a snapshot of an RDS instance."""
+
+    def __init__(self, aws_api: AWSApi, rds: ExternalResource) -> None:
+        self.aws_api = aws_api
+        self.rds = rds
+
+    def run(self, snapshot_identifier: str) -> None:
+        self.aws_api.create_rds_snapshot(
+            identifier=self.rds.identifier,
+            snapshot_identifier=snapshot_identifier,
+        )
+
+
+@app.task(base=AutomatedActionTask)
+def external_resource_rds_snapshot(
+    account: str,
+    identifier: str,
+    snapshot_identifier: str,
+    *,
+    action: Action,  # noqa: ARG001
+) -> None:
+    rds = get_external_resource(
+        account=account,
+        identifier=identifier,
+        provider=ExternalResourceProvider.RDS,
+    )
+
+    credentials = get_aws_credentials(
+        vault_secret=rds.account.automation_token, region=rds.account.region
+    )
+    with AWSApi(credentials=credentials, region=rds.region) as aws_api:
+        ExternalResourceRDSSnapshot(aws_api, rds).run(
+            snapshot_identifier=snapshot_identifier
+        )
+
+
 class ExternalResourceFlushElastiCache:
     def __init__(
         self, action: Action, oc: OpenshiftClient, elasticache: ExternalResource

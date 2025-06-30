@@ -333,3 +333,32 @@ def test_aws_api_rds_get_events(
         SourceIdentifier=identifier, SourceType="db-instance", Duration=duration_min
     )
     assert events == expected_events
+
+
+@pytest.mark.parametrize(
+    ("region", "identifier", "snapshot_identifier"),
+    [
+        ("eu-central-1", "test-db-instance", "test-snapshot-identifier"),
+    ],
+    ids=["success"],
+)
+def test_aws_api_create_rds_snapshot(
+    mock_aws_credentials: MagicMock,
+    mocker: MockerFixture,
+    region: str,
+    identifier: str,
+    snapshot_identifier: str,
+) -> None:
+    """Tests the create_rds_snapshot method of AWSApi."""
+    aws_api = AWSApi(credentials=mock_aws_credentials, region=region)
+
+    mock_rds_client_on_instance = mocker.MagicMock()
+    aws_api.rds_client = mock_rds_client_on_instance
+
+    aws_api.create_rds_snapshot(
+        identifier=identifier, snapshot_identifier=snapshot_identifier
+    )
+
+    mock_rds_client_on_instance.create_db_snapshot.assert_called_once_with(
+        DBInstanceIdentifier=identifier, DBSnapshotIdentifier=snapshot_identifier
+    )

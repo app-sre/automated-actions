@@ -1,11 +1,12 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Protocol
+from typing import Any, Protocol, Self
 
 from automated_actions.config import settings
 from boto3 import Session
 from botocore.config import Config
 from pydantic import BaseModel
+from types_boto3_rds.client import RDSClient
 from types_boto3_rds.type_defs import EventTypeDef
 
 from automated_actions_utils.vault_client import SecretFieldNotFoundError, VaultClient
@@ -91,9 +92,9 @@ class AWSApi:
                 "mode": "standard",
             },
         )
-        self.rds_client = self.session.client("rds", config=self.config)
+        self.rds_client: RDSClient = self.session.client("rds", config=self.config)
 
-    def __enter__(self) -> "AWSApi":
+    def __enter__(self) -> Self:
         """Enables the use of the AWSApi instance in a context manager."""
         return self
 
@@ -136,3 +137,18 @@ class AWSApi:
         ):
             events.extend(page.get("Events", []))
         return events
+
+    def create_rds_snapshot(self, identifier: str, snapshot_identifier: str) -> None:
+        """Creates a snapshot of a specified RDS instance.
+
+        Args:
+            identifier: The DB instance identifier.
+            snapshot_identifier: The snapshot identifier.
+        """
+        log.info(
+            f"Creating snapshot {snapshot_identifier} for RDS instance {identifier}"
+        )
+        self.rds_client.create_db_snapshot(
+            DBInstanceIdentifier=identifier,
+            DBSnapshotIdentifier=snapshot_identifier,
+        )

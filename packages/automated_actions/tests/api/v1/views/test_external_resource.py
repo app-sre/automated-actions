@@ -9,6 +9,7 @@ from pytest_mock import MockerFixture
 from automated_actions.api.v1.views.external_resource import (
     get_action_external_resource_flush_elasticache,
     get_action_external_resource_rds_reboot,
+    get_action_external_resource_rds_snapshot,
 )
 from automated_actions.db.models import Action
 
@@ -18,6 +19,14 @@ def mock_external_resource_rds_reboot_task(mocker: MockerFixture) -> MagicMock:
     """Mock the external_resource_rds_reboot_task function."""
     return mocker.patch(
         "automated_actions.api.v1.views.external_resource.external_resource_rds_reboot_task"
+    )
+
+
+@pytest.fixture
+def mock_external_resource_rds_snapshot_task(mocker: MockerFixture) -> MagicMock:
+    """Mock the external_resource_rds_snapshot_task function."""
+    return mocker.patch(
+        "automated_actions.api.v1.views.external_resource.external_resource_rds_snapshot_task"
     )
 
 
@@ -35,6 +44,9 @@ def test_app(app: FastAPI, mocker: MockerFixture, running_action: dict) -> FastA
     action_mock.action_id = running_action["action_id"]
     action_mock.dump.return_value = running_action
     app.dependency_overrides[get_action_external_resource_rds_reboot] = (
+        lambda: action_mock
+    )
+    app.dependency_overrides[get_action_external_resource_rds_snapshot] = (
         lambda: action_mock
     )
     app.dependency_overrides[get_action_external_resource_flush_elasticache] = (
@@ -68,6 +80,35 @@ def test_external_resource_rds_reboot(
             "force_failover": True,
             "action": test_app.dependency_overrides[
                 get_action_external_resource_rds_reboot
+            ](),
+        },
+        task_id=running_action["action_id"],
+    )
+
+
+def test_external_resource_rds_snapshot(
+    test_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+    mock_external_resource_rds_snapshot_task: MagicMock,
+    running_action: dict,
+) -> None:
+    response = client(test_app).post(
+        test_app.url_path_for(
+            "external_resource_rds_snapshot",
+            account="test-account",
+            identifier="test-identifier",
+            snapshot_identifier="test-snapshot-identifier",
+        ),
+    )
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.json()["action_id"] == running_action["action_id"]
+    mock_external_resource_rds_snapshot_task.apply_async.assert_called_once_with(
+        kwargs={
+            "account": "test-account",
+            "identifier": "test-identifier",
+            "snapshot_identifier": "test-snapshot-identifier",
+            "action": test_app.dependency_overrides[
+                get_action_external_resource_rds_snapshot
             ](),
         },
         task_id=running_action["action_id"],
