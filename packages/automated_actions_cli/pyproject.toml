@@ -1,6 +1,6 @@
 [project]
 name = "automated-actions-cli"
-version = "0.1.4"
+version = "0.1.5"
 description = "Automated Actions Client"
 authors = [
     # Feel free to add or change authors
