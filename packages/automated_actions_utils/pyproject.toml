@@ -14,6 +14,7 @@ dependencies = [
     "kubernetes==33.1.0",
     "openshift==0.13.2",
     "pydantic==2.11.7",
+    "types-boto3-lite[rds]==1.38.46",
     "types-hvac==2.3.0.20250516",
 ]
 
@@ -25,7 +26,6 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "boto3-stubs-lite[rds]==1.38.46",
     "mypy==1.16.1",
     "pytest-cov==6.2.1",
     "pytest-mock==3.14.1",

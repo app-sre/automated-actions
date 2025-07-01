@@ -1,17 +1,12 @@
+import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import Any, Protocol
 
+from automated_actions.config import settings
 from boto3 import Session
 from botocore.config import Config
 from pydantic import BaseModel
-
-if TYPE_CHECKING:
-    from mypy_boto3_rds.type_defs import EventTypeDef
-
-
-import logging
-
-from automated_actions.config import settings
+from types_boto3_rds.type_defs import EventTypeDef
 
 from automated_actions_utils.vault_client import SecretFieldNotFoundError, VaultClient
 
@@ -123,7 +118,7 @@ class AWSApi:
         self,
         identifier: str,
         duration_min: int = 60,
-    ) -> list["EventTypeDef"]:
+    ) -> list[EventTypeDef]:
         """Retrieves events for a specified RDS instance.
 
         Args:
