@@ -234,6 +234,7 @@ dependencies = [
     { name = "kubernetes" },
     { name = "openshift" },
     { name = "pydantic" },
+    { name = "types-boto3-lite", extra = ["rds"] },
     { name = "types-hvac" },
 ]
 
@@ -245,7 +246,6 @@ dev = [
     { name = "pytest-mock" },
     { name = "qenerate" },
     { name = "ruff" },
-    { name = "types-boto3-lite", extra = ["rds"] },
 ]
 
 [package.metadata]
@@ -256,6 +256,7 @@ requires-dist = [
     { name = "kubernetes", specifier = "==33.1.0" },
     { name = "openshift", specifier = "==0.13.2" },
     { name = "pydantic", specifier = "==2.11.7" },
+    { name = "types-boto3-lite", extras = ["rds"], specifier = "==1.38.46" },
     { name = "types-hvac", specifier = "==2.3.0.20250516" },
 ]
 
@@ -267,7 +268,6 @@ dev = [
     { name = "pytest-mock", specifier = "==3.14.1" },
     { name = "qenerate", specifier = "==0.8.0" },
     { name = "ruff", specifier = "==0.12.1" },
-    { name = "types-boto3-lite", extras = ["rds"], specifier = "==1.38.46" },
 ]
 
 [[package]]
