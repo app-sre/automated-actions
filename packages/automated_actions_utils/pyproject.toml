@@ -8,7 +8,6 @@ readme = "README.md"
 requires-python = "~= 3.12.0"
 dependencies = [
     "boto3==1.39.3",
-    # 3.5.2 needs newer graphql-core, but qenerate doesn't support it yet
     "gql==3.5.3",
     "hvac==2.3.0",
     "kubernetes==33.1.0",
