@@ -24,7 +24,7 @@ dev = [
     "openapi-python-client==0.25.2",
     "pytest-cov==6.2.1",
     "pytest==8.4.1",
-    "ruff==0.12.2",
+    "ruff==0.12.3",
     "types-python-dateutil==2.9.0.20250708",
 ]
 
