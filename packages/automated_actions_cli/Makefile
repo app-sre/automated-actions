@@ -10,4 +10,4 @@ test:
 .PHONY: pypi
 pypi:
 	uv build --sdist --wheel --out-dir dist
-	UV_PUBLISH_TOKEN=$(shell cat /run/secrets/app-sre-pypi-credentials/token) uv publish || true
+	uv publish || true

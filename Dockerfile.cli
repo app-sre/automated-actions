@@ -44,5 +44,5 @@ RUN make -C packages/automated_actions_cli test
 FROM test AS pypi
 # Secrets are owned by root and are not readable by others :(
 USER root
-RUN --mount=type=secret,id=app-sre-pypi-credentials/token make -C packages/automated_actions_cli -s pypi
+RUN --mount=type=secret,id=app-sre-pypi-credentials/token,env=UV_PUBLISH_TOKEN make -C packages/automated_actions_cli -s pypi
 USER 1001
