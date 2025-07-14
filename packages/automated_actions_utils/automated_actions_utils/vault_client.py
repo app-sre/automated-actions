@@ -30,8 +30,6 @@ class VaultClientMissingArgsError(Exception):
     pass
 
 
-VERSION_1 = 1
-VERSION_2 = 2
 SECRET_VERSION_LATEST = "LATEST"  # noqa: S105
 
 
@@ -75,7 +73,7 @@ class VaultClient:
         kv_version = self._get_mount_version(mount_point)
 
         data = None
-        if kv_version == VERSION_2:
+        if kv_version == "2":
             data, _ = self._read_secret_v2(mount_point, read_path, version=version)
         else:
             data = self._read_secret_v1(mount_point, read_path)
@@ -140,11 +138,8 @@ class VaultClient:
 
         return mount_point, read_path
 
-    def _get_mount_version(self, mount_point: str) -> int:
-        try:
-            self._client.secrets.kv.v2.read_configuration(mount_point)
-            version = VERSION_2
-        except hvac.exceptions.Forbidden:
-            version = VERSION_1
-
-        return version
+    # It needs read permission on "sys/mounts/+/tune"
+    def _get_mount_version(self, mount_point: str) -> str:
+        return self._client.sys.read_mount_configuration(mount_point)["options"][
+            "version"
+        ]

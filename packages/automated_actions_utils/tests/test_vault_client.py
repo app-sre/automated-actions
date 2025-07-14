@@ -8,8 +8,6 @@ from pytest_mock import MockerFixture
 
 from automated_actions_utils.vault_client import (
     SECRET_VERSION_LATEST,
-    VERSION_1,
-    VERSION_2,
     SecretAccessForbiddenError,
     SecretNotFoundError,
     SecretVersionIsNoneError,
@@ -74,6 +72,9 @@ def test_vault_client_init_missing_args() -> None:
 def test_read_secret_v2_success(
     vault_client: VaultClient, mock_hvac_client: MagicMock
 ) -> None:
+    mock_hvac_client.return_value.sys.read_mount_configuration.return_value = {
+        "options": {"version": "2"}
+    }
     mock_hvac_client.return_value.secrets.kv.v2.read_secret_version.return_value = {
         "data": {
             "data": {"key": "value"},
@@ -84,6 +85,9 @@ def test_read_secret_v2_success(
     result = vault_client.read_secret("mount/path", version=SECRET_VERSION_LATEST)
 
     assert result == {"key": "value"}
+    mock_hvac_client.return_value.sys.read_mount_configuration.assert_called_once_with(
+        "mount"
+    )
     mock_hvac_client.return_value.secrets.kv.v2.read_secret_version.assert_called_once_with(
         mount_point="mount", path="path", version=None
     )
@@ -92,16 +96,19 @@ def test_read_secret_v2_success(
 def test_read_secret_v1_success(
     vault_client: VaultClient, mock_hvac_client: MagicMock
 ) -> None:
+    mock_hvac_client.return_value.sys.read_mount_configuration.return_value = {
+        "options": {"version": "1"}
+    }
     mock_hvac_client.return_value.secrets.kv.v1.read_secret.return_value = {
         "data": {"key": "value"}
     }
-    mock_hvac_client.return_value.secrets.kv.v2.read_configuration.side_effect = (
-        hvac.exceptions.Forbidden("error")
-    )
 
     result = vault_client.read_secret("mount/path")
 
     assert result == {"key": "value"}
+    mock_hvac_client.return_value.sys.read_mount_configuration.assert_called_once_with(
+        "mount"
+    )
     mock_hvac_client.return_value.secrets.kv.v1.read_secret.assert_called_once_with(
         mount_point="mount", path="path"
     )
@@ -110,15 +117,28 @@ def test_read_secret_v1_success(
 def test_read_secret_not_found(
     vault_client: VaultClient, mock_hvac_client: MagicMock
 ) -> None:
+    mock_hvac_client.return_value.sys.read_mount_configuration.return_value = {
+        "options": {"version": "2"}
+    }
     mock_hvac_client.return_value.secrets.kv.v2.read_secret_version.return_value = None
 
     with pytest.raises(SecretNotFoundError):
         vault_client.read_secret("mount/path", version=SECRET_VERSION_LATEST)
 
+    mock_hvac_client.return_value.sys.read_mount_configuration.assert_called_once_with(
+        "mount"
+    )
+    mock_hvac_client.return_value.secrets.kv.v2.read_secret_version.assert_called_once_with(
+        mount_point="mount", path="path", version=None
+    )
+
 
 def test_read_secret_access_forbidden(
     vault_client: VaultClient, mock_hvac_client: MagicMock
 ) -> None:
+    mock_hvac_client.return_value.sys.read_mount_configuration.return_value = {
+        "options": {"version": "2"}
+    }
     mock_hvac_client.return_value.secrets.kv.v2.read_secret_version.side_effect = (
         hvac.exceptions.Forbidden
     )
@@ -126,32 +146,38 @@ def test_read_secret_access_forbidden(
     with pytest.raises(SecretAccessForbiddenError):
         vault_client.read_secret("mount/path", version=SECRET_VERSION_LATEST)
 
+    mock_hvac_client.return_value.sys.read_mount_configuration.assert_called_once_with(
+        "mount"
+    )
+    mock_hvac_client.return_value.secrets.kv.v2.read_secret_version.assert_called_once_with(
+        mount_point="mount", path="path", version=None
+    )
 
-def test_read_secret_version_is_none(vault_client: VaultClient) -> None:
+
+def test_read_secret_version_is_none(
+    vault_client: VaultClient, mock_hvac_client: MagicMock
+) -> None:
+    mock_hvac_client.return_value.sys.read_mount_configuration.return_value = {
+        "options": {"version": "2"}
+    }
     with pytest.raises(SecretVersionIsNoneError):
         vault_client.read_secret("mount/path", version=None)
 
-
-def test_get_mount_version_v2(
-    vault_client: VaultClient, mock_hvac_client: MagicMock
-) -> None:
-    mock_hvac_client.return_value.secrets.kv.v2.read_configuration.return_value = {}
-
-    version = vault_client._get_mount_version("mount")
-
-    assert version == VERSION_2
-    mock_hvac_client.return_value.secrets.kv.v2.read_configuration.assert_called_once_with(
+    mock_hvac_client.return_value.sys.read_mount_configuration.assert_called_once_with(
         "mount"
     )
 
 
-def test_get_mount_version_v1(
+def test__get_mount_version(
     vault_client: VaultClient, mock_hvac_client: MagicMock
 ) -> None:
-    mock_hvac_client.return_value.secrets.kv.v2.read_configuration.side_effect = (
-        hvac.exceptions.Forbidden
-    )
+    mock_hvac_client.return_value.sys.read_mount_configuration.return_value = {
+        "options": {"version": "2"}
+    }
 
     version = vault_client._get_mount_version("mount")
 
-    assert version == VERSION_1
+    assert version == "2"
+    mock_hvac_client.return_value.sys.read_mount_configuration.assert_called_once_with(
+        "mount"
+    )
