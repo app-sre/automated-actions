@@ -166,7 +166,7 @@ class ActionProtocol(Protocol[T_co]):
 
 
 class User(Protocol):
-    username: UnicodeAttribute
+    username: str
 
 
 class ActionManager[ActionClass: ActionProtocol]:
