@@ -1,6 +1,6 @@
 [project]
 name = "automated-actions-client"
-version = "0.1.4"
+version = "0.1.5"
 description = "Automated Actions Client"
 authors = [{ name = "AppSRE", email = "sd-app-sre@redhat.com" }]
 license = { text = "Apache 2.0" }

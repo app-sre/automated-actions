@@ -156,3 +156,24 @@ def test_delete_pod_unsupported_owner(
         f"Pod '{name}' in namespace '{namespace}' cannot be deleted as "
         f"it does not belong to a ReplicaSet, StatefulSet."
     )
+
+
+def test_delete_success(
+    openshift_client: OpenshiftClient, mock_dynamic_client: MagicMock
+) -> None:
+    mock_api = MagicMock()
+    mock_dynamic_client.return_value.resources.get.return_value = mock_api
+    mock_api.delete.return_value = {"status": "deleted"}
+
+    namespace = "test-namespace"
+    api_version = "v1"
+    kind = "Job"
+    name = "test-job"
+
+    result = openshift_client.delete(namespace, api_version, kind, name)
+
+    mock_dynamic_client.return_value.resources.get.assert_called_once_with(
+        api_version=api_version, kind=kind
+    )
+    mock_api.delete.assert_called_once_with(name=name, namespace=namespace)
+    assert result == {"status": "deleted"}

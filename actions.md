@@ -36,6 +36,12 @@ These are the core operations that users can request the system to perform.
   * **Required Parameters**: Cluster name, namespace name, workload kind (e.g., `Deployment`, `Pod`), workload name.
   * **Usage Example (CLI)**: `automated-actions openshift-workload-restart --cluster my-cluster --namespace my-namespace --kind Deployment --name my-app-deployment`
 
+* **`openshift-workload-delete`**:
+  * **Description**: Deletes a specified workload (e.g., ConfigMap, Job, Secret) in an OpenShift cluster.
+  * **Use Case**: Useful for cleaning up resources that are no longer needed, such as temporary jobs or outdated configurations.
+  * **Required Parameters**: Cluster name, namespace name, resource kind (e.g., `ConfigMap`, `Job`, `Secret`), resource name.
+  * **Usage Example (CLI)**: `automated-actions openshift-workload-delete --cluster my-cluster --namespace my-namespace --kind ConfigMap --name my-configmap`
+
 ## Administrative & Utility Commands
 
 These commands are typically used for managing actions, retrieving information, or system administration rather than performing an automated task on an external system.

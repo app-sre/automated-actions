@@ -184,6 +184,13 @@ class OpenshiftClient:
 
         return api.delete(name=name, namespace=namespace)
 
+    def delete(
+        self, namespace: str, api_version: str, kind: str, name: str
+    ) -> ResourceInstance:
+        """Delete a resource in the specified namespace."""
+        api = self.dyn_client.resources.get(api_version=api_version, kind=kind)
+        return api.delete(name=name, namespace=namespace)
+
     def job_wait(
         self,
         job_name: str,

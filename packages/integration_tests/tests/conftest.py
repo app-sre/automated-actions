@@ -48,6 +48,11 @@ class OpenshiftPodRestartParameters(BaseParameters):
     parent_kind_name: str
 
 
+class OpenshiftWorkloadDeleteParameters(BaseParameters):
+    cluster: str
+    namespace: str
+
+
 class Config(BaseSettings):
     """Configuration for the tests."""
 
@@ -66,6 +71,7 @@ class Config(BaseSettings):
     no_op: NoOpParameters = NoOpParameters(sleep_time=2)
     openshift_deployment_restart: OpenshiftDeploymentRestartParameters
     openshift_pod_restart: OpenshiftPodRestartParameters
+    openshift_workload_delete: OpenshiftWorkloadDeleteParameters
 
 
 _config = Config()

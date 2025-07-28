@@ -1,11 +1,9 @@
 import uuid
-from time import time
 from unittest.mock import Mock, call
 
 import pytest
 from automated_actions_utils.cluster_connection import ClusterConnectionData
 from automated_actions_utils.openshift_client import (
-    OpenshiftClient,
     OpenshiftClientResourceNotFoundError,
     RollingRestartResource,
 )
@@ -18,22 +16,7 @@ from automated_actions.celery.openshift.tasks import (
     OpenshiftWorkloadRestart,
     openshift_workload_restart,
 )
-from automated_actions.db.models import Action, ActionStatus
-
-
-@pytest.fixture
-def mock_oc(mocker: MockerFixture) -> Mock:
-    return mocker.Mock(spec=OpenshiftClient)
-
-
-@pytest.fixture
-def mock_action(mocker: MockerFixture) -> Mock:
-    return mocker.Mock(spec=Action, created_at=time())
-
-
-@pytest.fixture
-def cluster_connection_data() -> ClusterConnectionData:
-    return ClusterConnectionData(url="url", token="token")  # noqa: S106
+from automated_actions.db.models import ActionStatus
 
 
 def test_openshift_workload_restart_pod(mock_oc: Mock) -> None:

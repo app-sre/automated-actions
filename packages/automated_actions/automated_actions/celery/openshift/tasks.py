@@ -60,3 +60,46 @@ def openshift_workload_restart(
         server_url=cluster_connection.url, token=cluster_connection.token
     )
     OpenshiftWorkloadRestart(oc, namespace, kind, name).run()
+
+
+class OpenshiftWorkloadDelete:
+    def __init__(
+        self,
+        oc: OpenshiftClient,
+        namespace: str,
+        api_version: str,
+        kind: str,
+        name: str,
+    ) -> None:
+        self.oc = oc
+        self.namespace = namespace
+        self.name = name
+        self.api_version = api_version
+        self.kind = kind
+
+    def run(self) -> None:
+        log.info(
+            f"Deleting OpenShift workload {self.api_version}/{self.kind} {self.name} in namespace {self.namespace}"
+        )
+        self.oc.delete(
+            namespace=self.namespace,
+            api_version=self.api_version,
+            kind=self.kind,
+            name=self.name,
+        )
+
+
+@app.task(base=AutomatedActionTask)
+def openshift_workload_delete(
+    cluster: str,
+    namespace: str,
+    api_version: str,
+    kind: str,
+    name: str,
+    action: Action,  # noqa: ARG001
+) -> None:
+    cluster_connection = get_cluster_connection_data(cluster, settings)
+    oc = OpenshiftClient(
+        server_url=cluster_connection.url, token=cluster_connection.token
+    )
+    OpenshiftWorkloadDelete(oc, namespace, api_version, kind, name).run()

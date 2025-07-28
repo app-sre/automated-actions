@@ -1,5 +1,4 @@
 import uuid
-from time import time
 from unittest.mock import ANY, Mock
 
 import pytest
@@ -10,7 +9,6 @@ from automated_actions_utils.external_resource import (
     ExternalResource,
     VaultSecret,
 )
-from automated_actions_utils.openshift_client import OpenshiftClient
 from pytest_mock import MockerFixture
 
 from automated_actions.celery.external_resource.tasks import (
@@ -19,22 +17,12 @@ from automated_actions.celery.external_resource.tasks import (
     external_resource_flush_elasticache,
     external_resource_rds_reboot,
 )
-from automated_actions.db.models import Action, ActionStatus
+from automated_actions.db.models import ActionStatus
 
 
 @pytest.fixture
 def mock_aws(mocker: MockerFixture) -> Mock:
     return mocker.Mock(spec=AWSApi)
-
-
-@pytest.fixture
-def mock_oc(mocker: MockerFixture) -> Mock:
-    return mocker.Mock(spec=OpenshiftClient)
-
-
-@pytest.fixture
-def mock_action(mocker: MockerFixture) -> Mock:
-    return mocker.Mock(spec=Action, created_at=time())
 
 
 @pytest.fixture
