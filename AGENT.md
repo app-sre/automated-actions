@@ -127,7 +127,7 @@ Celery workers execute actions by:
 - **Functional Code**: Use functional and stateless approaches where they improve clarity
 - **Clean logic**: Keep core logic clean and push implementation details to the edges
 - **File Organization**: Balance file organization with simplicity - use an appropriate number of files for the project scale
-- **Configuration**:Use environment variables for configuration
+- **Configuration**: Use environment variables for configuration
 
 ### Python Code Style
 
