@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AI Agent Instructions
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to any AI agents we use, e.g. Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Important Instruction Reminders
 
