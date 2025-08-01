@@ -28,7 +28,7 @@ NEVER proactively create documentation files (*.md) or README files but ask the 
 
 ### Building and Running
 
-- `docker-compose up automated-actions` - Run the application locally with dependencies (LocalStack for AWS services)
+- `docker compose up automated-actions` - Run the application locally with dependencies (LocalStack for AWS services)
 - `make build` - Build test container
 - `make prod` - Build production container
 - `make generate-client` - Regenerate the automated-actions-client from OpenAPI spec

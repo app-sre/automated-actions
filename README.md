@@ -229,7 +229,7 @@ Refer to the [settings documentation](/settings.md) for details on all available
 Use the provided [docker-compose.yml](/docker-compose.yml) file to run the application and its dependencies (like LocalStack for AWS services) locally.
 
 ```bash
-docker-compose up automated-actions # Or 'docker-compose up -d' for detached mode
+docker compose up automated-actions # Or 'docker compose up -d' for detached mode
 ```
 
 This will typically start the FastAPI server, Celery workers, OPA, and mock AWS services. Check the `docker-compose.yml` for specific service names and configurations.
