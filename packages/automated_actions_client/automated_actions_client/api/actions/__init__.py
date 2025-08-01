@@ -3,6 +3,7 @@
 
 from . import (
     external_resource_flush_elasticache,
+    external_resource_rds_logs,
     external_resource_rds_reboot,
     external_resource_rds_snapshot,
     no_op,
@@ -12,6 +13,7 @@ from . import (
 
 __all__ = [
     "external_resource_flush_elasticache",
+    "external_resource_rds_logs",
     "external_resource_rds_reboot",
     "external_resource_rds_snapshot",
     "no_op",

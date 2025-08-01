@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 
 from automated_actions.api.v1.views.external_resource import (
     get_action_external_resource_flush_elasticache,
+    get_action_external_resource_rds_logs,
     get_action_external_resource_rds_reboot,
     get_action_external_resource_rds_snapshot,
 )
@@ -31,6 +32,14 @@ def mock_external_resource_rds_snapshot_task(mocker: MockerFixture) -> MagicMock
 
 
 @pytest.fixture
+def mock_external_resource_rds_logs_task(mocker: MockerFixture) -> MagicMock:
+    """Mock the external_resource_rds_logs_task function."""
+    return mocker.patch(
+        "automated_actions.api.v1.views.external_resource.external_resource_rds_logs_task"
+    )
+
+
+@pytest.fixture
 def mock_external_resource_flush_elasticache_task(mocker: MockerFixture) -> MagicMock:
     """Mock the external_resource_flush_elasticache_task function."""
     return mocker.patch(
@@ -44,6 +53,9 @@ def test_app(app: FastAPI, mocker: MockerFixture, running_action: dict) -> FastA
     action_mock.action_id = running_action["action_id"]
     action_mock.dump.return_value = running_action
     app.dependency_overrides[get_action_external_resource_rds_reboot] = (
+        lambda: action_mock
+    )
+    app.dependency_overrides[get_action_external_resource_rds_logs] = (
         lambda: action_mock
     )
     app.dependency_overrides[get_action_external_resource_rds_snapshot] = (
@@ -84,6 +96,93 @@ def test_external_resource_rds_reboot(
         },
         task_id=running_action["action_id"],
     )
+
+
+def test_external_resource_rds_logs(
+    test_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+    mock_external_resource_rds_logs_task: MagicMock,
+    running_action: dict,
+) -> None:
+    response = client(test_app).post(
+        test_app.url_path_for(
+            "external_resource_rds_logs",
+            account="test-account",
+            identifier="test-identifier",
+        ),
+        params={
+            "expiration_days": 5,
+            "s3_file_name": "custom-logs.zip",
+        },
+    )
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.json()["action_id"] == running_action["action_id"]
+    mock_external_resource_rds_logs_task.apply_async.assert_called_once_with(
+        kwargs={
+            "account": "test-account",
+            "identifier": "test-identifier",
+            "expiration_days": 5,
+            "s3_file_name": "custom-logs.zip",
+            "action": test_app.dependency_overrides[
+                get_action_external_resource_rds_logs
+            ](),
+        },
+        task_id=running_action["action_id"],
+    )
+
+
+def test_external_resource_rds_logs_default_params(
+    test_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+    mock_external_resource_rds_logs_task: MagicMock,
+    running_action: dict,
+) -> None:
+    response = client(test_app).post(
+        test_app.url_path_for(
+            "external_resource_rds_logs",
+            account="test-account",
+            identifier="test-identifier",
+        ),
+    )
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.json()["action_id"] == running_action["action_id"]
+    mock_external_resource_rds_logs_task.apply_async.assert_called_once_with(
+        kwargs={
+            "account": "test-account",
+            "identifier": "test-identifier",
+            "expiration_days": 7,
+            "s3_file_name": None,
+            "action": test_app.dependency_overrides[
+                get_action_external_resource_rds_logs
+            ](),
+        },
+        task_id=running_action["action_id"],
+    )
+
+
+def test_external_resource_rds_logs_expiration_validation(
+    test_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+) -> None:
+    response = client(test_app).post(
+        test_app.url_path_for(
+            "external_resource_rds_logs",
+            account="test-account",
+            identifier="test-identifier",
+        ),
+        params={"expiration_days": 0},
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    response = client(test_app).post(
+        test_app.url_path_for(
+            "external_resource_rds_logs",
+            account="test-account",
+            identifier="test-identifier",
+        ),
+        params={"expiration_days": 8},
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_external_resource_rds_snapshot(

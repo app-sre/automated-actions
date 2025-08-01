@@ -1,15 +1,24 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Protocol, Self
+from collections.abc import Generator, Iterable
+from typing import TYPE_CHECKING, Any, Protocol, Self
 
 from automated_actions.config import settings
 from boto3 import Session
 from botocore.config import Config
 from pydantic import BaseModel
-from types_boto3_rds.client import RDSClient
-from types_boto3_rds.type_defs import EventTypeDef
+from zipstream import ZIP_DEFLATED, ZipStream
 
 from automated_actions_utils.vault_client import SecretFieldNotFoundError, VaultClient
+
+if TYPE_CHECKING:
+    from types_boto3_rds.client import RDSClient
+    from types_boto3_rds.type_defs import EventTypeDef
+    from types_boto3_s3.client import S3Client
+    from types_boto3_s3.type_defs import CompletedPartTypeDef
+
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +48,13 @@ class AWSStaticCredentials(BaseModel, AWSCredentials):
             aws_secret_access_key=self.secret_access_key,
             region_name=self.region,
         )
+
+
+class LogStream(BaseModel):
+    """Represents a log stream for RDS logs."""
+
+    name: str
+    content: Generator[bytes, None, None]
 
 
 def get_aws_credentials(vault_secret: VaultSecret, region: str) -> AWSCredentials:
@@ -83,7 +99,12 @@ def get_aws_credentials(vault_secret: VaultSecret, region: str) -> AWSCredential
 class AWSApi:
     """A client for interacting with AWS services."""
 
-    def __init__(self, credentials: AWSCredentials, region: str | None) -> None:
+    def __init__(
+        self,
+        credentials: AWSCredentials,
+        region: str | None = None,
+        s3_endpoint_url: str | None = None,
+    ) -> None:
         self.session = credentials.build_session()
         self.config = Config(
             region_name=region,
@@ -93,6 +114,9 @@ class AWSApi:
             },
         )
         self.rds_client: RDSClient = self.session.client("rds", config=self.config)
+        self.s3_client: S3Client = self.session.client(
+            "s3", config=self.config, endpoint_url=s3_endpoint_url
+        )
 
     def __enter__(self) -> Self:
         """Enables the use of the AWSApi instance in a context manager."""
@@ -101,6 +125,30 @@ class AWSApi:
     def __exit__(self, *args: object, **kwargs: Any) -> None:
         """Handles cleanup when exiting the context manager."""
         self.rds_client.close()
+        self.s3_client.close()
+
+    @staticmethod
+    def _upload_multipart_chunk(
+        target_aws_api: AWSApi,
+        bucket: str,
+        s3_key: str,
+        upload_id: str,
+        part_number: int,
+        data: bytes,
+    ) -> CompletedPartTypeDef:
+        """Uploads a single part for multipart upload and returns part info."""
+        log.debug(f"Uploading part {part_number} ({len(data)} bytes)")
+        part_response = target_aws_api.s3_client.upload_part(
+            Bucket=bucket,
+            Key=s3_key,
+            PartNumber=part_number,
+            UploadId=upload_id,
+            Body=data,
+        )
+        return {
+            "ETag": part_response["ETag"],
+            "PartNumber": part_number,
+        }
 
     def reboot_rds_instance(self, identifier: str, *, force_failover: bool) -> None:
         """Reboots a specified RDS database instance.
@@ -151,4 +199,118 @@ class AWSApi:
         self.rds_client.create_db_snapshot(
             DBInstanceIdentifier=identifier,
             DBSnapshotIdentifier=snapshot_identifier,
+        )
+
+    def list_rds_logs(self, identifier: str) -> list[str]:
+        """Lists the log files for a specified RDS instance."""
+        logs: list[str] = []
+        log.info(f"Listing RDS logs for instance {identifier}")
+        paginator = self.rds_client.get_paginator("describe_db_log_files")
+        for page in paginator.paginate(DBInstanceIdentifier=identifier):
+            logs.extend(
+                log_file["LogFileName"]
+                for log_file in page.get("DescribeDBLogFiles", [])
+                if log_file["LogFileName"]
+            )
+        return logs
+
+    def stream_rds_log(
+        self, identifier: str, log_file: str
+    ) -> Generator[bytes, None, None]:
+        """Streams a specific RDS log file."""
+        marker = "0"
+        while True:
+            response = self.rds_client.download_db_log_file_portion(
+                DBInstanceIdentifier=identifier,
+                LogFileName=log_file,
+                Marker=marker,
+            )
+            if log_data_chunk := response.get("LogFileData"):
+                yield log_data_chunk.encode("utf-8")
+
+            if response["AdditionalDataPending"]:
+                marker = response["Marker"]
+            else:
+                break
+
+    def stream_rds_logs_to_s3_zip(
+        self,
+        log_streams: Iterable[LogStream],
+        bucket: str,
+        s3_key: str,
+        target_aws_api: AWSApi | None = None,
+    ) -> None:
+        """Streams all RDS log files to a single zip file in an S3 bucket using multipart upload."""
+        target_aws_api = target_aws_api or self
+
+        # Create a zip stream for large files without loading everything into memory
+        zip_stream = ZipStream(compress_type=ZIP_DEFLATED)
+        for log_stream in log_streams:
+            zip_stream.add(log_stream.content, arcname=log_stream.name)
+
+        # Start multipart upload
+        log.info(f"Starting multipart upload for {s3_key} to bucket {bucket}")
+        create_response = target_aws_api.s3_client.create_multipart_upload(
+            Bucket=bucket, Key=s3_key, ContentType="application/zip"
+        )
+        upload_id = create_response["UploadId"]
+
+        try:
+            parts = []
+            part_number = 1
+            chunk_size = 5 * 1024 * 1024  # 5MB minimum part size for S3
+            buffer = b""
+
+            # Stream zip data in chunks and upload as parts
+            for chunk in zip_stream:
+                buffer += chunk
+
+                # Upload when buffer reaches chunk size
+                while len(buffer) >= chunk_size:
+                    part_data = buffer[:chunk_size]
+                    buffer = buffer[chunk_size:]
+
+                    part_info = self._upload_multipart_chunk(
+                        target_aws_api,
+                        bucket,
+                        s3_key,
+                        upload_id,
+                        part_number,
+                        part_data,
+                    )
+                    parts.append(part_info)
+                    part_number += 1
+
+            # Upload remaining buffer as final part (if any)
+            if buffer:
+                part_info = self._upload_multipart_chunk(
+                    target_aws_api, bucket, s3_key, upload_id, part_number, buffer
+                )
+                parts.append(part_info)
+
+            # Complete multipart upload
+            target_aws_api.s3_client.complete_multipart_upload(
+                Bucket=bucket,
+                Key=s3_key,
+                UploadId=upload_id,
+                MultipartUpload={"Parts": parts},
+            )
+            log.info(f"Successfully completed multipart upload for {s3_key}")
+
+        except:
+            # Abort multipart upload on error
+            log.exception("Error during multipart upload")
+            target_aws_api.s3_client.abort_multipart_upload(
+                Bucket=bucket, Key=s3_key, UploadId=upload_id
+            )
+            raise
+
+    def generate_s3_download_url(
+        self, bucket: str, s3_key: str, expiration_secs: int = 3600
+    ) -> str:
+        """Generate a pre-signed URL for downloading an object from S3."""
+        return self.s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket, "Key": s3_key},
+            ExpiresIn=expiration_secs,
         )

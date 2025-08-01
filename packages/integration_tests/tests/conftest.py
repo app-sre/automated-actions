@@ -20,6 +20,12 @@ class ExternalResourceFlushElasticache(BaseParameters):
     identifier: str
 
 
+class ExternalResourceRDSLogs(BaseParameters):
+    account: str
+    identifier: str
+    s3_file_name: str = "automated-actions-integration-tests.zip"
+
+
 class ExternalResourceRDSReboot(BaseParameters):
     account: str
     identifier: str
@@ -66,6 +72,7 @@ class Config(BaseSettings):
     token: str
 
     external_resource_flush_elasticache: ExternalResourceFlushElasticache
+    external_resource_rds_logs: ExternalResourceRDSLogs
     external_resource_rds_reboot: ExternalResourceRDSReboot
     external_resource_rds_snapshot: ExternalResourceRDSSnapshot
     no_op: NoOpParameters = NoOpParameters(sleep_time=2)

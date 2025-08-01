@@ -12,6 +12,13 @@ These are the core operations that users can request the system to perform.
   * **Required Parameters**: The AWS account name and the ElastiCache cluster identifier.
   * **Usage Example (CLI)**: `automated-actions external-resource-flush-elasticache --account aws-account-name --identifier my-elasticache-cluster`
 
+* **`external-resource-rds-logs`**:
+  * **Description**: Retrieves logs from an Amazon RDS instance and stores them in an S3 bucket.
+  * **Use Case**: Typically used for troubleshooting database issues, analyzing performance problems, or collecting logs for audit purposes.
+  * **Required Parameters**: The AWS account name and the RDS instance identifier.
+  * **Optional Parameters**: Expiration time in days (1-7, default: 7), S3 target file name (defaults to '{account}-{identifier}.zip').
+  * **Usage Example (CLI)**: `automated-actions external-resource-rds-logs --account aws-account-name --identifier my-rds-instance --expiration-days 5 --s3-file-name my-custom-logs.zip`
+
 * **`external-resource-rds-reboot`**:
   * **Description**: Reboots an Amazon RDS instance.
   * **Use Case**: Typically used for maintenance, applying updates, or resolving performance issues.

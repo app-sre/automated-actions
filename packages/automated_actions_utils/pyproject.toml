@@ -15,6 +15,7 @@ dependencies = [
     "pydantic==2.11.7",
     "types-boto3-lite[rds]==1.39.16",
     "types-hvac==2.3.0.20250516",
+    "zipstream-ng==1.8.0",
 ]
 
 [project.urls]
@@ -31,6 +32,8 @@ dev = [
     "pytest==8.4.1",
     "qenerate==0.8.0",
     "ruff==0.12.7",
+    "types-boto3-lite[rds,s3]==1.39.16",
+    "types-hvac==2.3.0.20250516",
 ]
 
 [build-system]
@@ -124,7 +127,7 @@ disallow_incomplete_defs = true
 [[tool.mypy.overrides]]
 # Below are all of the packages that don't implement stub packages. Mypy will throw an error if we don't ignore the
 # missing imports. See: https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
-module = ["kubernetes.*", "openshift.dynamic.*"]
+module = ["kubernetes.*", "openshift.dynamic.*", "zipstream.*"]
 ignore_missing_imports = true
 
 # Coverage configuration

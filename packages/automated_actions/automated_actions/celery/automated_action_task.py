@@ -29,12 +29,12 @@ class AutomatedActionTask(Task):
 
     def on_success(  # noqa: PLR6301
         self,
-        retval: Any,  # noqa: ARG002
+        retval: Any,
         task_id: str,  # noqa: ARG002
         args: tuple,  # noqa: ARG002
         kwargs: dict,
     ) -> None:
-        result = "ok"
+        result = "ok" if retval is None else str(retval)
         kwargs["action"].set_final_state(
             status=ActionStatus.SUCCESS,
             result=result,

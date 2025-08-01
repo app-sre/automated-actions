@@ -1,4 +1,5 @@
 # ruff: noqa: S105
+from collections.abc import Generator
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -9,6 +10,7 @@ from pytest_mock import MockerFixture
 from automated_actions_utils.aws_api import (
     AWSApi,
     AWSStaticCredentials,
+    LogStream,
     get_aws_credentials,
 )
 from automated_actions_utils.vault_client import SecretFieldNotFoundError
@@ -166,16 +168,26 @@ def mock_boto_config(mocker: MockerFixture) -> MagicMock:
     ],
     ids=["with_region", "none_region"],
 )
-def test_aws_api_init_and_rds_client_setup(
+def test_aws_api_init_and_client_setup(
     mock_aws_credentials: MagicMock,
     mock_boto_config: MagicMock,
     region_input: str | None,
     expected_region_in_config: str | None,
 ) -> None:
-    """Tests the __init__ method of AWSApi and RDS client setup."""
+    """Tests the __init__ method of AWSApi and both RDS and S3 client setup."""
     mock_session = mock_aws_credentials.build_session.return_value
     mock_rds_client_returned_by_session = MagicMock()
-    mock_session.client.return_value = mock_rds_client_returned_by_session
+    mock_s3_client_returned_by_session = MagicMock()
+
+    # Configure session.client to return different mocks based on service
+    def client_side_effect(service_name: str, **_: Any) -> MagicMock:
+        if service_name == "rds":
+            return mock_rds_client_returned_by_session
+        if service_name == "s3":
+            return mock_s3_client_returned_by_session
+        raise ValueError(f"Unexpected service: {service_name}")
+
+    mock_session.client.side_effect = client_side_effect
 
     aws_api = AWSApi(credentials=mock_aws_credentials, region=region_input)
 
@@ -191,10 +203,42 @@ def test_aws_api_init_and_rds_client_setup(
     )
     assert aws_api.config == mock_boto_config.return_value
 
-    # This checks that AWSApi.__init__ called self.session.client(...) correctly
-    mock_session.client.assert_called_once_with("rds", config=aws_api.config)
-    # And that aws_api.rds_client is the instance returned by that call
+    # Verify both RDS and S3 clients were created
+    mock_session.client.assert_any_call("rds", config=aws_api.config)
+    mock_session.client.assert_any_call("s3", config=aws_api.config, endpoint_url=None)
+
+    # And that both clients are properly assigned
     assert aws_api.rds_client == mock_rds_client_returned_by_session
+    assert aws_api.s3_client == mock_s3_client_returned_by_session
+
+
+def test_aws_api_init_with_s3_endpoint_url(mock_aws_credentials: MagicMock) -> None:
+    """Tests AWSApi initialization with a custom S3 endpoint URL."""
+    mock_session = mock_aws_credentials.build_session.return_value
+    mock_rds_client = MagicMock()
+    mock_s3_client = MagicMock()
+
+    def client_side_effect(service_name: str, **_: Any) -> MagicMock:
+        if service_name == "rds":
+            return mock_rds_client
+        if service_name == "s3":
+            return mock_s3_client
+        raise ValueError(f"Unexpected service: {service_name}")
+
+    mock_session.client.side_effect = client_side_effect
+
+    s3_endpoint = "https://localstack:4566"
+    aws_api = AWSApi(
+        credentials=mock_aws_credentials,
+        region="us-west-2",
+        s3_endpoint_url=s3_endpoint,
+    )
+
+    # Verify S3 client was called with the custom endpoint URL
+    mock_session.client.assert_any_call(
+        "s3", config=aws_api.config, endpoint_url=s3_endpoint
+    )
+    assert aws_api.s3_client == mock_s3_client
 
 
 @pytest.mark.parametrize(
@@ -362,3 +406,329 @@ def test_aws_api_create_rds_snapshot(
     mock_rds_client_on_instance.create_db_snapshot.assert_called_once_with(
         DBInstanceIdentifier=identifier, DBSnapshotIdentifier=snapshot_identifier
     )
+
+
+@pytest.mark.parametrize(
+    ("region", "identifier", "paginator_return_value", "expected_log_files"),
+    [
+        (
+            "us-west-2",
+            "test-db-instance",
+            [
+                {
+                    "DescribeDBLogFiles": [
+                        {"LogFileName": "error/mysql-error.log"},
+                        {"LogFileName": "slowquery/mysql-slowquery.log"},
+                    ]
+                }
+            ],
+            ["error/mysql-error.log", "slowquery/mysql-slowquery.log"],
+        ),
+        (
+            "us-east-1",
+            "postgres-instance",
+            [{"DescribeDBLogFiles": [{"LogFileName": "postgresql.log"}]}],
+            ["postgresql.log"],
+        ),
+        (
+            "eu-west-1",
+            "empty-instance",
+            [{"DescribeDBLogFiles": []}],
+            [],
+        ),
+        (
+            "ap-south-1",
+            "multi-page-db",
+            [
+                {"DescribeDBLogFiles": [{"LogFileName": "error.log"}]},
+                {
+                    "DescribeDBLogFiles": [
+                        {"LogFileName": "slow.log"},
+                        {"LogFileName": "general.log"},
+                    ]
+                },
+            ],
+            ["error.log", "slow.log", "general.log"],
+        ),
+        (
+            "eu-north-1",
+            "missing-key-db",
+            [
+                {"DescribeDBLogFiles": [{"LogFileName": "valid.log"}]},
+                {"NotDescribeDBLogFiles": []},  # Page missing 'DescribeDBLogFiles' key
+            ],
+            ["valid.log"],
+        ),
+        (
+            "ca-central-1",
+            "empty-filename-db",
+            [
+                {
+                    "DescribeDBLogFiles": [
+                        {"LogFileName": "valid.log"},
+                        {"LogFileName": ""},  # Empty filename should be filtered out
+                        {"LogFileName": "another.log"},
+                    ]
+                }
+            ],
+            ["valid.log", "another.log"],
+        ),
+    ],
+    ids=[
+        "success_single_page",
+        "postgres_instance",
+        "empty_instance",
+        "multiple_pages",
+        "missing_key_in_page",
+        "empty_filename_filtered",
+    ],
+)
+def test_aws_api_list_rds_logs(
+    mock_aws_credentials: MagicMock,
+    mocker: MockerFixture,
+    region: str,
+    identifier: str,
+    paginator_return_value: list[dict[str, list[dict[str, str]]]],
+    expected_log_files: list[str],
+) -> None:
+    """Tests the list_rds_logs method of AWSApi with paginated responses."""
+    aws_api = AWSApi(credentials=mock_aws_credentials, region=region)
+
+    mock_rds_client_on_instance = mocker.MagicMock()
+    aws_api.rds_client = mock_rds_client_on_instance
+
+    mock_paginator = mocker.MagicMock()
+    mock_rds_client_on_instance.get_paginator.return_value = mock_paginator
+    mock_paginator.paginate.return_value = paginator_return_value
+
+    result = aws_api.list_rds_logs(identifier=identifier)
+
+    mock_rds_client_on_instance.get_paginator.assert_called_once_with(
+        "describe_db_log_files"
+    )
+    mock_paginator.paginate.assert_called_once_with(DBInstanceIdentifier=identifier)
+    assert result == expected_log_files
+
+
+@pytest.mark.parametrize(
+    ("region", "identifier", "log_file", "log_data_chunks"),
+    [
+        ("us-west-2", "test-db", "error.log", ["log line 1\n", "log line 2\n"]),
+        ("us-east-1", "test-db", "slow.log", ["slow query data\n"]),
+        ("eu-west-1", "test-db", "empty.log", []),
+    ],
+)
+def test_aws_api_stream_rds_log(
+    mock_aws_credentials: MagicMock,
+    mocker: MockerFixture,
+    region: str,
+    identifier: str,
+    log_file: str,
+    log_data_chunks: list[str],
+) -> None:
+    """Tests the stream_rds_log method of AWSApi."""
+    aws_api = AWSApi(credentials=mock_aws_credentials, region=region)
+
+    mock_rds_client_on_instance = mocker.MagicMock()
+    aws_api.rds_client = mock_rds_client_on_instance
+
+    # Mock sequential responses for download_db_log_file_portion
+    mock_responses = []
+    for i, chunk in enumerate(log_data_chunks):
+        is_last = i == len(log_data_chunks) - 1
+        mock_responses.append({
+            "LogFileData": chunk,
+            "Marker": str(i + 1),
+            "AdditionalDataPending": not is_last,
+        })
+
+    # If no chunks, return a single response with empty data
+    if not log_data_chunks:
+        mock_responses = [
+            {
+                "LogFileData": "",
+                "Marker": "0",
+                "AdditionalDataPending": False,
+            }
+        ]
+
+    mock_rds_client_on_instance.download_db_log_file_portion.side_effect = (
+        mock_responses
+    )
+
+    # Collect all streamed data
+    result_data = b"".join(
+        aws_api.stream_rds_log(identifier=identifier, log_file=log_file)
+    )
+
+    # Verify the expected data was returned
+    expected_data = "".join(log_data_chunks).encode("utf-8")
+    assert result_data == expected_data
+
+    # Verify the RDS client was called correctly
+    expected_calls = len(mock_responses)
+    assert (
+        mock_rds_client_on_instance.download_db_log_file_portion.call_count
+        == expected_calls
+    )
+
+
+@pytest.mark.parametrize(
+    ("region", "bucket", "s3_key", "log_stream_count"),
+    [
+        ("us-west-2", "test-bucket", "logs/test.zip", 2),
+        ("us-east-1", "my-bucket", "rds-logs/instance-logs.zip", 1),
+        ("eu-west-1", "backup-bucket", "logs/backup.zip", 0),
+    ],
+)
+def test_aws_api_stream_rds_logs_to_s3_zip(
+    mock_aws_credentials: MagicMock,
+    mocker: MockerFixture,
+    region: str,
+    bucket: str,
+    s3_key: str,
+    log_stream_count: int,
+) -> None:
+    """Tests the stream_rds_logs_to_s3_zip method of AWSApi."""
+    aws_api = AWSApi(credentials=mock_aws_credentials, region=region)
+
+    mock_s3_client_on_instance = mocker.MagicMock()
+    aws_api.s3_client = mock_s3_client_on_instance
+
+    # Mock S3 multipart upload responses
+    upload_id = "test-upload-id"
+    mock_s3_client_on_instance.create_multipart_upload.return_value = {
+        "UploadId": upload_id
+    }
+    mock_s3_client_on_instance.upload_part.return_value = {"ETag": "test-etag"}
+
+    # Create test log streams
+    log_streams = []
+    for i in range(log_stream_count):
+
+        def generate_log_content() -> Generator[bytes, Any, None]:
+            yield b"log data chunk 1"
+            yield b"log data chunk 2"
+
+        log_streams.append(
+            LogStream(name=f"test-log-{i}.log", content=generate_log_content())
+        )
+
+    # Mock ZipStream to avoid actual zip creation
+    mock_zip_stream = mocker.patch("automated_actions_utils.aws_api.ZipStream")
+    mock_zip_instance = mocker.MagicMock()
+    mock_zip_stream.return_value = mock_zip_instance
+    mock_zip_instance.__iter__.return_value = iter([b"zip content chunk"])
+
+    # Mock _upload_multipart_chunk
+    mocker.patch.object(
+        aws_api,
+        "_upload_multipart_chunk",
+        return_value={"PartNumber": 1, "ETag": "test-etag"},
+    )
+
+    aws_api.stream_rds_logs_to_s3_zip(
+        log_streams=log_streams,
+        bucket=bucket,
+        s3_key=s3_key,
+    )
+
+    # Verify S3 operations were called
+    mock_s3_client_on_instance.create_multipart_upload.assert_called_once_with(
+        Bucket=bucket, Key=s3_key, ContentType="application/zip"
+    )
+    mock_s3_client_on_instance.complete_multipart_upload.assert_called_once()
+
+    # Verify log streams were added to zip
+    assert mock_zip_instance.add.call_count == log_stream_count
+
+
+@pytest.mark.parametrize("region", ["us-west-2"])
+def test_aws_api_stream_rds_logs_to_s3_zip_with_target_api(
+    mock_aws_credentials: MagicMock,
+    mocker: MockerFixture,
+    region: str,
+) -> None:
+    """Tests stream_rds_logs_to_s3_zip with a different target AWS API."""
+    source_aws_api = AWSApi(credentials=mock_aws_credentials, region=region)
+    target_aws_api = AWSApi(credentials=mock_aws_credentials, region="us-east-1")
+
+    mock_target_s3_client = mocker.MagicMock()
+    target_aws_api.s3_client = mock_target_s3_client
+
+    upload_id = "test-upload-id"
+    mock_target_s3_client.create_multipart_upload.return_value = {"UploadId": upload_id}
+
+    # Mock ZipStream
+    mock_zip_stream = mocker.patch("automated_actions_utils.aws_api.ZipStream")
+    mock_zip_instance = mocker.MagicMock()
+    mock_zip_stream.return_value = mock_zip_instance
+    mock_zip_instance.__iter__.return_value = iter([b"zip content"])
+
+    # Mock _upload_multipart_chunk
+    mocker.patch.object(
+        source_aws_api,
+        "_upload_multipart_chunk",
+        return_value={"PartNumber": 1, "ETag": "test-etag"},
+    )
+
+    log_streams = [LogStream(name="test.log", content=iter([b"test data"]))]
+
+    source_aws_api.stream_rds_logs_to_s3_zip(
+        log_streams=log_streams,
+        bucket="test-bucket",
+        s3_key="test.zip",
+        target_aws_api=target_aws_api,
+    )
+
+    # Verify the target API was used for S3 operations
+    mock_target_s3_client.create_multipart_upload.assert_called_once()
+    mock_target_s3_client.complete_multipart_upload.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    ("region", "bucket", "s3_key", "expiration_secs", "expected_url"),
+    [
+        (
+            "us-west-2",
+            "test-bucket",
+            "logs/test.zip",
+            3600,
+            "https://s3.amazonaws.com/test-bucket/logs/test.zip",
+        ),
+        (
+            "us-east-1",
+            "my-logs",
+            "rds.zip",
+            7200,
+            "https://s3.amazonaws.com/my-logs/rds.zip",
+        ),
+    ],
+)
+def test_aws_api_generate_s3_download_url(
+    mock_aws_credentials: MagicMock,
+    mocker: MockerFixture,
+    region: str,
+    bucket: str,
+    s3_key: str,
+    expiration_secs: int,
+    expected_url: str,
+) -> None:
+    """Tests the generate_s3_download_url method of AWSApi."""
+    aws_api = AWSApi(credentials=mock_aws_credentials, region=region)
+
+    mock_s3_client_on_instance = mocker.MagicMock()
+    aws_api.s3_client = mock_s3_client_on_instance
+
+    mock_s3_client_on_instance.generate_presigned_url.return_value = expected_url
+
+    result = aws_api.generate_s3_download_url(
+        bucket=bucket, s3_key=s3_key, expiration_secs=expiration_secs
+    )
+
+    mock_s3_client_on_instance.generate_presigned_url.assert_called_once_with(
+        "get_object",
+        Params={"Bucket": bucket, "Key": s3_key},
+        ExpiresIn=expiration_secs,
+    )
+    assert result == expected_url

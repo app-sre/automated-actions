@@ -8,7 +8,7 @@ services:
     environment:
       - DEBUG=${DEBUG-}
       - DOCKER_HOST=unix:///var/run/docker.sock
-      - SERVICES=${SERVICES:-sqs,dynamodb}
+      - SERVICES=${SERVICES:-sqs,dynamodb,s3}
       - PERSISTENCE=${PERSISTENCE:-0}
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./.localstack_volume}:/var/lib/localstack"
@@ -83,6 +83,7 @@ services:
       - AA_BROKER_URL=sqs://localstack:4566
       - AA_SQS_URL=http://localstack:4566/000000000000/automated-actions
       - AA_DYNAMODB_URL=http://localstack:4566
+      - AA_EXTERNAL_RESOURCE_RDS_LOGS__S3_URL=http://localstack:4566
     build:
       context: .
       dockerfile: Dockerfile

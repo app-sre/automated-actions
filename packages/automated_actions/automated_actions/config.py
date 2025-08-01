@@ -20,6 +20,17 @@ class ExternalResourceElastiCacheConfig(BaseSettings):
     }
 
 
+class ExternalResourceRdsLogsConfig(BaseSettings):
+    """Configuration for the external resource RDS logs related actions."""
+
+    s3_url: str = "http://s3.localhost.localstack.cloud:4566"
+    access_key_id: str = "localstack"
+    secret_access_key: str = "localstack"  # noqa: S105
+    region: str = "us-east-1"
+    bucket: str = "automated-actions"
+    prefix: str = "rds-logs"
+
+
 class Settings(BaseSettings):
     # pydantic config
     model_config = {
@@ -76,6 +87,9 @@ class Settings(BaseSettings):
     # external resources - ElastiCache
     external_resource_elasticache: ExternalResourceElastiCacheConfig = (
         ExternalResourceElastiCacheConfig()
+    )
+    external_resource_rds_logs: ExternalResourceRdsLogsConfig = (
+        ExternalResourceRdsLogsConfig()
     )
 
 
