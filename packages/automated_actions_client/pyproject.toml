@@ -20,12 +20,12 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "mypy==1.17.0",
+    "mypy==1.17.1",
     "openapi-python-client==0.25.3",
     "pytest-cov==6.2.1",
     "pytest==8.4.1",
-    "ruff==0.12.7",
-    "types-python-dateutil==2.9.0.20250708",
+    "ruff==0.12.9",
+    "types-python-dateutil==2.9.0.20250809",
 ]
 
 [build-system]
