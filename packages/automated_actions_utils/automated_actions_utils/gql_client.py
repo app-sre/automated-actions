@@ -14,9 +14,9 @@ class GQLClient:
         self.client = Client(transport=transport)
 
     def query(self, query: str, variables: dict | None = None) -> dict[str, Any] | None:
-        result = self.client.execute(
-            gql(query), variables, get_execution_result=True
-        ).formatted
+        gql_request = gql(query)
+        gql_request.variable_values = variables
+        result = self.client.execute(gql_request, get_execution_result=True).formatted
 
         if "data" in result:
             return result["data"]
