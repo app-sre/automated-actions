@@ -20,7 +20,7 @@ dependencies = [
     "pyjwt==2.10.1",
     "pynamodb==6.1.0",
     "requests-toolbelt==1.0.0",
-    "types-hvac==2.3.0.20250516",
+    "types-hvac==2.3.0.20250809",
     "uvicorn==0.35.0",
     "watchdog==6.0.0",
 ]
@@ -33,14 +33,14 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "mypy==1.17.0",
+    "mypy==1.17.1",
     "pytest-asyncio==1.1.0",
     "pytest-cov==6.2.1",
     "pytest-httpx==0.35.0",
     "pytest-mock==3.14.1",
     "pytest==8.4.1",
     "requests-mock==1.12.1",
-    "ruff==0.12.7",
+    "ruff==0.12.9",
 ]
 
 [build-system]
