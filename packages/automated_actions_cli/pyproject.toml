@@ -32,8 +32,8 @@ dev = [
     "mypy==1.17.1",
     "pytest-cov==6.2.1",
     "pytest==8.4.1",
-    "ruff==0.12.9",
-    "types-pyyaml==6.0.12.20250809",
+    "ruff==0.12.10",
+    "types-pyyaml==6.0.12.20250822",
 ]
 
 [project.scripts]
