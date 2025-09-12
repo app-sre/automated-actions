@@ -304,28 +304,28 @@ wheels = [
 
 [[package]]
 name = "botocore"
-version = "1.40.28"
+version = "1.40.29"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/10/b2/fe454104d7321c2e08b8eefa87cbd8c25128f6ba064595d69b2fc61dd29c/botocore-1.40.28.tar.gz", hash = "sha256:4a26c662dcce2e675209c23cd3a569e137a59fdc9692b8bb9dabed522cbe2d8c", size = 14343261, upload-time = "2025-09-10T19:22:37.203Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3f/0d/3e420528a69ea8077c91d80aaeea9c2c4dcdc4115e5e267f52636f3fa4f5/botocore-1.40.29.tar.gz", hash = "sha256:4e5207acef693167bb99c08a4c24d3e9405cb9669999e272a473a04cf2ba9df9", size = 14346806, upload-time = "2025-09-11T19:24:17.717Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ba/c9/41542221147a162f7043235cbccbb3b39148ab408e76fe466783f27c1680/botocore-1.40.28-py3-none-any.whl", hash = "sha256:fcd393da6cb4d97cff3823d4085cd034d1c80f1cc22a57b1f84d3f863b337a03", size = 14017584, upload-time = "2025-09-10T19:22:33.077Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/9e/d9d9726a9c95179544fb7ca3cba7e1cf82b60d9bc030eb034aa4abc22454/botocore-1.40.29-py3-none-any.whl", hash = "sha256:69a180a027044ae01db80b4cce4b2f93b6e4731fd7a8393c54f708c5677af85f", size = 14021245, upload-time = "2025-09-11T19:24:14.947Z" },
 ]
 
 [[package]]
 name = "botocore-stubs"
-version = "1.40.28"
+version = "1.40.29"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "types-awscrt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b1/ea/8033cc9399217564d22f8dd80a03e190c64bd4f4f7544b961f4a8db665a9/botocore_stubs-1.40.28.tar.gz", hash = "sha256:6866d06beb78a1e9313c8297db4c68afa5174586a511581a1fcf7d24b82fe547", size = 42756, upload-time = "2025-09-10T20:25:36.556Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/32/5c/49b2860e2a26b7383d5915374e61d962a3853e3fd569e4370444f0b902c0/botocore_stubs-1.40.29.tar.gz", hash = "sha256:324669d5ed7b5f7271bf3c3ea7208191b1d183f17d7e73398f11fef4a31fdf6b", size = 42742, upload-time = "2025-09-11T20:22:35.451Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/19/a6/146e172391255f4486918384207b0606295c1788c29db49da39db9f8d33d/botocore_stubs-1.40.28-py3-none-any.whl", hash = "sha256:80e4085766ec6c5b3c6335b969e698298c993f276e9a605e11758b0e4527acdd", size = 66844, upload-time = "2025-09-10T20:25:34.087Z" },
+    { url = "https://files.pythonhosted.org/packages/e2/3c/f901ca6c4d66e0bebbfc56e614fc214416db72c613f768ee2fc84ffdbff4/botocore_stubs-1.40.29-py3-none-any.whl", hash = "sha256:84cbcc6328dddaa1f825830f7dec8fa0dcd3bac8002211322e8529cbfb5eaddd", size = 66843, upload-time = "2025-09-11T20:22:32.576Z" },
 ]
 
 [[package]]
@@ -1471,11 +1471,11 @@ rds = [
 
 [[package]]
 name = "types-boto3-rds"
-version = "1.40.24"
+version = "1.40.29"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/24/91/608e7d93613f19f3bebac75e7281c5bb5f31578a5751b0472110cebb82ad/types_boto3_rds-1.40.24.tar.gz", hash = "sha256:045292cd551e86b7241909415d85d897d2e13647a08a5c2a2509589184afc24d", size = 85107, upload-time = "2025-09-04T19:24:52.492Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3a/52/806da4c6ab792250985cbbb146e8da3de6ac52ac1efaf628168b137c6373/types_boto3_rds-1.40.29.tar.gz", hash = "sha256:4527cb0c501ab8645a5f4f286f71ce1c74b33eb4f585d9e4049c593c35c88f06", size = 85203, upload-time = "2025-09-11T19:42:28.237Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/2e/07534e83d4783707eb183c70a4674421d3d484f896e5fa9ac2e073c97355/types_boto3_rds-1.40.24-py3-none-any.whl", hash = "sha256:1d687d796b5798fce715e2af9b728f656b168c10bfed8a647728ef85be4a7c1d", size = 91653, upload-time = "2025-09-04T19:24:48.283Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/e1/27ec435d2db5ccdd987b3a8f9f2d6202654da94a8b5057b9c4ae95537d8d/types_boto3_rds-1.40.29-py3-none-any.whl", hash = "sha256:41201ad9643e2d79d8f45c977f2a8d473791558e65b7e3a0d12ea1b39f350eb7", size = 91755, upload-time = "2025-09-11T19:42:24.967Z" },
 ]
 
 [[package]]
