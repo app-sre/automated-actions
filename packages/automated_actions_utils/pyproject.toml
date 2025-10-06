@@ -10,7 +10,7 @@ dependencies = [
     "boto3==1.40.46",
     "gql==4.0.0",
     "hvac==2.3.0",
-    "kubernetes==33.1.0",
+    "kubernetes==34.1.0",
     "openshift==0.13.2",
     "pydantic==2.11.10",
     "types-boto3-lite[rds]==1.40.46",
