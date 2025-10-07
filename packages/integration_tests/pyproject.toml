@@ -11,11 +11,11 @@ dependencies = [
     "automated-actions-client",
     "automated-actions-cli",
     "automated-actions-utils",
-    "pydantic-settings==2.10.1",
-    "pytest==8.4.1",
+    "pydantic-settings==2.11.0",
+    "pytest==8.4.2",
     "pytest-order==1.3.0",
     "pytest-rerunfailures==15.1",
-    "pyyaml==6.0.2",
+    "pyyaml==6.0.3",
 ]
 
 [project.urls]
@@ -26,9 +26,9 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "mypy==1.17.1",
-    "ruff==0.12.9",
-    "types-pyyaml==6.0.12.20250809",
+    "mypy==1.18.2",
+    "ruff==0.13.3",
+    "types-pyyaml==6.0.12.20250915",
 ]
 
 [build-system]

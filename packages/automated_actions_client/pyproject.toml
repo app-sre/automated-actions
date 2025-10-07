@@ -20,13 +20,13 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "mypy==1.17.1",
+    "mypy==1.18.2",
     # disabled until https://github.com/openapi-generators/openapi-python-client/pull/1324 is available in 0.26.2
     # "openapi-python-client==0.25.3",
-    "pytest-cov==6.2.1",
-    "pytest==8.4.1",
-    "ruff==0.12.9",
-    "types-python-dateutil==2.9.0.20250809",
+    "pytest-cov==6.3.0",
+    "pytest==8.4.2",
+    "ruff==0.13.3",
+    "types-python-dateutil==2.9.0.20250822",
 ]
 
 [build-system]
