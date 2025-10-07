@@ -21,7 +21,8 @@ documentation = "https://github.com/app-sre/automated-actions"
 dev = [
     # Development dependencies
     "mypy==1.18.2",
-    # disabled until https://github.com/openapi-generators/openapi-python-client/pull/1324 is available in 0.26.2
+    # we don't install this directly anymore, because it may have an outdated typer version dependency and this breaks Renovate
+    # instead, we use a specific version in the compose.yml file
     # "openapi-python-client==0.25.3",
     "pytest-cov==6.3.0",
     "pytest==8.4.2",

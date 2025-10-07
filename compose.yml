@@ -106,9 +106,9 @@ services:
       - dont-start-automatically
     entrypoint:
       - uv
+      - tool
       - run
-      - --frozen
-      - openapi-python-client
+      - openapi-python-client==0.26.2
     command:
       - generate
       - --url=http://automated-actions:8080/docs/openapi.json

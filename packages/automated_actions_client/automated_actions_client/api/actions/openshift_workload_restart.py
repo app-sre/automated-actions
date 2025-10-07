@@ -35,10 +35,12 @@ def _parse_response(
         response_202 = ActionSchemaOut.from_dict(response.json())
 
         return response_202
+
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
         return response_422
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -92,10 +94,9 @@ def sync_detailed(
         name=name,
     )
 
-    with client as _client:
-        response = _client.request(
-            **kwargs,
-        )
+    response = client.get_httpx_client().request(
+        **kwargs,
+    )
 
     return _build_response(client=client, response=response)
 
@@ -174,10 +175,7 @@ async def asyncio_detailed(
         name=name,
     )
 
-    async with client as _client:
-        response = await _client.request(
-            **kwargs,
-        )
+    response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
 
