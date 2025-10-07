@@ -24,7 +24,7 @@ dev = [
     # we don't install this directly anymore, because it may have an outdated typer version dependency and this breaks Renovate
     # instead, we use a specific version in the compose.yml file
     # "openapi-python-client==0.25.3",
-    "pytest-cov==6.3.0",
+    "pytest-cov==7.0.0",
     "pytest==8.4.2",
     "ruff==0.13.3",
     "types-python-dateutil==2.9.0.20250822",
