@@ -15,6 +15,34 @@ from automated_actions_utils.external_resource import (
 from tests.conftest import Config
 
 
+def delete_old_snapshot(
+    aws_api: AWSApi,
+    config: Config,
+    snapshot_delete_retries: int = 0,
+    snapshot_delete_retry_wait_time: int = 30,
+    # 5 minutes
+    max_snapshot_delete_retry_wait_time: int = 300,
+) -> None:
+    while True:
+        try:
+            snapshot_delete_retries += 1
+            # remove old test snapshot if it exists
+            aws_api.rds_client.delete_db_snapshot(
+                DBSnapshotIdentifier=config.external_resource_rds_snapshot.snapshot_identifier
+            )
+            break
+        except aws_api.rds_client.exceptions.DBSnapshotNotFoundFault:
+            break
+        except aws_api.rds_client.exceptions.InvalidDBSnapshotStateFault:
+            if (
+                snapshot_delete_retries * snapshot_delete_retry_wait_time
+                > max_snapshot_delete_retry_wait_time
+            ):
+                raise
+            time.sleep(snapshot_delete_retry_wait_time)
+            continue
+
+
 @pytest.fixture(scope="session")
 def aws_api(config: Config) -> AWSApi:
     rds = get_external_resource(
@@ -35,28 +63,8 @@ def action_id(aws_api: AWSApi, aa_client: AuthenticatedClient, config: Config) -
     We use a pytest fixture with session scope to avoid multiple actions being triggered
     in case of retry via the flaky mark
     """
-    snapshot_delete_retries = 0
-    snapshot_delete_retry_wait_time = 30
-    max_snapshot_delete_retry_wait_time = 300  # 5 minutes
-
-    while True:
-        try:
-            snapshot_delete_retries += 1
-            # remove old test snapshot if it exists
-            aws_api.rds_client.delete_db_snapshot(
-                DBSnapshotIdentifier=config.external_resource_rds_snapshot.snapshot_identifier
-            )
-            break
-        except aws_api.rds_client.exceptions.DBSnapshotNotFoundFault:
-            break
-        except aws_api.rds_client.exceptions.InvalidDBSnapshotStateFault:
-            if (
-                snapshot_delete_retries * snapshot_delete_retry_wait_time
-                > max_snapshot_delete_retry_wait_time
-            ):
-                raise
-            time.sleep(snapshot_delete_retry_wait_time)
-            continue
+    # ensure any old test snapshot is deleted before starting the test
+    delete_old_snapshot(aws_api, config)
 
     action = external_resource_rds_snapshot.sync(
         account=config.external_resource_rds_snapshot.account,
@@ -97,6 +105,10 @@ def test_external_resource_rds_snapshot(
             and snapshot["DBSnapshotIdentifier"]
             == config.external_resource_rds_snapshot.snapshot_identifier
         ):
+            # cleanup - delete the snapshot
+            delete_old_snapshot(
+                aws_api, config, max_snapshot_delete_retry_wait_time=60 * 10
+            )
             return
 
     pytest.fail(
