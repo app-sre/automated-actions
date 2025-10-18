@@ -16,12 +16,12 @@ dependencies = [
     "kubernetes==34.1.0",
     "prometheus-fastapi-instrumentator==7.1.0",
     "pydantic-settings==2.11.0",
-    "pydantic==2.12.2",
+    "pydantic==2.12.3",
     "pyjwt==2.10.1",
     "pynamodb==6.1.0",
     "requests-toolbelt==1.0.0",
     "types-hvac==2.3.0.20250914",
-    "uvicorn==0.37.0",
+    "uvicorn==0.38.0",
     "watchdog==6.0.0",
 ]
 
