@@ -26,7 +26,7 @@ WORKDIR ${APP_ROOT}/src
 # Builder image
 #
 FROM registry.access.redhat.com/ubi9/python-312@sha256:f17b0788b7eff1683ff8ba7c6a17b907648753d489e8d7d3975eaf6c41644287 AS builder
-COPY --from=ghcr.io/astral-sh/uv:0.9.4@sha256:35aca64ac15f61941da93e92ebfb22220359e95056e6a827f4aef2235c4d353f /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.9.4@sha256:c4089b0085cf4d38e38d5cdaa5e57752c1878a6f41f2e3a3a234dc5f23942cb4 /uv /bin/uv
 ENV \
     # use venv from ubi image
     UV_PROJECT_ENVIRONMENT=${APP_ROOT} \
@@ -44,7 +44,7 @@ RUN cd packages/automated_actions && uv sync --frozen --no-group dev --verbose
 # Test image
 #
 FROM base AS test
-COPY --from=ghcr.io/astral-sh/uv:0.9.4@sha256:35aca64ac15f61941da93e92ebfb22220359e95056e6a827f4aef2235c4d353f /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.9.4@sha256:c4089b0085cf4d38e38d5cdaa5e57752c1878a6f41f2e3a3a234dc5f23942cb4 /uv /bin/uv
 
 COPY Makefile ./
 COPY --from=builder /opt/app-root /opt/app-root
