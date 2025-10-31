@@ -30,6 +30,12 @@ These are the core operations that users can request the system to perform.
   * **Required Parameters**: none
   * **Usage Example (CLI)**: `automated-actions no-op`
 
+* **`openshift-trigger-cronjob`**:
+  * **Description**: Triggers a specified CronJob in an OpenShift cluster.
+  * **Use Case**: Useful for manually starting scheduled jobs outside of their regular schedule, such as for testing or urgent execution.
+  * **Required Parameters**: Cluster name, namespace name, CronJob name.
+  * **Usage Example (CLI)**: `automated-actions openshift-trigger-cronjob --cluster my-cluster --namespace my-namespace --cronjob my-cronjob`
+
 * **`openshift-workload-restart`**:
   * **Description**: Restarts a specified workload (e.g., Deployment, StatefulSet, Pod) in an OpenShift cluster.
   * **Use Case**: Useful for resolving issues with applications by restarting their components, applying new configurations that require a restart, or clearing a stuck state.

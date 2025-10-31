@@ -1,8 +1,10 @@
+import http
 from datetime import UTC
 from datetime import datetime as dt
 from unittest.mock import MagicMock
 
 import pytest
+from kubernetes.client import ApiException
 from kubernetes.dynamic.exceptions import NotFoundError
 from pytest_mock import MockerFixture
 
@@ -12,6 +14,7 @@ from automated_actions_utils.openshift_client import (
     OpenshiftClientPodDeletionNotSupportedError,
     OpenshiftClientResourceNotFoundError,
     RollingRestartResource,
+    V1CronJob,
 )
 
 
@@ -177,3 +180,47 @@ def test_delete_success(
     )
     mock_api.delete.assert_called_once_with(name=name, namespace=namespace)
     assert result == {"status": "deleted"}
+
+
+def test_trigger_cronjob_success(
+    openshift_client: OpenshiftClient, mocker: MockerFixture
+) -> None:
+    k8s_cronjob_mock = MagicMock(spec=V1CronJob)
+    read_namespaced_cron_job_mock = mocker.patch.object(
+        openshift_client.batch_v1,
+        "read_namespaced_cron_job",
+        return_value=k8s_cronjob_mock,
+    )
+    run_job_mock = mocker.patch.object(openshift_client, "run_job")
+
+    namespace = "test-namespace"
+    cronjob = "test-cronjob"
+
+    openshift_client.trigger_cronjob(namespace, cronjob)
+
+    read_namespaced_cron_job_mock.assert_called_once_with(
+        name=cronjob, namespace=namespace
+    )
+    run_job_kwargs = run_job_mock.call_args[1]
+    assert run_job_kwargs["namespace"] == namespace
+    assert cronjob in run_job_kwargs["job"].metadata.name
+    assert run_job_kwargs["job"].spec == k8s_cronjob_mock.spec.job_template.spec
+
+
+def test_trigger_cronjob_failure(
+    openshift_client: OpenshiftClient, mocker: MockerFixture
+) -> None:
+    mocker.patch.object(
+        openshift_client.batch_v1,
+        "read_namespaced_cron_job",
+        side_effect=ApiException(status=http.HTTPStatus.NOT_FOUND),
+    )
+    run_job_mock = mocker.patch.object(openshift_client, "run_job")
+
+    namespace = "test-namespace"
+    cronjob = "test-cronjob"
+
+    with pytest.raises(OpenshiftClientResourceNotFoundError):
+        openshift_client.trigger_cronjob(namespace, cronjob)
+
+    run_job_mock.assert_not_called()

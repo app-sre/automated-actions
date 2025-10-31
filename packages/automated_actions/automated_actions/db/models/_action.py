@@ -7,7 +7,7 @@ from datetime import datetime as dt
 from enum import StrEnum
 from typing import Any, Protocol, Self, TypeVar
 
-from pydantic import BaseModel, ConfigDict, field_serializer
+from pydantic import BaseModel, model_validator
 from pynamodb.attributes import DynamicMapAttribute, NumberAttribute, UnicodeAttribute
 from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
@@ -30,29 +30,26 @@ class ActionSchemaIn(BaseModel):
 
 
 class ActionSchemaOut(ActionSchemaIn):
-    # Pydantic doesn't know about PynamoDB's DynamicMapAttribute
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
     action_id: str
     result: str | None = None
-    task_args: DynamicMapAttribute | None = None
+    task_args: dict | None = None
     created_at: float
     updated_at: float
 
-    @field_serializer("task_args")
-    def serialize_task_args(self, task_args: DynamicMapAttribute) -> dict:  # noqa: PLR6301
-        if task_args is None:
-            return {}
-
-        # "attribute_values" is an empty dict in DynamicMapAttribute(s). We remove it
-        # from the serialized version since it doesn't it doesn't relate to what we
-        # want to show from that database field. See
-        # https://github.com/pynamodb/PynamoDB/blob/a5c1f4e1b3201f01ee6d4cf759fc6dc494e67fd4/pynamodb/attributes.py#L1213
-        return {
-            k: task_args.attribute_values[k]
-            for k in task_args.attribute_values
-            if k != "attribute_values"
-        }
+    @model_validator(mode="before")
+    @classmethod
+    def compile_task_args(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "task_args" in data:
+            if data["task_args"] is None:
+                data["task_args"] = {}
+            else:
+                task_args = {
+                    k: data["task_args"].attribute_values[k]
+                    for k in data["task_args"].attribute_values
+                    if k != "attribute_values"
+                }
+                data["task_args"] = task_args
+        return data
 
 
 class OwnerIndex(GlobalSecondaryIndex["Action"]):

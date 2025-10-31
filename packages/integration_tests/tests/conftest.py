@@ -48,6 +48,12 @@ class OpenshiftPodRestartParameters(BaseParameters):
     parent_kind_name: str
 
 
+class OpenshiftTriggerCronJobParameters(BaseParameters):
+    cluster: str
+    namespace: str
+    cronjob: str
+
+
 class OpenshiftWorkloadDeleteParameters(BaseParameters):
     cluster: str
     namespace: str
@@ -71,6 +77,7 @@ class Config(BaseSettings):
     no_op: NoOpParameters = NoOpParameters(sleep_time=2)
     openshift_deployment_restart: OpenshiftDeploymentRestartParameters
     openshift_pod_restart: OpenshiftPodRestartParameters
+    openshift_trigger_cronjob: OpenshiftTriggerCronJobParameters
     openshift_workload_delete: OpenshiftWorkloadDeleteParameters
 
 

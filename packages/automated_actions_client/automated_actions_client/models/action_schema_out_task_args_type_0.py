@@ -4,11 +4,11 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="ActionSchemaOutTaskArgs")
+T = TypeVar("T", bound="ActionSchemaOutTaskArgsType0")
 
 
 @_attrs_define
-class ActionSchemaOutTaskArgs:
+class ActionSchemaOutTaskArgsType0:
     """ """
 
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -22,10 +22,10 @@ class ActionSchemaOutTaskArgs:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        action_schema_out_task_args = cls()
+        action_schema_out_task_args_type_0 = cls()
 
-        action_schema_out_task_args.additional_properties = d
-        return action_schema_out_task_args
+        action_schema_out_task_args_type_0.additional_properties = d
+        return action_schema_out_task_args_type_0
 
     @property
     def additional_keys(self) -> list[str]:

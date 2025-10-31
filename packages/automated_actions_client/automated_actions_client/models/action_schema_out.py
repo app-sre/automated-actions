@@ -14,7 +14,7 @@ from ..models.action_status import ActionStatus
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.action_schema_out_task_args import ActionSchemaOutTaskArgs
+    from ..models.action_schema_out_task_args_type_0 import ActionSchemaOutTaskArgsType0
 
 
 T = TypeVar("T", bound="ActionSchemaOut")
@@ -31,7 +31,7 @@ class ActionSchemaOut:
         updated_at (float):
         status (Union[Unset, ActionStatus]):
         result (Union[None, Unset, str]):
-        task_args (Union[Unset, ActionSchemaOutTaskArgs]):
+        task_args (Union['ActionSchemaOutTaskArgsType0', None, Unset]):
     """
 
     name: str
@@ -41,10 +41,14 @@ class ActionSchemaOut:
     updated_at: float
     status: Unset | ActionStatus = UNSET
     result: None | Unset | str = UNSET
-    task_args: Union[Unset, "ActionSchemaOutTaskArgs"] = UNSET
+    task_args: Union["ActionSchemaOutTaskArgsType0", None, Unset] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.action_schema_out_task_args_type_0 import (
+            ActionSchemaOutTaskArgsType0,
+        )
+
         name = self.name
 
         owner = self.owner
@@ -65,9 +69,13 @@ class ActionSchemaOut:
         else:
             result = self.result
 
-        task_args: Unset | dict[str, Any] = UNSET
-        if not isinstance(self.task_args, Unset):
+        task_args: None | Unset | dict[str, Any]
+        if isinstance(self.task_args, Unset):
+            task_args = UNSET
+        elif isinstance(self.task_args, ActionSchemaOutTaskArgsType0):
             task_args = self.task_args.to_dict()
+        else:
+            task_args = self.task_args
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -89,7 +97,9 @@ class ActionSchemaOut:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.action_schema_out_task_args import ActionSchemaOutTaskArgs
+        from ..models.action_schema_out_task_args_type_0 import (
+            ActionSchemaOutTaskArgsType0,
+        )
 
         d = dict(src_dict)
         name = d.pop("name")
@@ -118,12 +128,24 @@ class ActionSchemaOut:
 
         result = _parse_result(d.pop("result", UNSET))
 
-        _task_args = d.pop("task_args", UNSET)
-        task_args: Unset | ActionSchemaOutTaskArgs
-        if isinstance(_task_args, Unset):
-            task_args = UNSET
-        else:
-            task_args = ActionSchemaOutTaskArgs.from_dict(_task_args)
+        def _parse_task_args(
+            data: object,
+        ) -> Union["ActionSchemaOutTaskArgsType0", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                task_args_type_0 = ActionSchemaOutTaskArgsType0.from_dict(data)
+
+                return task_args_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["ActionSchemaOutTaskArgsType0", None, Unset], data)
+
+        task_args = _parse_task_args(d.pop("task_args", UNSET))
 
         action_schema_out = cls(
             name=name,
