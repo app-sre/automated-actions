@@ -103,3 +103,40 @@ def openshift_workload_delete(
         server_url=cluster_connection.url, token=cluster_connection.token
     )
     OpenshiftWorkloadDelete(oc, namespace, api_version, kind, name).run()
+
+
+class OpenshiftTriggerCronjob:
+    def __init__(
+        self,
+        action: Action,
+        oc: OpenshiftClient,
+        namespace: str,
+        cronjob: str,
+    ) -> None:
+        self.action = action
+        self.oc = oc
+        self.namespace = namespace
+        self.cronjob = cronjob
+
+    def run(self) -> None:
+        log.info(
+            f"Triggering OpenShift cronjob {self.cronjob} in namespace {self.namespace}"
+        )
+        self.oc.trigger_cronjob(
+            namespace=self.namespace,
+            cronjob=self.cronjob,
+            annotations={
+                "automated-actions.action_id": str(self.action.action_id),
+            },
+        )
+
+
+@app.task(base=AutomatedActionTask)
+def openshift_trigger_cronjob(
+    cluster: str, namespace: str, cronjob: str, action: Action
+) -> None:
+    cluster_connection = get_cluster_connection_data(cluster, settings)
+    oc = OpenshiftClient(
+        server_url=cluster_connection.url, token=cluster_connection.token
+    )
+    OpenshiftTriggerCronjob(action, oc, namespace, cronjob).run()

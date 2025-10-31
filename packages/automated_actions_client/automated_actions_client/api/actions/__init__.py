@@ -6,6 +6,7 @@ from . import (
     external_resource_rds_reboot,
     external_resource_rds_snapshot,
     no_op,
+    openshift_trigger_cronjob,
     openshift_workload_delete,
     openshift_workload_restart,
 )
@@ -15,6 +16,7 @@ __all__ = [
     "external_resource_rds_reboot",
     "external_resource_rds_snapshot",
     "no_op",
+    "openshift_trigger_cronjob",
     "openshift_workload_delete",
     "openshift_workload_restart",
 ]

@@ -5,6 +5,9 @@ from fastapi import APIRouter, Depends, Path, Query
 
 from automated_actions.api.v1.dependencies import UserDep
 from automated_actions.celery.openshift.tasks import (
+    openshift_trigger_cronjob as openshift_trigger_cronjob_task,
+)
+from automated_actions.celery.openshift.tasks import (
     openshift_workload_delete as openshift_workload_delete_task,
 )
 from automated_actions.celery.openshift.tasks import (
@@ -21,6 +24,7 @@ log = logging.getLogger(__name__)
 
 OPENSHIFT_WORKLOAD_RESTART_ID = "openshift-workload-restart"
 OPENSHIFT_WORKLOAD_DELETE_ID = "openshift-workload-delete"
+OPENSHIFT_TRIGGER_CRONJOB_ID = "openshift-trigger-cronjob"
 
 
 def get_action_openshift_workload_restart(
@@ -107,6 +111,41 @@ def openshift_workload_delete(
             "api_version": api_version,
             "kind": kind,
             "name": name,
+            "action": action,
+        },
+        task_id=action.action_id,
+    )
+    return action.dump()
+
+
+def get_action_openshift_trigger_cronjob(
+    action_mgr: Annotated[ActionManager, Depends(get_action_manager)], user: UserDep
+) -> Action:
+    """Creates a new action record for an OpenShift operation."""
+    return action_mgr.create_action(name=OPENSHIFT_TRIGGER_CRONJOB_ID, owner=user)
+
+
+@router.post(
+    "/openshift/trigger-cronjob/{cluster}/{namespace}/{cronjob}",
+    operation_id=OPENSHIFT_TRIGGER_CRONJOB_ID,
+    status_code=202,
+    tags=["Actions"],
+)
+def openshift_trigger_cronjob(
+    cluster: Annotated[str, Path(description="OpenShift cluster name")],
+    namespace: Annotated[str, Path(description="OpenShift namespace")],
+    cronjob: Annotated[str, Path(description="OpenShift cronjob name")],
+    action: Annotated[Action, Depends(get_action_openshift_trigger_cronjob)],
+) -> ActionSchemaOut:
+    """Run a specified OpenShift cronjob immediately."""
+    log.info(
+        f"Triggering cronjob {cronjob} in {cluster}/{namespace}: action_id={action.action_id}"
+    )
+    openshift_trigger_cronjob_task.apply_async(
+        kwargs={
+            "cluster": cluster,
+            "namespace": namespace,
+            "cronjob": cronjob,
             "action": action,
         },
         task_id=action.action_id,

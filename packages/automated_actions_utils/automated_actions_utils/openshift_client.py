@@ -1,3 +1,4 @@
+import http
 import logging
 import time
 import uuid
@@ -8,8 +9,11 @@ from kubernetes.client import (
     ApiClient as K8sApiClient,
 )
 from kubernetes.client import (
+    ApiException,
+    BatchV1Api,
     Configuration,
     V1Container,
+    V1CronJob,
     V1EnvVar,
     V1EnvVarSource,
     V1Job,
@@ -127,6 +131,7 @@ class OpenshiftClient:
         configuration.retries = retries
         self.k8s_api_client = K8sApiClient(configuration=configuration)
         self.dyn_client = DynamicClient(self.k8s_api_client)
+        self.batch_v1 = BatchV1Api(api_client=self.k8s_api_client)
 
     # https://kubernetes.io/docs/reference/labels-annotations-taints/#kubectl-k8s-io-restart-at
     def rolling_restart(
@@ -199,7 +204,6 @@ class OpenshiftClient:
         check_interval: int = 5,
     ) -> None:
         """Wait for a Kubernetes Job to complete."""
-        job_api = self.dyn_client.resources.get(api_version="batch/v1", kind="Job")
         start_time = time.time()
 
         while True:
@@ -207,11 +211,15 @@ class OpenshiftClient:
                 raise TimeoutError(f"Timeout waiting for Job '{job_name}' to complete.")
 
             try:
-                job = job_api.get(name=job_name, namespace=namespace)
-            except NotFoundError:
-                log.debug(f"Job '{job_name}' not found yet, retrying...")
-                time.sleep(check_interval)
-                continue
+                job: V1Job = self.batch_v1.read_namespaced_job(
+                    name=job_name, namespace=namespace
+                )
+            except ApiException as err:
+                if err.status == http.HTTPStatus.NOT_FOUND:
+                    log.debug(f"Job '{job_name}' not found yet, retrying...")
+                    time.sleep(check_interval)
+                    continue
+                raise
 
             if not job.status:
                 log.debug(f"Job '{job_name}' has no status yet, retrying...")
@@ -246,13 +254,41 @@ class OpenshiftClient:
         wait_for_completion: bool = True,
     ) -> None:
         """Run a Kubernetes Job and optionally wait for its completion."""
-        job_api = self.dyn_client.resources.get(api_version="batch/v1", kind="Job")
         log.info(f"Creating Job '{job.metadata.name}' in namespace '{namespace}'")
-        job_api.create(
-            body=self.k8s_api_client.sanitize_for_serialization(job),
+        self.batch_v1.create_namespaced_job(
             namespace=namespace,
+            body=self.k8s_api_client.sanitize_for_serialization(job),
         )
         if wait_for_completion:
             self.job_wait(
                 job_name=job.metadata.name, namespace=namespace, timeout_seconds=10 * 60
             )
+
+    def trigger_cronjob(
+        self, namespace: str, cronjob: str, annotations: dict[str, str] | None = None
+    ) -> None:
+        try:
+            k8s_cronjob: V1CronJob = self.batch_v1.read_namespaced_cron_job(
+                name=cronjob, namespace=namespace
+            )
+        except ApiException as err:
+            if err.status == http.HTTPStatus.NOT_FOUND:
+                raise OpenshiftClientResourceNotFoundError(
+                    f"CronJob {cronjob} does not exist in namespace {namespace}"
+                ) from err
+            raise
+
+        # make mypy happy
+        assert k8s_cronjob.spec is not None
+        assert k8s_cronjob.spec.job_template is not None
+
+        job = V1Job(
+            api_version="batch/v1",
+            kind="Job",
+            metadata=V1ObjectMeta(
+                name=f"aa-triggered-{cronjob[:41]}-{uuid.uuid4().hex[:8]}",
+                annotations=annotations,
+            ),
+            spec=k8s_cronjob.spec.job_template.spec,
+        )
+        self.run_job(namespace=namespace, job=job, wait_for_completion=False)
