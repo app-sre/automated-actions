@@ -1,7 +1,6 @@
 import http
 import logging
 import time
-import uuid
 from datetime import UTC, datetime
 from enum import StrEnum
 
@@ -27,6 +26,7 @@ from kubernetes.dynamic.exceptions import NotFoundError
 from kubernetes.dynamic.resource import ResourceInstance
 from openshift.dynamic import DynamicClient
 from pydantic import BaseModel
+from sretoolbox.utils.k8s import unique_job_name
 
 SUPPORTED_POD_OWNERS = {"ReplicaSet", "StatefulSet"}
 log = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ def job_builder(
     image: str,
     command: list[str],
     args: list[str] | None = None,
-    job_name_prefix: str = "temp-job-",
+    job_name: str = "temp-job",
     backoff_limit: int = 4,
     annotations: dict[str, str] | None = None,
     env: dict[str, str] | None = None,
@@ -116,7 +116,7 @@ def job_builder(
         api_version="batch/v1",
         kind="Job",
         metadata=V1ObjectMeta(
-            name=f"{job_name_prefix}{uuid.uuid4().hex[:8]}",
+            name=unique_job_name(job_name),
             annotations=annotations,
         ),
         spec=job_spec,
@@ -286,7 +286,7 @@ class OpenshiftClient:
             api_version="batch/v1",
             kind="Job",
             metadata=V1ObjectMeta(
-                name=f"aa-triggered-{cronjob[:41]}-{uuid.uuid4().hex[:8]}",
+                name=unique_job_name(f"aa-triggered-{cronjob}"),
                 annotations=annotations,
             ),
             spec=k8s_cronjob.spec.job_template.spec,

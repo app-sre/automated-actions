@@ -106,7 +106,7 @@ class ExternalResourceFlushElastiCache:
             image=image,
             command=command,
             args=args,
-            job_name_prefix="flush-elasticache-",
+            job_name="flush-elasticache",
             annotations={
                 "automated-actions.action_id": str(self.action.action_id),
             },
