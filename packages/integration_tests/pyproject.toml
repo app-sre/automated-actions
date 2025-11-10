@@ -27,7 +27,7 @@ documentation = "https://github.com/app-sre/automated-actions"
 dev = [
     # Development dependencies
     "mypy==1.18.2",
-    "ruff==0.14.3",
+    "ruff==0.14.4",
     "types-pyyaml==6.0.12.20250915",
 ]
 
