@@ -1,5 +1,5 @@
 FROM registry.access.redhat.com/ubi9-minimal@sha256:61d5ad475048c2e655cd46d0a55dfeaec182cc3faa6348cb85989a7c9e196483 AS base
-COPY --from=openpolicyagent/opa:1.10.1-static@sha256:e1f196b5316301785d5251543c9d0f3f6c83ce6ac23263b494730427fa80e248 /opa /opa
+COPY --from=openpolicyagent/opa:1.11.0-static@sha256:a044b7e11c09480b56cef5405176a1ddd6cc65d824e1240fb2b1726367a08949 /opa /opa
 
 ENV PATH=${PATH}:/
 USER 1000:1000
