@@ -326,23 +326,23 @@ wheels = [
 
 [[package]]
 name = "botocore-stubs"
-version = "1.42.8"
+version = "1.42.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "types-awscrt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c7/df/d2be0d6d485edfcf44e3b92d55b643a3e0a38555e2202fa0ef95ef998008/botocore_stubs-1.42.8.tar.gz", hash = "sha256:9656c43dcfdadf92b7a87d7997cd941a0ed6cb111374ed879ecdd07c9ab301dd", size = 42408, upload-time = "2025-12-11T22:26:51.474Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9e/98/4ce007813d13ff107b8c5a39a85916f53bd58923dbb358882a6031d8f53a/botocore_stubs-1.42.9.tar.gz", hash = "sha256:92fdd2a1d911355166da3e30e9bb9b1803f7e2caec0d913f5fad3a920352ce6d", size = 42413, upload-time = "2025-12-12T21:24:37.054Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/6d/01635795111d6622280f52678f32f7399502c90af045a15a98fb81b2f55e/botocore_stubs-1.42.8-py3-none-any.whl", hash = "sha256:ebcd1c6a136f99cba54a30d1214a0e9ff2f2adcc43e627d8bcd371f6dd887e5e", size = 66749, upload-time = "2025-12-11T22:26:49.916Z" },
+    { url = "https://files.pythonhosted.org/packages/7b/9f/fbed79fa17af56cea7543b70d3f69c11426575a38b3421666411becefeef/botocore_stubs-1.42.9-py3-none-any.whl", hash = "sha256:9f8b652549d4f727aa69e09d462d18e54a1bd10f3dbb593da56d5d0aafe9756e", size = 66748, upload-time = "2025-12-12T21:24:35.832Z" },
 ]
 
 [[package]]
 name = "cachetools"
-version = "6.2.2"
+version = "6.2.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/fb/44/ca1675be2a83aeee1886ab745b28cda92093066590233cc501890eb8417a/cachetools-6.2.2.tar.gz", hash = "sha256:8e6d266b25e539df852251cfd6f990b4bc3a141db73b939058d809ebd2590fc6", size = 31571, upload-time = "2025-11-13T17:42:51.465Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/44/5dc354b9f2df614673c2a542a630ef95d578b4a8673a1046d1137a7e2453/cachetools-6.2.3.tar.gz", hash = "sha256:64e0a4ddf275041dd01f5b873efa87c91ea49022b844b8c5d1ad3407c0f42f1f", size = 31641, upload-time = "2025-12-12T21:18:06.011Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e6/46/eb6eca305c77a4489affe1c5d8f4cae82f285d9addd8de4ec084a7184221/cachetools-6.2.2-py3-none-any.whl", hash = "sha256:6c09c98183bf58560c97b2abfcedcbaf6a896a490f534b031b661d3723b45ace", size = 11503, upload-time = "2025-11-13T17:42:50.232Z" },
+    { url = "https://files.pythonhosted.org/packages/ab/de/aa4cfc69feb5b3d604310214369979bb222ed0df0e2575a1b6e7af1a5579/cachetools-6.2.3-py3-none-any.whl", hash = "sha256:3fde34f7033979efb1e79b07ae529c2c40808bdd23b0b731405a48439254fba5", size = 11554, upload-time = "2025-12-12T21:18:04.556Z" },
 ]
 
 [[package]]
