@@ -78,4 +78,5 @@ COPY --from=test ${IS_TESTED_FLAG} ${IS_TESTED_FLAG}
 
 WORKDIR ${APP_ROOT}/src/packages/integration_tests
 
-CMD ["pytest", "tests"]
+ENTRYPOINT ["pytest"]
+CMD ["tests"]
