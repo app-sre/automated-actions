@@ -1,6 +1,6 @@
 #
 # Base image with defaults for all stages
-FROM registry.access.redhat.com/ubi9-minimal@sha256:6fc28bcb6776e387d7a35a2056d9d2b985dc4e26031e98a2bd35a7137cd6fd71 AS base
+FROM registry.access.redhat.com/ubi9/python-312-minimal@sha256:64a3083a25d9f7573bb9b1a167e10be0464859a8e81421853d09947e873fe500 AS base
 
 COPY LICENSE /licenses/
 
@@ -16,16 +16,17 @@ ENV \
     ENV="${APP_ROOT}/bin/activate" \
     PROMPT_COMMAND=". ${APP_ROOT}/bin/activate"
 
-# Install base dependencies
-RUN microdnf install -y python3.12 make && microdnf clean all
-USER 1001
 WORKDIR ${APP_ROOT}/src
 
+USER 0
+# Install base dependencies
+RUN microdnf install -y make && microdnf clean all
+USER 1001
 
 #
 # Builder image
 #
-FROM registry.access.redhat.com/ubi9/python-312@sha256:3da39d0c938994161bdf9b6b13eb2eacd9a023c86dd5166f3da31df171c88780 AS builder
+FROM registry.access.redhat.com/ubi9/python-312-minimal@sha256:64a3083a25d9f7573bb9b1a167e10be0464859a8e81421853d09947e873fe500 AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.9.18@sha256:5713fa8217f92b80223bc83aac7db36ec80a84437dbc0d04bbc659cae030d8c9 /uv /bin/uv
 ENV \
     # use venv from ubi image
