@@ -6,6 +6,8 @@ COPY LICENSE /licenses/
 
 ENV APP_ROOT=/opt/app-root
 ENV \
+    # unbuffered output for easier logging
+    PYTHONUNBUFFERED=1 \
     # use venv from ubi image
     UV_PROJECT_ENVIRONMENT=${APP_ROOT} \
     # compile bytecode for faster startup

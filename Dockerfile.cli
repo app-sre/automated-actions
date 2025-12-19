@@ -4,6 +4,8 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.18@sha256:5713fa8217f92b80223bc83aac7db36ec
 COPY LICENSE /licenses/
 
 ENV \
+    # unbuffered output for easier logging
+    PYTHONUNBUFFERED=1 \
     # use venv from ubi image
     UV_PROJECT_ENVIRONMENT=$APP_ROOT \
     # disable uv cache. it doesn't make sense in a container
