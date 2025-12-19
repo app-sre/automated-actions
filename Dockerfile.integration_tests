@@ -14,13 +14,15 @@ ENV \
     UV_NO_CACHE=true \
     BASH_ENV="${APP_ROOT}/bin/activate" \
     ENV="${APP_ROOT}/bin/activate" \
-    PROMPT_COMMAND=". ${APP_ROOT}/bin/activate"
+    PROMPT_COMMAND=". ${APP_ROOT}/bin/activate" \
+    IS_TESTED_FLAG="/tmp/is_tested"
 
 WORKDIR ${APP_ROOT}/src
 
 USER 0
 # Install base dependencies
 RUN microdnf install -y make && microdnf clean all
+USER 1001
 
 #
 # Builder image
@@ -62,18 +64,16 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.18@sha256:5713fa8217f92b80223bc83aac7db36ec
 COPY --from=builder --chown=1001:0 /opt/app-root /opt/app-root
 COPY packages/integration_tests/Makefile ./packages/integration_tests/
 
-USER 1001
-
 RUN make -C packages/integration_tests test
-
+RUN touch ${IS_TESTED_FLAG}
 
 #
 # Production image
 #
 FROM base AS prod
 COPY --from=builder /opt/app-root /opt/app-root
+COPY --from=test ${IS_TESTED_FLAG} ${IS_TESTED_FLAG}
 
 WORKDIR ${APP_ROOT}/src/packages/integration_tests
 
-USER 1001
 CMD ["pytest", "tests"]

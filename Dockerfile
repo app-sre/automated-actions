@@ -14,7 +14,8 @@ ENV \
     UV_NO_CACHE=true \
     BASH_ENV="${APP_ROOT}/bin/activate" \
     ENV="${APP_ROOT}/bin/activate" \
-    PROMPT_COMMAND=". ${APP_ROOT}/bin/activate"
+    PROMPT_COMMAND=". ${APP_ROOT}/bin/activate" \
+    IS_TESTED_FLAG="/tmp/is_tested"
 
 WORKDIR ${APP_ROOT}/src
 
@@ -49,14 +50,17 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.18@sha256:5713fa8217f92b80223bc83aac7db36ec
 
 COPY Makefile ./
 COPY --from=builder /opt/app-root /opt/app-root
+
 RUN uv sync --frozen --verbose
 RUN make test
-
+RUN touch ${IS_TESTED_FLAG}
 
 #
 # Production image
 #
 FROM base AS prod
 COPY --from=builder /opt/app-root /opt/app-root
+COPY --from=test ${IS_TESTED_FLAG} ${IS_TESTED_FLAG}
+
 COPY app.sh ./
 ENTRYPOINT [ "./app.sh" ]
