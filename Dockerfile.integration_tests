@@ -78,5 +78,5 @@ COPY --from=test ${IS_TESTED_FLAG} ${IS_TESTED_FLAG}
 
 WORKDIR ${APP_ROOT}/src/packages/integration_tests
 
-ENTRYPOINT ["pytest"]
+ENTRYPOINT ["pytest", "-p", "no:cacheprovider"]
 CMD ["tests"]
