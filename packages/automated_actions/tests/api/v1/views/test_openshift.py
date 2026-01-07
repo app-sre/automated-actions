@@ -27,8 +27,8 @@ def test_app(app: FastAPI, mocker: MockerFixture, running_action: dict) -> FastA
     action_mock = mocker.MagicMock(spec=Action)
     action_mock.action_id = running_action["action_id"]
     action_mock.dump.return_value = running_action
-    app.dependency_overrides[get_action_openshift_workload_restart] = (
-        lambda: action_mock
+    app.dependency_overrides[get_action_openshift_workload_restart] = lambda: (
+        action_mock
     )
     app.dependency_overrides[get_action_openshift_workload_delete] = lambda: action_mock
     app.dependency_overrides[get_action_openshift_trigger_cronjob] = lambda: action_mock

@@ -43,14 +43,14 @@ def test_app(app: FastAPI, mocker: MockerFixture, running_action: dict) -> FastA
     action_mock = mocker.MagicMock(spec=Action)
     action_mock.action_id = running_action["action_id"]
     action_mock.dump.return_value = running_action
-    app.dependency_overrides[get_action_external_resource_rds_reboot] = (
-        lambda: action_mock
+    app.dependency_overrides[get_action_external_resource_rds_reboot] = lambda: (
+        action_mock
     )
-    app.dependency_overrides[get_action_external_resource_rds_snapshot] = (
-        lambda: action_mock
+    app.dependency_overrides[get_action_external_resource_rds_snapshot] = lambda: (
+        action_mock
     )
-    app.dependency_overrides[get_action_external_resource_flush_elasticache] = (
-        lambda: action_mock
+    app.dependency_overrides[get_action_external_resource_flush_elasticache] = lambda: (
+        action_mock
     )
     return app
 
