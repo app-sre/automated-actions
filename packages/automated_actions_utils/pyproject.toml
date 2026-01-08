@@ -7,14 +7,14 @@ license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.12.0"
 dependencies = [
-    "boto3==1.42.22",
+    "boto3==1.42.23",
     "gql==4.0.0",
     "hvac==2.4.0",
     "kubernetes==34.1.0",
     "openshift==0.13.2",
     "pydantic==2.12.5",
     "sretoolbox==3.2.0",
-    "types-boto3-lite[rds]==1.42.22",
+    "types-boto3-lite[rds]==1.42.23",
     "types-hvac==2.4.0.20251115",
 ]
 
