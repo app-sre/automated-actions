@@ -26,8 +26,8 @@ dev = [
     # "openapi-python-client==0.25.3",
     "pytest-cov==7.0.0",
     "pytest==9.0.2",
-    "ruff==0.14.11",
-    "types-python-dateutil==2.9.0.20251115",
+    "ruff==0.15.0",
+    "types-python-dateutil==2.9.0.20260124",
 ]
 
 [build-system]
@@ -49,6 +49,7 @@ fix = true
 [tool.ruff.lint]
 select = ["F", "I", "UP", "RUF022"]
 ignore = [
+    "UP042", # Use enum.StrEnum instead of both `str` and `enum.Enum`"
     "UP046", # non-pep695-generic-class
 ]
 
