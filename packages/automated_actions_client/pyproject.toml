@@ -49,6 +49,7 @@ fix = true
 [tool.ruff.lint]
 select = ["F", "I", "UP", "RUF022"]
 ignore = [
+    "UP042", # Use enum.StrEnum instead of both `str` and `enum.Enum`"
     "UP046", # non-pep695-generic-class
 ]
 
