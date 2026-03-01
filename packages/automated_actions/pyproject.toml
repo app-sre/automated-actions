@@ -9,7 +9,7 @@ requires-python = "~= 3.12.0"
 dependencies = [
     "automated-actions-utils",
     "celery[sqs]==5.6.2",
-    "fastapi==0.131.0",
+    "fastapi==0.134.0",
     "httpx==0.28.1",
     "hvac==2.4.0",
     "itsdangerous==2.2.0",
@@ -40,7 +40,7 @@ dev = [
     "pytest-mock==3.15.1",
     "pytest==9.0.2",
     "requests-mock==1.12.1",
-    "ruff==0.15.2",
+    "ruff==0.15.4",
 ]
 
 [build-system]
