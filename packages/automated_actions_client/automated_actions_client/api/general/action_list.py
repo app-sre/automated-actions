@@ -4,13 +4,12 @@
 from http import HTTPStatus
 from typing import Any
 
-import httpx
+import httpxyz as httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.action_schema_out import ActionSchemaOut
 from ...models.action_status import ActionStatus
-from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response, Unset
 
 
@@ -58,7 +57,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> HTTPValidationError | list["ActionSchemaOut"] | None:
+) -> list["ActionSchemaOut"] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -69,11 +68,6 @@ def _parse_response(
 
         return response_200
 
-    if response.status_code == 422:
-        response_422 = HTTPValidationError.from_dict(response.json())
-
-        return response_422
-
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -82,7 +76,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
+) -> Response[list["ActionSchemaOut"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -97,7 +91,7 @@ def sync_detailed(
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
     max_age_minutes: None | Unset | int = UNSET,
-) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
+) -> Response[list["ActionSchemaOut"]]:
     """Action List
 
      Lists actions, optionally filtered by status, user, or age.
@@ -114,7 +108,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, list['ActionSchemaOut']]]
+        Response[list['ActionSchemaOut']]
     """
 
     kwargs = _get_kwargs(
@@ -136,7 +130,7 @@ def sync(
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
     max_age_minutes: None | Unset | int = UNSET,
-) -> HTTPValidationError | list["ActionSchemaOut"] | None:
+) -> list["ActionSchemaOut"] | None:
     """Action List
 
      Lists actions, optionally filtered by status, user, or age.
@@ -153,7 +147,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, list['ActionSchemaOut']]
+        list['ActionSchemaOut']
     """
 
     return sync_detailed(
@@ -170,7 +164,7 @@ async def asyncio_detailed(
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
     max_age_minutes: None | Unset | int = UNSET,
-) -> Response[HTTPValidationError | list["ActionSchemaOut"]]:
+) -> Response[list["ActionSchemaOut"]]:
     """Action List
 
      Lists actions, optionally filtered by status, user, or age.
@@ -187,7 +181,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[HTTPValidationError, list['ActionSchemaOut']]]
+        Response[list['ActionSchemaOut']]
     """
 
     kwargs = _get_kwargs(
@@ -207,7 +201,7 @@ async def asyncio(
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
     max_age_minutes: None | Unset | int = UNSET,
-) -> HTTPValidationError | list["ActionSchemaOut"] | None:
+) -> list["ActionSchemaOut"] | None:
     """Action List
 
      Lists actions, optionally filtered by status, user, or age.
@@ -224,7 +218,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[HTTPValidationError, list['ActionSchemaOut']]
+        list['ActionSchemaOut']
     """
 
     return (

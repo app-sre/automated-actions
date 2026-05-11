@@ -1,6 +1,6 @@
 [project]
 name = "automated-actions-cli"
-version = "0.1.7"
+version = "0.1.8"
 description = "Automated Actions Client"
 authors = [
     # Feel free to add or change authors
@@ -35,6 +35,10 @@ dev = [
     "ruff==0.15.12",
     "types-pyyaml==6.0.12.20260508",
 ]
+
+[[tool.uv.dependency-metadata]]
+name = "httpx-gssapi"
+requires-dist = ["httpxyz>=0.31", "gssapi"]
 
 [project.scripts]
 automated-actions = 'automated_actions_cli.__main__:app'

@@ -4,12 +4,11 @@
 from http import HTTPStatus
 from typing import Any
 
-import httpx
+import httpxyz as httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.action_schema_out import ActionSchemaOut
-from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response, Unset
 
 
@@ -36,16 +35,11 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> ActionSchemaOut | HTTPValidationError | None:
+) -> ActionSchemaOut | None:
     if response.status_code == 202:
         response_202 = ActionSchemaOut.from_dict(response.json())
 
         return response_202
-
-    if response.status_code == 422:
-        response_422 = HTTPValidationError.from_dict(response.json())
-
-        return response_422
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -55,7 +49,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[ActionSchemaOut | HTTPValidationError]:
+) -> Response[ActionSchemaOut]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -70,7 +64,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     force_failover: Unset | bool = False,
-) -> Response[ActionSchemaOut | HTTPValidationError]:
+) -> Response[ActionSchemaOut]:
     """External Resource Rds Reboot
 
      Reboot an RDS instance.
@@ -88,7 +82,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[ActionSchemaOut, HTTPValidationError]]
+        Response[ActionSchemaOut]
     """
 
     kwargs = _get_kwargs(
@@ -110,7 +104,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     force_failover: Unset | bool = False,
-) -> ActionSchemaOut | HTTPValidationError | None:
+) -> ActionSchemaOut | None:
     """External Resource Rds Reboot
 
      Reboot an RDS instance.
@@ -128,7 +122,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[ActionSchemaOut, HTTPValidationError]
+        ActionSchemaOut
     """
 
     return sync_detailed(
@@ -145,7 +139,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     force_failover: Unset | bool = False,
-) -> Response[ActionSchemaOut | HTTPValidationError]:
+) -> Response[ActionSchemaOut]:
     """External Resource Rds Reboot
 
      Reboot an RDS instance.
@@ -163,7 +157,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[ActionSchemaOut, HTTPValidationError]]
+        Response[ActionSchemaOut]
     """
 
     kwargs = _get_kwargs(
@@ -183,7 +177,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     force_failover: Unset | bool = False,
-) -> ActionSchemaOut | HTTPValidationError | None:
+) -> ActionSchemaOut | None:
     """External Resource Rds Reboot
 
      Reboot an RDS instance.
@@ -201,7 +195,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[ActionSchemaOut, HTTPValidationError]
+        ActionSchemaOut
     """
 
     return (

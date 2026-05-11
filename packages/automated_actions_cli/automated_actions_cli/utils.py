@@ -2,7 +2,7 @@ import logging
 import shutil
 import subprocess
 
-import httpx
+import httpxyz
 from diskcache import Cache
 from packaging.version import Version
 from packaging.version import parse as parse_version
@@ -63,12 +63,12 @@ def get_latest_pypi_version(package_name: str) -> Version:
     version_str = "0.0.0"
     if package_name not in pypi_version_cache:
         try:
-            response = httpx.get(
+            response = httpxyz.get(
                 f"https://pypi.org/pypi/{package_name}/json", timeout=5
             )
             response.raise_for_status()
             version_str = response.json().get("info", {}).get("version", version_str)
-        except httpx.RequestError:
+        except httpxyz.RequestError:
             # ignore network errors
             pass
     else:

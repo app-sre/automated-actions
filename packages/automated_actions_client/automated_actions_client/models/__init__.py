@@ -8,6 +8,7 @@ from .http_validation_error import HTTPValidationError
 from .openshift_workload_restart_kind import OpenshiftWorkloadRestartKind
 from .user_schema_out import UserSchemaOut
 from .validation_error import ValidationError
+from .validation_error_context import ValidationErrorContext
 
 __all__ = (
     "ActionSchemaOut",
@@ -18,4 +19,5 @@ __all__ = (
     "OpenshiftWorkloadRestartKind",
     "UserSchemaOut",
     "ValidationError",
+    "ValidationErrorContext",
 )

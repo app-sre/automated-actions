@@ -1,7 +1,7 @@
 services:
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
-    image: localstack/localstack
+    image: ministackorg/ministack
     ports:
       - "127.0.0.1:4566:4566"            # LocalStack Gateway
       - "127.0.0.1:4510-4559:4510-4559"  # external services port range
@@ -15,10 +15,12 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - ./localstack:/etc/localstack/init/ready.d
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4566/_ministack/health')"]
       interval: 10s
-      timeout: 1s
-      retries: 10
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
 
   opa:
     build:

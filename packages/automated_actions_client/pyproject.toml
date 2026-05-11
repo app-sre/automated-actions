@@ -1,12 +1,12 @@
 [project]
 name = "automated-actions-client"
-version = "0.1.6"
+version = "0.1.7"
 description = "Automated Actions Client"
 authors = [{ name = "AppSRE", email = "sd-app-sre@redhat.com" }]
 license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.12.0"
-dependencies = ["httpx", "attrs", "typer", "python-dateutil"]
+dependencies = ["httpxyz", "attrs", "typer", "python-dateutil"]
 
 # [tool.uv.sources]
 # # use this unreleased version because of typer 0.16.0 update

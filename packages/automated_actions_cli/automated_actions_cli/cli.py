@@ -11,7 +11,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Annotated, Any
 
-import httpx
+import httpxyz as httpx
 import typer
 from automated_actions_client import AuthenticatedClient, Client
 from automated_actions_client.api.general.me import sync as api_v1_me
@@ -153,7 +153,7 @@ def main(  # noqa: C901, PLR0912
         level="DEBUG" if debug else "INFO",
         format="%(name)-20s: %(message)s",
     )
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpxyz").setLevel(logging.WARNING)
 
     if not debug:
         sys.excepthook = no_traceback_exception_hook

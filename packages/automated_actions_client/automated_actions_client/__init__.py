@@ -1,4 +1,4 @@
-"""A client library for accessing Automated Actions"""
+"""A client library for accessing Automated Actions API"""
 
 from .client import AuthenticatedClient, Client
 

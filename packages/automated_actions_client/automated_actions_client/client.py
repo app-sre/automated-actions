@@ -4,7 +4,7 @@
 import ssl
 from typing import Any
 
-import httpx
+import httpxyz as httpx
 from attrs import define, evolve, field
 
 

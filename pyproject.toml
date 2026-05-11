@@ -19,3 +19,11 @@ members = [
     "packages/automated_actions_utils",
     "packages/integration_tests",
 ]
+
+[[tool.uv.dependency-metadata]]
+name = "pytest-httpx"
+requires-dist = ["httpxyz>=0.31", "pytest==9.*"]
+
+[[tool.uv.dependency-metadata]]
+name = "httpx-gssapi"
+requires-dist = ["httpxyz>=0.31", "gssapi"]

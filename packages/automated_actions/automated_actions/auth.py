@@ -7,7 +7,7 @@ from json import JSONDecodeError
 from typing import Any, Protocol, Self
 from urllib.parse import quote
 
-import httpx
+import httpxyz as httpx
 import jwt
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from itsdangerous import URLSafeTimedSerializer
