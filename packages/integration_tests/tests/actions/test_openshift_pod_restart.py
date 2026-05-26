@@ -1,9 +1,9 @@
 import random
 from time import sleep
+from typing import TYPE_CHECKING
 
 import pytest
 from automated_actions.config import settings
-from automated_actions_client import AuthenticatedClient
 from automated_actions_client.api.actions import openshift_workload_restart
 from automated_actions_client.api.general import action_detail
 from automated_actions_client.models.action_schema_out import ActionSchemaOut
@@ -13,10 +13,13 @@ from automated_actions_client.models.openshift_workload_restart_kind import (
 )
 from automated_actions_utils.cluster_connection import get_cluster_connection_data
 from automated_actions_utils.openshift_client import OpenshiftClient
-from kubernetes.dynamic.resource import ResourceInstance
 from pydantic import BaseModel
 
-from tests.conftest import Config
+if TYPE_CHECKING:
+    from automated_actions_client import AuthenticatedClient
+    from kubernetes.dynamic.resource import ResourceInstance
+
+    from tests.conftest import Config
 
 
 @pytest.fixture

@@ -8,8 +8,7 @@ import textwrap
 from http.cookiejar import MozillaCookieJar
 from importlib.metadata import version
 from pathlib import Path
-from types import TracebackType
-from typing import Annotated, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
 import httpxyz as httpx
 import typer
@@ -29,6 +28,9 @@ from automated_actions_cli.utils import (
     kinit,
     progress_spinner,
 )
+
+if TYPE_CHECKING:
+    from types import TracebackType
 
 PACAKGE_NAME = "automated-actions-cli"
 LOCAL_VERSION = parse_version(version(PACAKGE_NAME))

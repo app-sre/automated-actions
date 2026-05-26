@@ -1,11 +1,11 @@
 [project]
 name = "automated-actions-client"
-version = "0.1.7"
+version = "0.2.0"
 description = "Automated Actions Client"
 authors = [{ name = "AppSRE", email = "sd-app-sre@redhat.com" }]
 license = { text = "Apache 2.0" }
 readme = "README.md"
-requires-python = "~= 3.12.0"
+requires-python = "~= 3.14.0"
 dependencies = ["httpxyz", "attrs", "typer", "python-dateutil"]
 
 # [tool.uv.sources]

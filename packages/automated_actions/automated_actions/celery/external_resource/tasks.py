@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from automated_actions_utils.aws_api import AWSApi, get_aws_credentials
 from automated_actions_utils.cluster_connection import get_cluster_connection_data
 from automated_actions_utils.external_resource import (
@@ -14,7 +16,9 @@ from automated_actions_utils.openshift_client import (
 from automated_actions.celery.app import app
 from automated_actions.celery.automated_action_task import AutomatedActionTask
 from automated_actions.config import settings
-from automated_actions.db.models import Action
+
+if TYPE_CHECKING:
+    from automated_actions.db.models import Action
 
 
 class ExternalResourceRDSReboot:

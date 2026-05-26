@@ -57,7 +57,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> list["ActionSchemaOut"] | None:
+) -> list[ActionSchemaOut] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -76,7 +76,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[list["ActionSchemaOut"]]:
+) -> Response[list[ActionSchemaOut]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -91,7 +91,7 @@ def sync_detailed(
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
     max_age_minutes: None | Unset | int = UNSET,
-) -> Response[list["ActionSchemaOut"]]:
+) -> Response[list[ActionSchemaOut]]:
     """Action List
 
      Lists actions, optionally filtered by status, user, or age.
@@ -130,7 +130,7 @@ def sync(
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
     max_age_minutes: None | Unset | int = UNSET,
-) -> list["ActionSchemaOut"] | None:
+) -> list[ActionSchemaOut] | None:
     """Action List
 
      Lists actions, optionally filtered by status, user, or age.
@@ -164,7 +164,7 @@ async def asyncio_detailed(
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
     max_age_minutes: None | Unset | int = UNSET,
-) -> Response[list["ActionSchemaOut"]]:
+) -> Response[list[ActionSchemaOut]]:
     """Action List
 
      Lists actions, optionally filtered by status, user, or age.
@@ -201,7 +201,7 @@ async def asyncio(
     status: ActionStatus | None | Unset = UNSET,
     action_user: None | Unset | str = UNSET,
     max_age_minutes: None | Unset | int = UNSET,
-) -> list["ActionSchemaOut"] | None:
+) -> list[ActionSchemaOut] | None:
     """Action List
 
      Lists actions, optionally filtered by status, user, or age.

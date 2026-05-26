@@ -1,10 +1,9 @@
-from collections.abc import Callable
 from datetime import UTC, timedelta
 from datetime import datetime as dt
+from typing import TYPE_CHECKING
 
 import pytest
 from automated_actions.config import settings
-from automated_actions_client import AuthenticatedClient
 from automated_actions_client.api.actions import (
     openshift_trigger_cronjob,
 )
@@ -15,7 +14,12 @@ from automated_actions_utils.openshift_client import (
     OpenshiftClient,
 )
 
-from tests.conftest import Config
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from automated_actions_client import AuthenticatedClient
+
+    from tests.conftest import Config
 
 
 @pytest.fixture

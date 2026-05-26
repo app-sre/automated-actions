@@ -1,5 +1,5 @@
-from collections.abc import Callable
 from time import sleep
+from typing import TYPE_CHECKING
 
 import pytest
 from automated_actions_client import AuthenticatedClient
@@ -8,6 +8,9 @@ from automated_actions_client.models.action_schema_out import ActionSchemaOut
 from automated_actions_client.models.action_status import ActionStatus
 from pydantic import BaseModel, HttpUrl
 from pydantic_settings import BaseSettings
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class BaseParameters(BaseModel):

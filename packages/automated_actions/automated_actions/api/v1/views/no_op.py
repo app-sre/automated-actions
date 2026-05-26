@@ -1,15 +1,17 @@
 import logging
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import APIRouter, Depends
 
-from automated_actions.api.v1.dependencies import UserDep
 from automated_actions.celery.no_op.tasks import no_op as no_op_task
 from automated_actions.db.models import (
     Action,
     ActionSchemaOut,
 )
 from automated_actions.db.models._action import ActionManager, get_action_manager
+
+if TYPE_CHECKING:
+    from automated_actions.api.v1.dependencies import UserDep
 
 router = APIRouter()
 log = logging.getLogger(__name__)

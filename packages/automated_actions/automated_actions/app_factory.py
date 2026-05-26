@@ -29,7 +29,7 @@ async def app_lifespan_manager(
     run_db_init: bool = True,
     run_auth_init: bool = True,
     run_router_config: bool = True,
-) -> AsyncGenerator[None, None]:
+) -> AsyncGenerator[None]:
     log.info("Lifespan: Application startup sequence initiated.")
 
     if run_db_init:
@@ -68,7 +68,7 @@ def create_app(
     run_router_config: bool = True,
 ) -> FastAPI:
     @asynccontextmanager
-    async def lifespan(app_instance: FastAPI) -> AsyncGenerator[None, None]:
+    async def lifespan(app_instance: FastAPI) -> AsyncGenerator[None]:
         async with app_lifespan_manager(
             app_instance,
             run_db_init=run_db_init,

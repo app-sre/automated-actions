@@ -1,12 +1,16 @@
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import pytest
-from automated_actions_client import AuthenticatedClient
 from automated_actions_client.api.actions import no_op
 from automated_actions_client.models.action_schema_out import ActionSchemaOut
 from automated_actions_client.models.action_status import ActionStatus
 
-from tests.conftest import Config
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from automated_actions_client import AuthenticatedClient
+
+    from tests.conftest import Config
 
 
 @pytest.fixture(scope="session")

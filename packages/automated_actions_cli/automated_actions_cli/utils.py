@@ -1,16 +1,19 @@
 import logging
 import shutil
 import subprocess
+from typing import TYPE_CHECKING
 
 import httpxyz
 from diskcache import Cache
 from packaging.version import Version
 from packaging.version import parse as parse_version
-from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.text import Text
 
 from automated_actions_cli.config import config
+
+if TYPE_CHECKING:
+    from rich.console import Console
 
 logger = logging.getLogger(__name__)
 

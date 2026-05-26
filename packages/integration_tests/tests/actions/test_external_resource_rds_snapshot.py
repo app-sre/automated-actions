@@ -1,8 +1,7 @@
 import time
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import pytest
-from automated_actions_client import AuthenticatedClient
 from automated_actions_client.api.actions import external_resource_rds_snapshot
 from automated_actions_client.models.action_schema_out import ActionSchemaOut
 from automated_actions_client.models.action_status import ActionStatus
@@ -12,7 +11,12 @@ from automated_actions_utils.external_resource import (
     get_external_resource,
 )
 
-from tests.conftest import Config
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from automated_actions_client import AuthenticatedClient
+
+    from tests.conftest import Config
 
 
 def delete_old_snapshot(

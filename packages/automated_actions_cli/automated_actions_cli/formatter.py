@@ -1,9 +1,11 @@
 import json
-from collections.abc import Callable
 from enum import StrEnum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class OutputFormat(StrEnum):

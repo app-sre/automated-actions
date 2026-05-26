@@ -1,6 +1,10 @@
+from typing import TYPE_CHECKING
+
 from automated_actions.celery.app import app
 from automated_actions.celery.automated_action_task import AutomatedActionTask
-from automated_actions.db.models import Action
+
+if TYPE_CHECKING:
+    from automated_actions.db.models import Action
 
 
 @app.task(base=AutomatedActionTask)

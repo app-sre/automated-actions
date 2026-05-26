@@ -41,7 +41,7 @@ class ActionSchemaOut:
     updated_at: float
     status: Unset | ActionStatus = UNSET
     result: None | Unset | str = UNSET
-    task_args: Union["ActionSchemaOutTaskArgsType0", None, Unset] = UNSET
+    task_args: ActionSchemaOutTaskArgsType0 | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -130,7 +130,7 @@ class ActionSchemaOut:
 
         def _parse_task_args(
             data: object,
-        ) -> Union["ActionSchemaOutTaskArgsType0", None, Unset]:
+        ) -> ActionSchemaOutTaskArgsType0 | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):

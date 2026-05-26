@@ -5,6 +5,7 @@ from collections.abc import Callable
 from datetime import UTC
 from datetime import datetime as dt
 from datetime import timedelta as td
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import jwt
@@ -17,7 +18,9 @@ from pytest_httpx import HTTPXMock
 from pytest_mock import MockerFixture
 
 from automated_actions.auth import OpenIDConnect
-from tests.conftest import MockUserModel
+
+if TYPE_CHECKING:
+    from tests.conftest import MockUserModel
 
 
 @pytest.fixture

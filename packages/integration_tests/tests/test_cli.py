@@ -2,12 +2,13 @@ import json
 import os
 from collections.abc import Callable
 from subprocess import CalledProcessError, CompletedProcess, run
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import pytest
 import yaml
 
-from tests.conftest import Config
+if TYPE_CHECKING:
+    from tests.conftest import Config
 
 AACli = Callable[..., CompletedProcess]
 

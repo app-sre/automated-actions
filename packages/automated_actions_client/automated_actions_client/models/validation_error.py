@@ -3,7 +3,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -34,7 +33,7 @@ class ValidationError:
     msg: str
     type_: str
     input_: Unset | Any = UNSET
-    ctx: Union[Unset, "ValidationErrorContext"] = UNSET
+    ctx: Unset | ValidationErrorContext = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

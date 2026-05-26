@@ -5,7 +5,7 @@ description = "Automated Actions Server"
 authors = [{ name = "AppSRE", email = "sd-app-sre@redhat.com" }]
 license = { text = "Apache 2.0" }
 readme = "README.md"
-requires-python = "~= 3.12.0"
+requires-python = "~= 3.14.0"
 dependencies = [
     "automated-actions-utils",
     "celery[sqs]==5.6.3",
@@ -101,6 +101,7 @@ ignore = [
     "EM102",   # Exception must not use an f-string literal, assign to variable first
     "TRY003",  # Avoid specifying long messages outside the exception class
     "TRY300",  # try-consider-else
+    "TC001",   # type-checking-block
     "TC002",   # type-checking-block
     "TC003",   # type-checking-block
     # pydoclint
@@ -122,6 +123,19 @@ preview = true
 
 [tool.ruff.lint.isort]
 known-first-party = ["automated_actions"]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+runtime-evaluated-decorators = [
+    "fastapi.FastAPI.get",
+    "fastapi.FastAPI.post",
+    "fastapi.FastAPI.put",
+    "fastapi.FastAPI.delete",
+    "fastapi.APIRouter.get",
+    "fastapi.APIRouter.post",
+    "fastapi.APIRouter.put",
+    "fastapi.APIRouter.delete",
+]
 
 # Mypy configuration
 [tool.mypy]

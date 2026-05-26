@@ -5,7 +5,7 @@ description = "Automated Actions Utils"
 authors = [{ name = "AppSRE", email = "sd-app-sre@redhat.com" }]
 license = { text = "Apache 2.0" }
 readme = "README.md"
-requires-python = "~= 3.12.0"
+requires-python = "~= 3.14.0"
 dependencies = [
     "boto3==1.43.6",
     "gql==4.0.0",
@@ -109,6 +109,13 @@ preview = true
 
 [tool.ruff.lint.isort]
 known-first-party = ["automated_actions_utils"]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+runtime-evaluated-decorators = [
+    "dataclasses.dataclass",
+    "pydantic.dataclasses.dataclass",
+]
 
 # Mypy configuration
 [tool.mypy]

@@ -1,9 +1,8 @@
 import uuid
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import pytest
 from automated_actions.config import settings
-from automated_actions_client import AuthenticatedClient
 from automated_actions_client.api.actions import (
     openshift_workload_delete,
 )
@@ -16,7 +15,12 @@ from automated_actions_utils.openshift_client import (
 from kubernetes.dynamic.exceptions import NotFoundError
 from pydantic import BaseModel
 
-from tests.conftest import Config
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from automated_actions_client import AuthenticatedClient
+
+    from tests.conftest import Config
 
 
 class OpenshiftWorkloadDeleteParameters(BaseModel):

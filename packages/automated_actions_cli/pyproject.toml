@@ -1,6 +1,6 @@
 [project]
 name = "automated-actions-cli"
-version = "0.1.8"
+version = "0.2.0"
 description = "Automated Actions Client"
 authors = [
     # Feel free to add or change authors
@@ -8,7 +8,7 @@ authors = [
 ]
 license = { text = "Apache 2.0" }
 readme = "README.md"
-requires-python = "~= 3.12.0"
+requires-python = "~= 3.14.0"
 dependencies = [
     "appdirs==1.4.4",
     "automated-actions-client",
@@ -110,6 +110,10 @@ preview = true
 
 [tool.ruff.lint.isort]
 known-first-party = ["automated_actions_cli"]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+runtime-evaluated-decorators = ["typer.Typer.command", "typer.Typer.callback"]
 
 [tool.mypy]
 files = ["automated_actions_cli"]

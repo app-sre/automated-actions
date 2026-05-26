@@ -52,7 +52,7 @@ class Client:
     _client: httpx.Client | None = field(default=None, init=False)
     _async_client: httpx.AsyncClient | None = field(default=None, init=False)
 
-    def with_headers(self, headers: dict[str, str]) -> "Client":
+    def with_headers(self, headers: dict[str, str]) -> Client:
         """Get a new client matching this one with additional headers"""
         if self._client is not None:
             self._client.headers.update(headers)
@@ -60,7 +60,7 @@ class Client:
             self._async_client.headers.update(headers)
         return evolve(self, headers={**self._headers, **headers})
 
-    def with_cookies(self, cookies: dict[str, str]) -> "Client":
+    def with_cookies(self, cookies: dict[str, str]) -> Client:
         """Get a new client matching this one with additional cookies"""
         if self._client is not None:
             self._client.cookies.update(cookies)
@@ -68,7 +68,7 @@ class Client:
             self._async_client.cookies.update(cookies)
         return evolve(self, cookies={**self._cookies, **cookies})
 
-    def with_timeout(self, timeout: httpx.Timeout) -> "Client":
+    def with_timeout(self, timeout: httpx.Timeout) -> Client:
         """Get a new client matching this one with a new timeout (in seconds)"""
         if self._client is not None:
             self._client.timeout = timeout
@@ -76,7 +76,7 @@ class Client:
             self._async_client.timeout = timeout
         return evolve(self, timeout=timeout)
 
-    def set_httpx_client(self, client: httpx.Client) -> "Client":
+    def set_httpx_client(self, client: httpx.Client) -> Client:
         """Manually set the underlying httpx.Client
 
         **NOTE**: This will override any other settings on the client, including cookies, headers, and timeout.
@@ -107,7 +107,7 @@ class Client:
         self.get_httpx_client().__exit__(*args, **kwargs)
         self._client = None
 
-    def set_async_httpx_client(self, async_client: httpx.AsyncClient) -> "Client":
+    def set_async_httpx_client(self, async_client: httpx.AsyncClient) -> Client:
         """Manually the underlying httpx.AsyncClient
 
         **NOTE**: This will override any other settings on the client, including cookies, headers, and timeout.
@@ -190,7 +190,7 @@ class AuthenticatedClient:
     prefix: str = "Bearer"
     auth_header_name: str = "Authorization"
 
-    def with_headers(self, headers: dict[str, str]) -> "AuthenticatedClient":
+    def with_headers(self, headers: dict[str, str]) -> AuthenticatedClient:
         """Get a new client matching this one with additional headers"""
         if self._client is not None:
             self._client.headers.update(headers)
@@ -198,7 +198,7 @@ class AuthenticatedClient:
             self._async_client.headers.update(headers)
         return evolve(self, headers={**self._headers, **headers})
 
-    def with_cookies(self, cookies: dict[str, str]) -> "AuthenticatedClient":
+    def with_cookies(self, cookies: dict[str, str]) -> AuthenticatedClient:
         """Get a new client matching this one with additional cookies"""
         if self._client is not None:
             self._client.cookies.update(cookies)
@@ -206,7 +206,7 @@ class AuthenticatedClient:
             self._async_client.cookies.update(cookies)
         return evolve(self, cookies={**self._cookies, **cookies})
 
-    def with_timeout(self, timeout: httpx.Timeout) -> "AuthenticatedClient":
+    def with_timeout(self, timeout: httpx.Timeout) -> AuthenticatedClient:
         """Get a new client matching this one with a new timeout (in seconds)"""
         if self._client is not None:
             self._client.timeout = timeout
@@ -214,7 +214,7 @@ class AuthenticatedClient:
             self._async_client.timeout = timeout
         return evolve(self, timeout=timeout)
 
-    def set_httpx_client(self, client: httpx.Client) -> "AuthenticatedClient":
+    def set_httpx_client(self, client: httpx.Client) -> AuthenticatedClient:
         """Manually set the underlying httpx.Client
 
         **NOTE**: This will override any other settings on the client, including cookies, headers, and timeout.
@@ -250,7 +250,7 @@ class AuthenticatedClient:
 
     def set_async_httpx_client(
         self, async_client: httpx.AsyncClient
-    ) -> "AuthenticatedClient":
+    ) -> AuthenticatedClient:
         """Manually the underlying httpx.AsyncClient
 
         **NOTE**: This will override any other settings on the client, including cookies, headers, and timeout.

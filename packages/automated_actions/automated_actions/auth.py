@@ -101,7 +101,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         scope: str = "openid email profile",
         enforce_https: bool = True,
         user_model: type[UserModel],
-    ) -> "OpenIDConnect[UserModel]":
+    ) -> OpenIDConnect[UserModel]:
         async with httpx.AsyncClient() as client:
             res = await client.get(
                 issuer.rstrip("/") + "/.well-known/openid-configuration", timeout=5
