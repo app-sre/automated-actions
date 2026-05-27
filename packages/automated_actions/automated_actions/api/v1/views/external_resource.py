@@ -1,8 +1,9 @@
 import logging
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query
 
+from automated_actions.api.v1.dependencies import UserDep  # noqa: TC001
 from automated_actions.celery.external_resource.tasks import (
     external_resource_flush_elasticache as external_resource_flush_elasticache_task,
 )
@@ -17,9 +18,6 @@ from automated_actions.db.models import (
     ActionSchemaOut,
 )
 from automated_actions.db.models._action import ActionManager, get_action_manager
-
-if TYPE_CHECKING:
-    from automated_actions.api.v1.dependencies import UserDep
 
 router = APIRouter()
 log = logging.getLogger(__name__)

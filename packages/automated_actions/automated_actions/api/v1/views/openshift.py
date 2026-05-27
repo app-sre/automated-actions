@@ -1,8 +1,9 @@
 import logging
-from typing import TYPE_CHECKING, Annotated, Literal
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Path, Query
 
+from automated_actions.api.v1.dependencies import UserDep  # noqa: TC001
 from automated_actions.celery.openshift.tasks import (
     openshift_trigger_cronjob as openshift_trigger_cronjob_task,
 )
@@ -17,9 +18,6 @@ from automated_actions.db.models import (
     ActionSchemaOut,
 )
 from automated_actions.db.models._action import ActionManager, get_action_manager
-
-if TYPE_CHECKING:
-    from automated_actions.api.v1.dependencies import UserDep
 
 router = APIRouter()
 log = logging.getLogger(__name__)

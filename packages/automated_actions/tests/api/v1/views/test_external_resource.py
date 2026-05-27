@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, get_type_hints
 
 import pytest
 from fastapi import FastAPI, status
@@ -147,3 +147,17 @@ def test_external_resource_flush_elasticache(
         },
         task_id=running_action["action_id"],
     )
+
+
+@pytest.mark.parametrize(
+    "func",
+    [
+        get_action_external_resource_flush_elasticache,
+        get_action_external_resource_rds_reboot,
+        get_action_external_resource_rds_snapshot,
+    ],
+    ids=lambda f: f.__qualname__,
+)
+def test_dependency_type_aliases_resolve_at_runtime(func: Callable) -> None:
+    """UserDep must not be in a TYPE_CHECKING block."""
+    get_type_hints(func, include_extras=True)
