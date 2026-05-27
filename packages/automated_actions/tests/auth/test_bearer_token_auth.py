@@ -1,12 +1,15 @@
 from datetime import UTC
 from datetime import datetime as dt
 from datetime import timedelta as td
-from unittest.mock import MagicMock
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi import HTTPException, status
 
 from automated_actions.auth import BearerTokenAuth
+
+if TYPE_CHECKING:
+    from unittest.mock import MagicMock
 
 
 @pytest.fixture

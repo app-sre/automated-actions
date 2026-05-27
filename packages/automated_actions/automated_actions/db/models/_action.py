@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import uuid
-from collections.abc import Iterable
 from datetime import UTC
 from datetime import datetime as dt
 from enum import StrEnum
-from typing import Any, Protocol, Self, TypeVar
+from typing import TYPE_CHECKING, Any, Protocol, Self, TypeVar
 
 from pydantic import BaseModel, model_validator
 from pynamodb.attributes import DynamicMapAttribute, NumberAttribute, UnicodeAttribute
@@ -13,6 +12,9 @@ from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 
 from automated_actions.config import settings
 from automated_actions.db.models._base import Table
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class ActionStatus(StrEnum):

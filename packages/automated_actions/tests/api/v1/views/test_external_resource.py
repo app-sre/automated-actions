@@ -1,10 +1,8 @@
-from collections.abc import Callable
-from unittest.mock import MagicMock
+
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi import FastAPI, status
-from fastapi.testclient import TestClient
-from pytest_mock import MockerFixture
 
 from automated_actions.api.v1.views.external_resource import (
     get_action_external_resource_flush_elasticache,
@@ -12,6 +10,13 @@ from automated_actions.api.v1.views.external_resource import (
     get_action_external_resource_rds_snapshot,
 )
 from automated_actions.db.models import Action
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from unittest.mock import MagicMock
+
+    from fastapi.testclient import TestClient
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture

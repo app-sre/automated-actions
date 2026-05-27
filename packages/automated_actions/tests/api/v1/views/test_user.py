@@ -1,7 +1,12 @@
-from collections.abc import Callable
+
+from typing import TYPE_CHECKING
 
 from fastapi import FastAPI, status
-from fastapi.testclient import TestClient
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from fastapi.testclient import TestClient
 
 
 def test_user_me(app: FastAPI, client: Callable[[FastAPI], TestClient]) -> None:

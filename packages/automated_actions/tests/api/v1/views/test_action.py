@@ -1,12 +1,10 @@
 # ruff: noqa: ARG003
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 import pytest
 from fastapi import FastAPI, status
-from fastapi.testclient import TestClient
 from pynamodb.attributes import DynamicMapAttribute
 
 from automated_actions.db.models import (
@@ -17,6 +15,10 @@ from automated_actions.db.models import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from fastapi.testclient import TestClient
+
     from automated_actions.db.models._action import ActionSchemaIn
 
 

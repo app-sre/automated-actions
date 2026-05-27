@@ -1,4 +1,5 @@
-from pynamodb.models import Model
+
+from typing import TYPE_CHECKING
 
 from ._action import (
     Action,
@@ -10,6 +11,9 @@ from ._action import (
 )
 from ._base import Table
 from ._user import User, UserSchemaOut
+
+if TYPE_CHECKING:
+    from pynamodb.models import Model
 
 ALL_TABLES: list[type[Model]] = [User, Action]
 

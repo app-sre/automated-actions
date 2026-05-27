@@ -1,14 +1,17 @@
 import uuid
-from unittest.mock import Mock
-
-from automated_actions_utils.cluster_connection import ClusterConnectionData
-from pytest_mock import MockerFixture
+from typing import TYPE_CHECKING
 
 from automated_actions.celery.openshift.tasks import (
     OpenshiftWorkloadDelete,
     openshift_workload_delete,
 )
 from automated_actions.db.models import ActionStatus
+
+if TYPE_CHECKING:
+    from unittest.mock import Mock
+
+    from automated_actions_utils.cluster_connection import ClusterConnectionData
+    from pytest_mock import MockerFixture
 
 
 def test_openshift_workload_delete(mock_oc: Mock) -> None:

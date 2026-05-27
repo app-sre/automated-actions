@@ -1,13 +1,18 @@
-from collections.abc import Callable
-from unittest.mock import MagicMock
+
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi import FastAPI, status
-from fastapi.testclient import TestClient
-from pytest_mock import MockerFixture
 
 from automated_actions.api.v1.views.no_op import get_action
 from automated_actions.db.models import Action
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from unittest.mock import MagicMock
+
+    from fastapi.testclient import TestClient
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture

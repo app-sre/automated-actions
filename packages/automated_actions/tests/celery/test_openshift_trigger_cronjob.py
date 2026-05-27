@@ -1,14 +1,16 @@
 import uuid
+from typing import TYPE_CHECKING
 from unittest.mock import ANY, Mock
-
-from automated_actions_utils.cluster_connection import ClusterConnectionData
-from pytest_mock import MockerFixture
 
 from automated_actions.celery.openshift.tasks import (
     OpenshiftTriggerCronjob,
     openshift_trigger_cronjob,
 )
 from automated_actions.db.models import ActionStatus
+
+if TYPE_CHECKING:
+    from automated_actions_utils.cluster_connection import ClusterConnectionData
+    from pytest_mock import MockerFixture
 
 
 def test_openshift_trigger_cronjob(

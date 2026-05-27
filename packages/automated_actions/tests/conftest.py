@@ -1,13 +1,16 @@
 # ruff: noqa: S105, S106, PLC0415
 import os
-from collections.abc import Callable, Iterable
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
 
 import pytest
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import BaseModel, Field
-from pytest_httpx import HTTPXMock
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
+    from fastapi import FastAPI
+    from pytest_httpx import HTTPXMock
 
 os.environ["AA_ENVIRONMENT"] = "unit_tests"
 os.environ["AA_OIDC_ISSUER"] = "http://dev.com"

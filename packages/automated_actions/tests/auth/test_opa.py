@@ -3,11 +3,12 @@ from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException, status
-from pytest_httpx import HTTPXMock
 
 from automated_actions.auth import OPA
 
 if TYPE_CHECKING:
+    from pytest_httpx import HTTPXMock
+
     from tests.conftest import MockUserModel
 
 

@@ -1,4 +1,5 @@
 import uuid
+from typing import TYPE_CHECKING
 from unittest.mock import ANY, Mock
 
 import pytest
@@ -9,7 +10,6 @@ from automated_actions_utils.external_resource import (
     ExternalResource,
     VaultSecret,
 )
-from pytest_mock import MockerFixture
 
 from automated_actions.celery.external_resource.tasks import (
     ExternalResourceFlushElastiCache,
@@ -18,6 +18,9 @@ from automated_actions.celery.external_resource.tasks import (
     external_resource_rds_reboot,
 )
 from automated_actions.db.models import ActionStatus
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture

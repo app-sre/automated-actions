@@ -1,14 +1,18 @@
 from time import time
-from unittest.mock import Mock
+from typing import TYPE_CHECKING
 
 import pytest
 from automated_actions_utils.cluster_connection import ClusterConnectionData
 from automated_actions_utils.openshift_client import (
     OpenshiftClient,
 )
-from pytest_mock import MockerFixture
 
 from automated_actions.db.models import Action
+
+if TYPE_CHECKING:
+    from unittest.mock import Mock
+
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture

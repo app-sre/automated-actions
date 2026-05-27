@@ -1,10 +1,14 @@
-from collections.abc import Callable
 from datetime import UTC
 from datetime import datetime as dt
+from typing import TYPE_CHECKING
 
 import jwt
 from fastapi import FastAPI, status
-from fastapi.testclient import TestClient
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from fastapi.testclient import TestClient
 
 
 def test_admin_create_token(

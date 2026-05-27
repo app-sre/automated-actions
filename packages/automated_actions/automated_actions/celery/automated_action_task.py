@@ -1,14 +1,16 @@
 import logging
 from time import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from billiard.einfo import ExceptionInfo
 from hvac.exceptions import VaultError
 from kubernetes.client.exceptions import ApiException
 
 from automated_actions.celery.metrics import action_elapsed_time
 from automated_actions.db.models import ActionStatus
 from celery import Task
+
+if TYPE_CHECKING:
+    from billiard.einfo import ExceptionInfo
 
 log = logging.getLogger(__name__)
 

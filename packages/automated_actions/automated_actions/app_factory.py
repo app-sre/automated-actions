@@ -1,9 +1,9 @@
 import logging
 import logging.config
 import socket
-from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from importlib.metadata import version
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter as FastAPIAPIRouter
 from fastapi import FastAPI, Request, status
@@ -18,6 +18,9 @@ from automated_actions.api import (
     initialize_auth_components,
 )
 from automated_actions.config import settings
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
 
 log = logging.getLogger(__name__)
 

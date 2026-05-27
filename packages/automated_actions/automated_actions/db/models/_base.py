@@ -1,16 +1,18 @@
 from datetime import UTC
 from datetime import datetime as dt
-from typing import Any, ClassVar, Self
+from typing import TYPE_CHECKING, Any, ClassVar, Self
 
 from fastapi import HTTPException
 from pydantic import BaseModel as PydanticBaseModel
 from pynamodb.attributes import NumberAttribute
 from pynamodb.exceptions import DoesNotExist
-from pynamodb.expressions.condition import Condition
-from pynamodb.expressions.update import Action as PynamoAction
 from pynamodb.models import Model as PynamoModel
 
 from automated_actions.config import settings
+
+if TYPE_CHECKING:
+    from pynamodb.expressions.condition import Condition
+    from pynamodb.expressions.update import Action as PynamoAction
 
 
 class Table[SchemaIn: PydanticBaseModel, SchemaOut: PydanticBaseModel](PynamoModel):
