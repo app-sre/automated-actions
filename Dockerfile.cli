@@ -13,7 +13,7 @@ ENV \
 
 USER root
 # install the kerberos bindings to support Kerberos if the user runs the CLI via docker
-RUN microdnf install -y make krb5-libs krb5-workstation && microdnf clean all && rm -rf /var/cache/yum
+RUN microdnf install -y make krb5-devel krb5-libs krb5-workstation && microdnf clean all && rm -rf /var/cache/yum
 USER 1001
 
 COPY pyproject.toml uv.lock ./
@@ -22,12 +22,12 @@ COPY packages/automated_actions_client ./packages/automated_actions_client
 COPY packages/automated_actions_cli/README.md ./packages/automated_actions_cli/
 COPY packages/automated_actions_cli/pyproject.toml ./packages/automated_actions_cli/
 # install just the dependencies
-RUN uv sync --frozen --no-install-project
+RUN uv sync --frozen --no-install-project --verbose
 
 COPY packages/automated_actions_cli/Makefile ./packages/automated_actions_cli/
 COPY packages/automated_actions_cli/tests ./packages/automated_actions_cli/tests
 COPY packages/automated_actions_cli/automated_actions_cli ./packages/automated_actions_cli/automated_actions_cli
-RUN uv sync --frozen
+RUN uv sync --frozen --verbose
 
 #
 # Test image
