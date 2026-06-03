@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/python-314@sha256:8b6fccf90752f801ba1fd3a92f8a6dbc0971a2f446cfb8f6ad299909e0bf927b AS base
+FROM registry.access.redhat.com/ubi9/python-314@sha256:4f1f1081a6ec4635df97c7c615ee271fae970848bf394f8dd81c7eb81816f9bc AS base
 
 COPY LICENSE /licenses/
 
