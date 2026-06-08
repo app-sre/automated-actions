@@ -70,7 +70,15 @@ def no_traceback_exception_hook(
     tb: TracebackType | None,  # noqa: ARG001
 ) -> None:
     """Custom exception hook to display exceptions without traceback."""
-    rich_print(f"{exc_type.__name__}: {exc_value}", file=sys.stderr)
+    msg = str(exc_value)
+    if not msg and hasattr(exc_value, "response"):
+        resp = exc_value.response
+        try:
+            detail = resp.json().get("detail", resp.text)
+        except ValueError, AttributeError:
+            detail = resp.text
+        msg = f"HTTP {resp.status_code}: {detail}"
+    rich_print(f"{exc_type.__name__}: {msg}", file=sys.stderr)
 
 
 def version_callback(*, value: bool) -> None:
@@ -224,21 +232,12 @@ def _serialize_result(result: object) -> object:
     return result
 
 
-def _register_client_command(
-    name: str,
-    func: Callable[..., Any],
-    type_ns: dict[str, Any],
-) -> None:
-    """Register a single client function as a typer command."""
-    sig = inspect.signature(func)
-    hints = typing.get_type_hints(func, localns=type_ns)
-
-    data_hint = hints.get("data")
-    skip_data = data_hint is type(None)
-    data_model: type[pydantic.BaseModel] | None = None
-    if inspect.isclass(data_hint) and issubclass(data_hint, pydantic.BaseModel):
-        data_model = data_hint
-
+def _build_typer_params(
+    sig: inspect.Signature,
+    hints: dict[str, Any],
+    data_model: type[pydantic.BaseModel] | None,
+) -> tuple[list[inspect.Parameter], dict[str, Any]]:
+    """Build typer parameter list and annotations from a client function signature."""
     new_params: list[inspect.Parameter] = [
         inspect.Parameter(
             "ctx", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=typer.Context
@@ -285,6 +284,25 @@ def _register_client_command(
         )
         new_annotations[pname] = annotation
 
+    return new_params, new_annotations
+
+
+def _register_client_command(
+    name: str,
+    func: Callable[..., Any],
+    type_ns: dict[str, Any],
+) -> None:
+    """Register a single client function as a typer command."""
+    sig = inspect.signature(func)
+    hints = typing.get_type_hints(func, localns=type_ns)
+
+    data_hint = hints.get("data")
+    skip_data = data_hint is type(None)
+    data_model: type[pydantic.BaseModel] | None = None
+    if inspect.isclass(data_hint) and issubclass(data_hint, pydantic.BaseModel):
+        data_model = data_hint
+
+    new_params, new_annotations = _build_typer_params(sig, hints, data_model)
     new_sig = sig.replace(parameters=new_params, return_annotation=None)
 
     def wrapper(ctx: typer.Context, **kwargs: Any) -> None:
@@ -300,7 +318,13 @@ def _register_client_command(
                 if f in call_kwargs
             }
             call_kwargs["data"] = data_model(**data_fields)
-        result = func(**call_kwargs)
+        try:
+            result = func(**call_kwargs)
+        except Exception as e:
+            if hasattr(e, "response"):
+                rich_print(e.response.text, file=sys.stderr)
+                raise typer.Exit(1) from None
+            raise
         ctx.obj["formatter"](_serialize_result(result))
 
     wrapper.__signature__ = new_sig  # type: ignore[attr-defined]
