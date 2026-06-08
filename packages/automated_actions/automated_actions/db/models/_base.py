@@ -26,6 +26,7 @@ class Table[SchemaIn: PydanticBaseModel, SchemaOut: PydanticBaseModel](PynamoMod
         region = settings.dynamodb_aws_region
         aws_access_key_id = settings.dynamodb_aws_access_key_id
         aws_secret_access_key = settings.dynamodb_aws_secret_access_key
+        billing_mode = "PAY_PER_REQUEST"
         tags: ClassVar = {"app": "automated-actions"}
         schema_out: Any
 

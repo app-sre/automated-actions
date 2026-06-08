@@ -17,9 +17,7 @@ def create_db_tables() -> None:
     for table_model in ALL_TABLES:
         if not table_model.exists():
             log.info(f"Creating table {table_model.Meta.table_name}...")
-            table_model.create_table(
-                read_capacity_units=1, write_capacity_units=1, wait=True
-            )
+            table_model.create_table(wait=True)
             log.info(f"Table {table_model.Meta.table_name} created.")
     log.info("All tables checked.")
 

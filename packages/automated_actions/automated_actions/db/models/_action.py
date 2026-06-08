@@ -57,8 +57,6 @@ class ActionSchemaOut(ActionSchemaIn):
 class OwnerIndex(GlobalSecondaryIndex["Action"]):
     class Meta:
         index_name = "owner-index"
-        read_capacity_units = 10
-        write_capacity_units = 10
         projection = AllProjection()
 
     owner = UnicodeAttribute(hash_key=True)
