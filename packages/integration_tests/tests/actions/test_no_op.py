@@ -1,25 +1,22 @@
 from typing import TYPE_CHECKING
 
 import pytest
-from automated_actions_client.api.actions import no_op
-from automated_actions_client.models.action_schema_out import ActionSchemaOut
-from automated_actions_client.models.action_status import ActionStatus
+from automated_actions_client.client import no_op
+from automated_actions_client.schemas import ActionSchemaOut, ActionStatus
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-    from automated_actions_client import AuthenticatedClient
 
     from tests.conftest import Config
 
 
 @pytest.fixture(scope="session")
-def action_id(aa_client: AuthenticatedClient) -> str:
+def action_id() -> str:
     """Trigger a no-op action and return the action id.
 
     We use a pytest fixture with session scope to avoid multiple actions being triggered
     """
-    action = no_op.sync(client=aa_client)
+    action = no_op()
     assert isinstance(action, ActionSchemaOut)
     assert action.status == ActionStatus.PENDING
     assert not action.result

@@ -1,20 +1,25 @@
 import atexit
 import contextlib
-import importlib
+import enum
+import inspect
 import logging
 import os
 import sys
 import textwrap
+import typing
 from http.cookiejar import MozillaCookieJar
 from importlib.metadata import version
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Any
 
-import httpxyz as httpx
+import pydantic
 import typer
-from automated_actions_client import AuthenticatedClient, Client
-from automated_actions_client.api.general.me import sync as api_v1_me
-from httpx_gssapi import OPTIONAL, HTTPSPNEGOAuth
+from automated_actions_client import client as client_module
+from automated_actions_client import schemas as client_schemas
+from automated_actions_client.client import client as aa_client
+from automated_actions_client.client import me
+from automated_actions_client.config import Config
+from clientele.http import httpx_backend
 from packaging.version import parse as parse_version
 from rich import print as rich_print
 from rich.console import Console
@@ -29,13 +34,14 @@ from automated_actions_cli.utils import (
     progress_spinner,
 )
 
+from ._gssapi import OPTIONAL, HTTPSPNEGOAuth
+
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from types import TracebackType
 
 PACAKGE_NAME = "automated-actions-cli"
 LOCAL_VERSION = parse_version(version(PACAKGE_NAME))
-# Keep in sync with the tags used by automated-actions FastAPI endpoints.
-OPENAPI_TAGS = ["actions", "general", "admin"]
 
 app = typer.Typer(
     pretty_exceptions_show_locals=False,
@@ -73,32 +79,6 @@ def version_callback(*, value: bool) -> None:
         raise typer.Exit
 
 
-class ClientWithCookieJar(Client):
-    def get_httpx_client(self) -> httpx.Client:
-        """Get the underlying httpx.Client, constructing a new one if not previously set"""
-        if self._client is None:
-            self._cookiejar = MozillaCookieJar(filename=config.cookies_file)
-            with contextlib.suppress(FileNotFoundError):
-                self._cookiejar.load()
-
-            self._client = httpx.Client(
-                base_url=self._base_url,
-                cookies=self._cookiejar,
-                headers=self._headers,
-                timeout=self._timeout,
-                verify=self._verify_ssl,
-                follow_redirects=self._follow_redirects,
-                **self._httpx_args,
-            )
-        return self._client
-
-    def __exit__(self, *args: object, **kwargs: Any) -> None:
-        # persist cookies
-        self._cookiejar.save()
-        super().__exit__(*args, **kwargs)
-        self._client = None
-
-
 @app.callback(no_args_is_help=True)
 def main(  # noqa: C901, PLR0912
     ctx: typer.Context,
@@ -130,6 +110,8 @@ def main(  # noqa: C901, PLR0912
         bool, typer.Option(help="Use colored output", envvar="AA_COLOR")
     ] = True,
 ) -> None:
+    ctx.ensure_object(dict)
+
     if "--help" in sys.argv:
         rich_print(
             blend_text(BANNER, (32, 32, 255), (255, 32, 255)),
@@ -155,20 +137,20 @@ def main(  # noqa: C901, PLR0912
         level="DEBUG" if debug else "INFO",
         format="%(name)-20s: %(message)s",
     )
-    logging.getLogger("httpxyz").setLevel(logging.WARNING)
+    logging.getLogger("httpx2").setLevel(logging.WARNING)
 
     if not debug:
         sys.excepthook = no_traceback_exception_hook
 
     if token := os.environ.get("AA_TOKEN"):
-        ctx.obj = {
-            "client": AuthenticatedClient(
+        aa_client.configure(
+            config=Config(
                 base_url=str(url),
-                token=token,
-                raise_on_unexpected_status=True,
+                headers={"Authorization": f"Bearer {token}"},
                 follow_redirects=True,
+                timeout=15,
             )
-        }
+        )
 
     elif kerberos_available():
         if progress:
@@ -177,16 +159,24 @@ def main(  # noqa: C901, PLR0912
         if progress:
             progress.start()
 
-        ctx.obj = {
-            "client": ClientWithCookieJar(
+        cookiejar = MozillaCookieJar(filename=config.cookies_file)
+        with contextlib.suppress(FileNotFoundError):
+            cookiejar.load()
+
+        aa_client.configure(
+            config=Config(
                 base_url=str(url),
-                raise_on_unexpected_status=True,
-                follow_redirects=True,
-                httpx_args={
-                    "auth": HTTPSPNEGOAuth(mutual_authentication=OPTIONAL),
-                },
+                http_backend=httpx_backend.HttpxHTTPBackend(
+                    client_options={
+                        "cookies": cookiejar,
+                        "auth": HTTPSPNEGOAuth(mutual_authentication=OPTIONAL),
+                        "follow_redirects": True,
+                        "base_url": str(url),
+                    }
+                ),
             )
-        }
+        )
+
     else:
         logger.error(
             "No bearer token or Kerberos authentication available. Please set AA_TOKEN or install and configure Kerberos."
@@ -203,7 +193,7 @@ def main(  # noqa: C901, PLR0912
             raise ValueError("Invalid output format")
 
     # enforce the user to login
-    api_v1_me(client=ctx.obj["client"])
+    me()
 
     if screen_capture_file is not None:
         screen_capture_file = screen_capture_file.with_suffix(".svg")
@@ -216,18 +206,120 @@ def main(  # noqa: C901, PLR0912
         atexit.register(console.save_svg, str(screen_capture_file), title=title)
 
 
+def _get_help_panel(name: str) -> str:
+    """Map function name to help panel group, matching FastAPI endpoint tags."""
+    if name.startswith(("external_resource_", "openshift_")) or name == "no_op":
+        return "Actions"
+    if name == "create_token":
+        return "Admin"
+    return "General"
+
+
+def _serialize_result(result: object) -> object:
+    """Convert pydantic models to serializable dicts."""
+    if isinstance(result, pydantic.BaseModel):
+        return result.model_dump(mode="json")
+    if isinstance(result, list):
+        return [_serialize_result(item) for item in result]
+    return result
+
+
+def _register_client_command(
+    name: str,
+    func: Callable[..., Any],
+    type_ns: dict[str, Any],
+) -> None:
+    """Register a single client function as a typer command."""
+    sig = inspect.signature(func)
+    hints = typing.get_type_hints(func, localns=type_ns)
+
+    data_hint = hints.get("data")
+    skip_data = data_hint is type(None)
+    data_model: type[pydantic.BaseModel] | None = None
+    if inspect.isclass(data_hint) and issubclass(data_hint, pydantic.BaseModel):
+        data_model = data_hint
+
+    new_params: list[inspect.Parameter] = [
+        inspect.Parameter(
+            "ctx", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=typer.Context
+        )
+    ]
+    new_annotations: dict[str, Any] = {"ctx": typer.Context, "return": None}
+
+    for pname, param in sig.parameters.items():
+        if pname == "data":
+            if data_model:
+                for field_name, field_info in data_model.model_fields.items():
+                    ft = field_info.annotation or str
+                    annotation = Annotated[ft, typer.Option()]  # type: ignore[valid-type]
+                    default = (
+                        inspect.Parameter.empty
+                        if field_info.is_required()
+                        else field_info.default
+                    )
+                    new_params.append(
+                        inspect.Parameter(
+                            field_name,
+                            inspect.Parameter.KEYWORD_ONLY,
+                            default=default,
+                            annotation=annotation,
+                        )
+                    )
+                    new_annotations[field_name] = annotation
+            continue
+
+        resolved = hints.get(pname, param.annotation)
+        annotation = Annotated[resolved, typer.Option()]  # type: ignore[misc]
+        default = (
+            param.default
+            if param.default is not inspect.Parameter.empty
+            else inspect.Parameter.empty
+        )
+        new_params.append(
+            inspect.Parameter(
+                pname,
+                inspect.Parameter.KEYWORD_ONLY,
+                default=default,
+                annotation=annotation,
+            )
+        )
+        new_annotations[pname] = annotation
+
+    new_sig = sig.replace(parameters=new_params, return_annotation=None)
+
+    def wrapper(ctx: typer.Context, **kwargs: Any) -> None:
+        call_kwargs = {
+            k: v.value if isinstance(v, enum.Enum) else v for k, v in kwargs.items()
+        }
+        if skip_data:
+            call_kwargs["data"] = None
+        elif data_model:
+            data_fields = {
+                f: call_kwargs.pop(f)
+                for f in data_model.model_fields
+                if f in call_kwargs
+            }
+            call_kwargs["data"] = data_model(**data_fields)
+        result = func(**call_kwargs)
+        ctx.obj["formatter"](_serialize_result(result))
+
+    wrapper.__signature__ = new_sig  # type: ignore[attr-defined]
+    wrapper.__annotations__ = new_annotations
+    wrapper.__name__ = name
+    wrapper.__qualname__ = name
+    wrapper.__doc__ = func.__doc__
+
+    app.command(rich_help_panel=_get_help_panel(name))(wrapper)
+
+
 def initialize_client_actions() -> None:
     """Initialize typer commands from all available automated-actions-client actions."""
-    for module in OPENAPI_TAGS:
-        for action in dir(
-            importlib.import_module(f"automated_actions_client.api.{module}")
-        ):
-            if not action.startswith("_"):
-                app.add_typer(
-                    importlib.import_module(
-                        f"automated_actions_client.api.{module}.{action}"
-                    ).app
-                )
+    ns = vars(client_schemas)
+
+    for name, func in inspect.getmembers(client_module, inspect.isfunction):
+        if name.startswith("_"):
+            continue
+        _register_client_command(name, func, ns)
 
 
 initialize_client_actions()

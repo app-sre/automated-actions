@@ -2,10 +2,10 @@ from time import sleep
 from typing import TYPE_CHECKING
 
 import pytest
-from automated_actions_client import AuthenticatedClient
-from automated_actions_client.api.general import action_detail
-from automated_actions_client.models.action_schema_out import ActionSchemaOut
-from automated_actions_client.models.action_status import ActionStatus
+from automated_actions_client.client import action_detail
+from automated_actions_client.client import client as aa_api_client
+from automated_actions_client.config import Config as ClientConfig
+from automated_actions_client.schemas import ActionSchemaOut, ActionStatus
 from pydantic import BaseModel, HttpUrl
 from pydantic_settings import BaseSettings
 
@@ -93,34 +93,34 @@ def config() -> Config:
     return _config
 
 
-@pytest.fixture(scope="session")
-def aa_client(config: Config) -> AuthenticatedClient:
-    return AuthenticatedClient(
-        base_url=str(config.url),
-        token=config.token,
-        raise_on_unexpected_status=True,
-        follow_redirects=True,
+@pytest.fixture(scope="session", autouse=True)
+def _configure_client(config: Config) -> None:
+    """Configure the clientele API client singleton."""
+    aa_api_client.configure(
+        config=ClientConfig(
+            base_url=str(config.url),
+            headers={"Authorization": f"Bearer {config.token}"},
+            follow_redirects=True,
+        )
     )
 
 
 @pytest.fixture
-def wait_for_action_completion(
-    aa_client: AuthenticatedClient,
-) -> Callable[[str, int, int], ActionSchemaOut]:
+def wait_for_action_completion() -> Callable[[str, int, int], ActionSchemaOut]:
     """Wait for the action to complete and return the action details."""
 
     def _wait_for_completion(
         action_id: str, retries: int, sleep_time: int
     ) -> ActionSchemaOut:
         retry = 1
-        detail = action_detail.sync(client=aa_client, action_id=action_id)
+        detail = action_detail(action_id=action_id)
         assert isinstance(detail, ActionSchemaOut)
 
         while retry <= retries and detail.status in {
             ActionStatus.PENDING,
             ActionStatus.RUNNING,
         }:
-            detail = action_detail.sync(client=aa_client, action_id=action_id)
+            detail = action_detail(action_id=action_id)
             assert isinstance(detail, ActionSchemaOut)
             retry += 1
             sleep(sleep_time)

@@ -1,12 +1,7 @@
-from typing import TYPE_CHECKING
-
-from automated_actions_client.api.general import me
-
-if TYPE_CHECKING:
-    from automated_actions_client import AuthenticatedClient
+from automated_actions_client.client import me
 
 
-def test_api_v1_user_me(aa_client: AuthenticatedClient) -> None:
-    user = me.sync(client=aa_client)
-    assert user
+def test_api_v1_user_me() -> None:
+    user = me()
+    assert user is not None
     assert user.username

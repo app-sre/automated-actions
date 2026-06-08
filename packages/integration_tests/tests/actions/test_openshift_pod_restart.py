@@ -4,19 +4,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 from automated_actions.config import settings
-from automated_actions_client.api.actions import openshift_workload_restart
-from automated_actions_client.api.general import action_detail
-from automated_actions_client.models.action_schema_out import ActionSchemaOut
-from automated_actions_client.models.action_status import ActionStatus
-from automated_actions_client.models.openshift_workload_restart_kind import (
-    OpenshiftWorkloadRestartKind,
-)
+from automated_actions_client.client import action_detail, openshift_workload_restart
+from automated_actions_client.schemas import ActionSchemaOut, ActionStatus
 from automated_actions_utils.cluster_connection import get_cluster_connection_data
 from automated_actions_utils.openshift_client import OpenshiftClient
 from pydantic import BaseModel
 
 if TYPE_CHECKING:
-    from automated_actions_client import AuthenticatedClient
     from kubernetes.dynamic.resource import ResourceInstance
 
     from tests.conftest import Config
@@ -69,7 +63,7 @@ def _get_running_pod_names(
 
 
 def test_openshift_pod_restart_ok(
-    aa_client: AuthenticatedClient, config: Config, openshift_client: OpenshiftClient
+    config: Config, openshift_client: OpenshiftClient
 ) -> None:
     cluster = config.openshift_pod_restart.cluster
     namespace = config.openshift_pod_restart.namespace
@@ -88,11 +82,10 @@ def test_openshift_pod_restart_ok(
     assert len(pod_names) == parent.replicas
 
     pod_to_delete = random.choice(pod_names)  # noqa: S311
-    action = openshift_workload_restart.sync(
-        client=aa_client,
+    action = openshift_workload_restart(
         cluster=cluster,
         namespace=namespace,
-        kind=OpenshiftWorkloadRestartKind("Pod"),
+        kind="Pod",
         name=pod_to_delete,
     )
     assert isinstance(action, ActionSchemaOut)
@@ -117,14 +110,14 @@ def test_openshift_pod_restart_ok(
 
     assert success
 
-    action = action_detail.sync(client=aa_client, action_id=action.action_id)
+    action = action_detail(action_id=action.action_id)
     assert isinstance(action, ActionSchemaOut)
     assert action.status == ActionStatus.SUCCESS
     assert action.result
 
 
 def test_openshift_pod_restart_does_not_exist(
-    aa_client: AuthenticatedClient, config: Config, openshift_client: OpenshiftClient
+    config: Config, openshift_client: OpenshiftClient
 ) -> None:
     namespace = config.openshift_pod_restart.namespace
 
@@ -135,18 +128,17 @@ def test_openshift_pod_restart_does_not_exist(
     pod_to_delete = "this-pod-does-not-exist"
     assert pod_to_delete not in pod_names
 
-    action = openshift_workload_restart.sync(
-        client=aa_client,
+    action = openshift_workload_restart(
         cluster=config.openshift_pod_restart.cluster,
         namespace=namespace,
-        kind=OpenshiftWorkloadRestartKind("Pod"),
+        kind="Pod",
         name=pod_to_delete,
     )
     assert isinstance(action, ActionSchemaOut)
     assert action.status == ActionStatus.PENDING
     assert not action.result
 
-    action = action_detail.sync(client=aa_client, action_id=action.action_id)
+    action = action_detail(action_id=action.action_id)
     assert isinstance(action, ActionSchemaOut)
 
     retry = 1
@@ -154,7 +146,7 @@ def test_openshift_pod_restart_does_not_exist(
         ActionStatus.PENDING,
         ActionStatus.RUNNING,
     }:
-        action = action_detail.sync(client=aa_client, action_id=action.action_id)
+        action = action_detail(action_id=action.action_id)
         assert isinstance(action, ActionSchemaOut)
         retry += 1
         sleep(config.openshift_pod_restart.sleep_time)

@@ -3,7 +3,7 @@ import shutil
 import subprocess
 from typing import TYPE_CHECKING
 
-import httpxyz
+import httpx2
 from diskcache import Cache
 from packaging.version import Version
 from packaging.version import parse as parse_version
@@ -66,12 +66,12 @@ def get_latest_pypi_version(package_name: str) -> Version:
     version_str = "0.0.0"
     if package_name not in pypi_version_cache:
         try:
-            response = httpxyz.get(
+            response = httpx2.get(
                 f"https://pypi.org/pypi/{package_name}/json", timeout=5
             )
             response.raise_for_status()
             version_str = response.json().get("info", {}).get("version", version_str)
-        except httpxyz.RequestError:
+        except httpx2.RequestError:
             # ignore network errors
             pass
     else:

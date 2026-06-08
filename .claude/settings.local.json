@@ -4,7 +4,8 @@
       "Bash(uv run pytest:*)",
       "Bash(make test:*)",
       "Bash(uv run automated-actions:*)",
-      "Bash(uv run ruff check:*)"
+      "Bash(uv run ruff check:*)",
+      "Bash(uv run mypy:*)"
     ],
     "deny": []
   }

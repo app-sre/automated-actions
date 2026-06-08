@@ -3,11 +3,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 from automated_actions.config import settings
-from automated_actions_client.api.actions import (
-    openshift_workload_delete,
-)
-from automated_actions_client.models.action_schema_out import ActionSchemaOut
-from automated_actions_client.models.action_status import ActionStatus
+from automated_actions_client.client import openshift_workload_delete
+from automated_actions_client.schemas import ActionSchemaOut, ActionStatus
 from automated_actions_utils.cluster_connection import get_cluster_connection_data
 from automated_actions_utils.openshift_client import (
     OpenshiftClient,
@@ -17,8 +14,6 @@ from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-    from automated_actions_client import AuthenticatedClient
 
     from tests.conftest import Config
 
@@ -56,7 +51,6 @@ def openshift_client(config: Config) -> OpenshiftClient:
 
 @pytest.fixture(scope="session")
 def action_id(
-    aa_client: AuthenticatedClient,
     openshift_workload_delete_parameters: OpenshiftWorkloadDeleteParameters,
 ) -> str:
     """Trigger an Openshift workload delete action and return the action id.
@@ -64,8 +58,7 @@ def action_id(
     We use a pytest fixture with session scope to avoid multiple actions being triggered
     in case of retry via the flaky mark
     """
-    action = openshift_workload_delete.sync(
-        client=aa_client,
+    action = openshift_workload_delete(
         cluster=openshift_workload_delete_parameters.cluster,
         namespace=openshift_workload_delete_parameters.namespace,
         api_version=openshift_workload_delete_parameters.api_version,

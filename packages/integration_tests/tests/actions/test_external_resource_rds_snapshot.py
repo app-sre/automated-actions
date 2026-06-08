@@ -2,9 +2,8 @@ import time
 from typing import TYPE_CHECKING
 
 import pytest
-from automated_actions_client.api.actions import external_resource_rds_snapshot
-from automated_actions_client.models.action_schema_out import ActionSchemaOut
-from automated_actions_client.models.action_status import ActionStatus
+from automated_actions_client.client import external_resource_rds_snapshot
+from automated_actions_client.schemas import ActionSchemaOut, ActionStatus
 from automated_actions_utils.aws_api import AWSApi, get_aws_credentials
 from automated_actions_utils.external_resource import (
     ExternalResourceProvider,
@@ -13,8 +12,6 @@ from automated_actions_utils.external_resource import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-    from automated_actions_client import AuthenticatedClient
 
     from tests.conftest import Config
 
@@ -61,7 +58,7 @@ def aws_api(config: Config) -> AWSApi:
 
 
 @pytest.fixture(scope="session")
-def action_id(aws_api: AWSApi, aa_client: AuthenticatedClient, config: Config) -> str:
+def action_id(aws_api: AWSApi, config: Config) -> str:
     """Trigger an RDS restart action and return the action id.
 
     We use a pytest fixture with session scope to avoid multiple actions being triggered
@@ -70,11 +67,10 @@ def action_id(aws_api: AWSApi, aa_client: AuthenticatedClient, config: Config) -
     # ensure any old test snapshot is deleted before starting the test
     delete_old_snapshot(aws_api, config)
 
-    action = external_resource_rds_snapshot.sync(
+    action = external_resource_rds_snapshot(
         account=config.external_resource_rds_snapshot.account,
         identifier=config.external_resource_rds_snapshot.identifier,
         snapshot_identifier=config.external_resource_rds_snapshot.snapshot_identifier,
-        client=aa_client,
     )
     assert isinstance(action, ActionSchemaOut)
     assert action.status == ActionStatus.PENDING

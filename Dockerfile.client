@@ -19,7 +19,6 @@ COPY packages/automated_actions_client/README.md ./
 COPY packages/automated_actions_client/pyproject.toml ./
 RUN uv sync --no-install-project
 
-COPY packages/automated_actions_client/openapi_python_client_templates ./openapi_python_client_templates
 COPY packages/automated_actions_client/Makefile ./
 COPY packages/automated_actions_client/tests ./tests
 COPY packages/automated_actions_client/automated_actions_client ./automated_actions_client

@@ -1,16 +1,12 @@
 [project]
 name = "automated-actions-client"
-version = "0.2.0"
+version = "0.3.0"
 description = "Automated Actions Client"
 authors = [{ name = "AppSRE", email = "sd-app-sre@redhat.com" }]
 license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.14.0"
-dependencies = ["httpxyz", "attrs", "typer", "python-dateutil"]
-
-# [tool.uv.sources]
-# # use this unreleased version because of typer 0.16.0 update
-# openapi-python-client = { git = "https://github.com/openapi-generators/openapi-python-client", rev = "13bf2e852c8cc68fff4b8c19abc2ae42bceff319" }
+dependencies = ["clientele[core]==2.2.1"]
 
 [project.urls]
 homepage = "https://github.com/app-sre/automated-actions"
@@ -20,14 +16,11 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
+    "clientele[cli]==2.2.1",
     "mypy==2.1.0",
-    # we don't install this directly anymore, because it may have an outdated typer version dependency and this breaks Renovate
-    # instead, we use a specific version in the compose.yml file
-    # "openapi-python-client==0.25.3",
     "pytest-cov==7.1.0",
     "pytest==9.0.3",
     "ruff==0.15.12",
-    "types-python-dateutil==2.9.0.20260508",
 ]
 
 [build-system]

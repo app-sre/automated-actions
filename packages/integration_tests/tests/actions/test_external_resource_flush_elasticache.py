@@ -1,25 +1,21 @@
 from typing import TYPE_CHECKING
 
 import pytest
-from automated_actions_client.api.actions import external_resource_flush_elasticache
-from automated_actions_client.models.action_schema_out import ActionSchemaOut
-from automated_actions_client.models.action_status import ActionStatus
+from automated_actions_client.client import external_resource_flush_elasticache
+from automated_actions_client.schemas import ActionSchemaOut, ActionStatus
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-    from automated_actions_client import AuthenticatedClient
 
     from tests.conftest import Config
 
 
 @pytest.fixture(scope="session")
-def action_id(aa_client: AuthenticatedClient, config: Config) -> str:
+def action_id(config: Config) -> str:
     """Trigger a flush elasticache action and return the action id."""
-    action = external_resource_flush_elasticache.sync(
+    action = external_resource_flush_elasticache(
         account=config.external_resource_flush_elasticache.account,
         identifier=config.external_resource_flush_elasticache.identifier,
-        client=aa_client,
     )
     assert isinstance(action, ActionSchemaOut)
     assert action.status == ActionStatus.PENDING

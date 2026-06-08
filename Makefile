@@ -29,9 +29,10 @@ dev-env:
 
 .PHONY: generate-client
 generate-client:
-	@rm -rf packages/automated_actions_client/automated_actions_client/*
 	docker compose run --remove-orphans generate-automated-actions-client
-	@touch packages/automated_actions_client/automated_actions_client/py.typed
+	docker compose down -t 1
+	@rm -f packages/automated_actions_client/automated_actions_client/MANIFEST.md packages/automated_actions_client/automated_actions_client/pyproject.toml
+	@$(MAKE) format test
 
 .PHONY: gql-introspection
 gql-introspection:

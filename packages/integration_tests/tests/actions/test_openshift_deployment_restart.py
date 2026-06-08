@@ -3,19 +3,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 from automated_actions.config import settings
-from automated_actions_client.api.actions import openshift_workload_restart
-from automated_actions_client.api.general import action_detail
-from automated_actions_client.models.action_schema_out import ActionSchemaOut
-from automated_actions_client.models.action_status import ActionStatus
-from automated_actions_client.models.openshift_workload_restart_kind import (
-    OpenshiftWorkloadRestartKind,
-)
+from automated_actions_client.client import action_detail, openshift_workload_restart
+from automated_actions_client.schemas import ActionSchemaOut, ActionStatus
 from automated_actions_utils.cluster_connection import get_cluster_connection_data
 from automated_actions_utils.openshift_client import OpenshiftClient
 
 if TYPE_CHECKING:
-    from automated_actions_client import AuthenticatedClient
-
     from tests.conftest import Config
 
 
@@ -29,7 +22,7 @@ def openshift_client(config: Config) -> OpenshiftClient:
 
 
 def test_openshift_deployment_restart(
-    aa_client: AuthenticatedClient, config: Config, openshift_client: OpenshiftClient
+    config: Config, openshift_client: OpenshiftClient
 ) -> None:
     api = openshift_client.dyn_client.resources.get(
         api_version="apps/v1", kind="Deployment"
@@ -45,11 +38,10 @@ def test_openshift_deployment_restart(
     assert replicas == before["status"]["availableReplicas"]
     assert replicas == before["status"]["readyReplicas"]
 
-    action = openshift_workload_restart.sync(
-        client=aa_client,
+    action = openshift_workload_restart(
         cluster=config.openshift_deployment_restart.cluster,
         namespace=config.openshift_deployment_restart.namespace,
-        kind=OpenshiftWorkloadRestartKind("Deployment"),
+        kind="Deployment",
         name=config.openshift_deployment_restart.name,
     )
     assert isinstance(action, ActionSchemaOut)
@@ -79,14 +71,14 @@ def test_openshift_deployment_restart(
 
     assert success
 
-    action = action_detail.sync(client=aa_client, action_id=action.action_id)
+    action = action_detail(action_id=action.action_id)
     assert isinstance(action, ActionSchemaOut)
     assert action.status == ActionStatus.SUCCESS
     assert action.result
 
 
 def test_openshift_deployment_restart_does_not_exist(
-    aa_client: AuthenticatedClient, config: Config, openshift_client: OpenshiftClient
+    config: Config, openshift_client: OpenshiftClient
 ) -> None:
     namespace = config.openshift_deployment_restart.namespace
 
@@ -97,18 +89,17 @@ def test_openshift_deployment_restart_does_not_exist(
     deployment_to_delete = "this-deployment-does-not-exist"
     assert deployment_to_delete not in deployment_names
 
-    action = openshift_workload_restart.sync(
-        client=aa_client,
+    action = openshift_workload_restart(
         cluster=config.openshift_deployment_restart.cluster,
         namespace=config.openshift_deployment_restart.namespace,
-        kind=OpenshiftWorkloadRestartKind("Deployment"),
+        kind="Deployment",
         name=deployment_to_delete,
     )
     assert isinstance(action, ActionSchemaOut)
     assert action.status == ActionStatus.PENDING
     assert not action.result
 
-    action = action_detail.sync(client=aa_client, action_id=action.action_id)
+    action = action_detail(action_id=action.action_id)
     assert isinstance(action, ActionSchemaOut)
 
     retry = 1
@@ -116,7 +107,7 @@ def test_openshift_deployment_restart_does_not_exist(
         ActionStatus.PENDING,
         ActionStatus.RUNNING,
     }:
-        action = action_detail.sync(client=aa_client, action_id=action.action_id)
+        action = action_detail(action_id=action.action_id)
         assert isinstance(action, ActionSchemaOut)
         retry += 1
         sleep(config.openshift_deployment_restart.sleep_time)
