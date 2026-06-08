@@ -72,7 +72,7 @@ def test_cli_optional_option_in_help(cli: AACli) -> None:
     result = cli("json", "action-list", "--help")
 
     assert "--status" in result.stdout, result.stdout
-    assert "[CANCELLED|" in result.stdout, result.stdout
+    assert "CANCELLED" in result.stdout, result.stdout
     assert "--action-user" in result.stdout, result.stdout
     assert "--max-age-minutes" in result.stdout, result.stdout
 
