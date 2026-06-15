@@ -14,7 +14,7 @@ dependencies = [
     "hvac==2.4.0",
     "itsdangerous==2.2.0",
     "kubernetes==36.0.2",
-    "prometheus-fastapi-instrumentator==7.1.0",
+    "prometheus-fastapi-instrumentator==8.0.0",
     "pydantic-settings==2.14.1",
     "pydantic==2.13.4",
     "pyjwt==2.12.1",
