@@ -1,5 +1,5 @@
 FROM registry.access.redhat.com/ubi10/ubi-minimal@sha256:76c113359a458e3f04057762b5bd4a9837a6987520434dea158c728280116713 AS base
-COPY --from=openpolicyagent/opa:1.17.0-static@sha256:94830e998dd9df8e49a61826f1ad03d8a68d3ecd52f105e06a2adb93b459ad46 /opa /opa
+COPY --from=openpolicyagent/opa:1.17.1-static@sha256:c29f8ee8dbe66608a1c04e9be84b04efc46877625e6b0877e559954565209efc /opa /opa
 
 ENV PATH=${PATH}:/ \
     IS_TESTED_FLAG="/tmp/is_tested"
