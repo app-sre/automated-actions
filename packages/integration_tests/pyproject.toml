@@ -78,6 +78,7 @@ ignore = [
     "S607",    # subprocess.run w/o full path
     "TRY003",  # Avoid specifying long messages outside the exception class
     "TRY300",  # try-consider-else
+    "RUF076",  # Avoid using `autouse=True` in `pytest.fixture` decorators
     # pydoclint
     "DOC",
     # May conflict with the formatter, https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules

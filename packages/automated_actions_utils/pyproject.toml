@@ -90,6 +90,7 @@ ignore = [
     "TRY300",  # try-consider-else
     "TC002",   # type-checking-block
     "TC003",   # type-checking-block
+    "RUF076",  # Avoid using `autouse=True` in `pytest.fixture` decorators
     # pydoclint
     "DOC",
     # May conflict with the formatter, https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
