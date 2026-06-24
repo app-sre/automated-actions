@@ -59,7 +59,7 @@ async def app_lifespan_manager(
         app.include_router(api_router, prefix="/api")
 
     log.info("Lifespan: Application startup complete.")
-    yield
+    yield  # noqa: RUF075
     log.info("Lifespan: Application shutdown sequence initiated.")
 
 

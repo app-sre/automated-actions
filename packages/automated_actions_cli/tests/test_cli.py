@@ -1,6 +1,6 @@
-import click
 import pytest
 from automated_actions_client.schemas import ActionSchemaOut, ActionStatus
+from typer.core import TyperCommand, TyperGroup, TyperOption
 from typer.main import get_command
 
 from automated_actions_cli.cli import (
@@ -9,7 +9,9 @@ from automated_actions_cli.cli import (
     app,
 )
 
-click_app = get_command(app)
+_cmd = get_command(app)
+assert isinstance(_cmd, TyperGroup)
+click_app: TyperGroup = _cmd
 
 EXPECTED_COMMANDS = {
     "action-cancel",
@@ -127,13 +129,19 @@ def test_all_params_are_options() -> None:
         for param in cmd.params:
             if param.name in TYPER_INTERNAL_PARAMS:
                 continue
-            assert isinstance(param, click.Option), (
+            assert isinstance(param, TyperOption), (
                 f"Command '{cmd_name}': param '{param.name}' is a "
-                f"{type(param).__name__}, expected Option"
+                f"{type(param).__name__}, expected TyperOption"
             )
 
 
 # --- Help panels ---
+
+
+def _get_command(cmd_name: str) -> TyperCommand:
+    cmd = click_app.commands[cmd_name]
+    assert isinstance(cmd, TyperCommand)
+    return cmd
 
 
 @pytest.mark.parametrize(
@@ -148,16 +156,16 @@ def test_all_params_are_options() -> None:
     ],
 )
 def test_help_panel(cmd_name: str, expected_panel: str) -> None:
-    cmd = click_app.commands[cmd_name]
-    assert cmd.rich_help_panel == expected_panel
+    assert _get_command(cmd_name).rich_help_panel == expected_panel
 
 
 # --- Specific command parameters ---
 
 
 def _get_param_names(cmd_name: str) -> set[str]:
-    cmd = click_app.commands[cmd_name]
-    return {p.name for p in cmd.params} - TYPER_INTERNAL_PARAMS
+    return {
+        p.name for p in _get_command(cmd_name).params if p.name
+    } - TYPER_INTERNAL_PARAMS
 
 
 def test_action_list_params() -> None:
@@ -169,9 +177,10 @@ def test_action_list_params() -> None:
 
 
 def test_action_list_status_choices() -> None:
-    cmd = click_app.commands["action-list"]
-    status_param = next(p for p in cmd.params if p.name == "status")
-    assert isinstance(status_param.type, click.Choice)
+    status_param = next(
+        p for p in _get_command("action-list").params if p.name == "status"
+    )
+    assert hasattr(status_param.type, "choices")
     assert set(status_param.type.choices) == {
         "PENDING",
         "RUNNING",

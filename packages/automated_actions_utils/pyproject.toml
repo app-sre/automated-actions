@@ -7,15 +7,15 @@ license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.14.0"
 dependencies = [
-    "boto3==1.43.6",
+    "boto3==1.43.36",
     "gql==4.0.0",
     "hvac==2.4.0",
     "kubernetes==36.0.2",
     "openshift==0.13.2",
     "pydantic==2.13.4",
-    "sretoolbox==4.0.0",
-    "types-boto3-lite[rds]==1.43.6",
-    "types-hvac==2.4.0.20260408",
+    "sretoolbox==4.0.1",
+    "types-boto3-lite[rds]==1.43.36",
+    "types-hvac==2.4.0.20260610",
 ]
 
 [project.urls]
@@ -29,9 +29,9 @@ dev = [
     "mypy==2.1.0",
     "pytest-cov==7.1.0",
     "pytest-mock==3.15.1",
-    "pytest==9.0.3",
-    "qenerate==0.9.1",
-    "ruff==0.15.12",
+    "pytest==9.1.1",
+    "qenerate==0.10.0",
+    "ruff==0.15.18",
 ]
 
 [build-system]
@@ -90,6 +90,7 @@ ignore = [
     "TRY300",  # try-consider-else
     "TC002",   # type-checking-block
     "TC003",   # type-checking-block
+    "RUF076",  # Avoid using `autouse=True` in `pytest.fixture` decorators
     # pydoclint
     "DOC",
     # May conflict with the formatter, https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules

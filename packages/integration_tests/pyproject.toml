@@ -11,10 +11,10 @@ dependencies = [
     "automated-actions-client",
     "automated-actions-cli",
     "automated-actions-utils",
-    "pydantic-settings==2.14.1",
-    "pytest==9.0.3",
-    "pytest-order==1.4.0",
-    "pytest-rerunfailures==16.1",
+    "pydantic-settings==2.14.2",
+    "pytest==9.1.1",
+    "pytest-order==1.5.0",
+    "pytest-rerunfailures==16.3",
     "pyyaml==6.0.3",
 ]
 
@@ -27,8 +27,8 @@ documentation = "https://github.com/app-sre/automated-actions"
 dev = [
     # Development dependencies
     "mypy==2.1.0",
-    "ruff==0.15.12",
-    "types-pyyaml==6.0.12.20260508",
+    "ruff==0.15.18",
+    "types-pyyaml==6.0.12.20260518",
 ]
 
 [build-system]
@@ -78,6 +78,7 @@ ignore = [
     "S607",    # subprocess.run w/o full path
     "TRY003",  # Avoid specifying long messages outside the exception class
     "TRY300",  # try-consider-else
+    "RUF076",  # Avoid using `autouse=True` in `pytest.fixture` decorators
     # pydoclint
     "DOC",
     # May conflict with the formatter, https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
