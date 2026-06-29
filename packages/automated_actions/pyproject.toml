@@ -9,7 +9,7 @@ requires-python = "~= 3.14.0"
 dependencies = [
     "automated-actions-utils",
     "celery[sqs]==5.6.3",
-    "fastapi==0.138.0",
+    "fastapi==0.138.1",
     "httpxyz==0.31.2",
     "hvac==2.4.0",
     "itsdangerous==2.2.0",
@@ -40,7 +40,7 @@ dev = [
     "pytest-mock==3.15.1",
     "pytest==9.1.1",
     "requests-mock==1.12.1",
-    "ruff==0.15.19",
+    "ruff==0.15.20",
 ]
 
 [[tool.uv.dependency-metadata]]
