@@ -1,6 +1,6 @@
 #
 # Base image with defaults for all stages
-FROM registry.access.redhat.com/ubi10/python-314-minimal@sha256:0d6de003c233849fc6690277d18b66a2f0217b6c8c447c074462aa22267b6982 AS base
+FROM registry.access.redhat.com/ubi10/python-314-minimal@sha256:92f2b9ef3d2fe255f5a2200f97bf4f14a95dc120bd19bcbc9f84a2f10e4af683 AS base
 
 COPY LICENSE /licenses/
 
@@ -29,7 +29,7 @@ USER 1001
 #
 # Builder image
 #
-FROM registry.access.redhat.com/ubi10/python-314-minimal@sha256:0d6de003c233849fc6690277d18b66a2f0217b6c8c447c074462aa22267b6982 AS builder
+FROM registry.access.redhat.com/ubi10/python-314-minimal@sha256:92f2b9ef3d2fe255f5a2200f97bf4f14a95dc120bd19bcbc9f84a2f10e4af683 AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.11.26@sha256:3d868e555f8f1dbc324afa005066cd11e1053fc4743b9808ca8025283e65efa5 /uv /bin/uv
 ENV \
     # use venv from ubi image

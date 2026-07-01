@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi10/ubi-minimal@sha256:5bc43c1af14ccc8bf73bb0306db13edcae1a30589569e9cdf7db5d4668b3ed24 AS base
+FROM registry.access.redhat.com/ubi10/ubi-minimal@sha256:b217fa65d8c21058887b18f005f587e47a17dd1281a5196ac88d01724a273dbd AS base
 COPY --from=openpolicyagent/opa:1.18.0-static@sha256:28ae242f7d30d8e3a755cd66cfebb24869b5aab4a666ba0c7ec1b6d2e6a564a2 /opa /opa
 
 ENV PATH=${PATH}:/ \
