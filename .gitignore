@@ -140,3 +140,6 @@ tmp/
 # local dev settings
 settings.conf
 .localstack_volume
+
+# Claude Code
+.claude/settings.local.json
