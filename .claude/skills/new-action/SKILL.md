@@ -172,7 +172,18 @@ Three test files need updates:
 - Add the new dependency function to the `test_dependency_type_aliases_resolve_at_runtime`
   parametrize list
 
-### 2.5 Regenerate client + fix CLI tests
+### 2.5 Bump package versions
+
+New actions add endpoints to the client, so both client and CLI packages need version bumps.
+
+**`packages/automated_actions_client/pyproject.toml`**:
+- Bump `version` (e.g. `0.3.0` -> `0.4.0`)
+
+**`packages/automated_actions_cli/pyproject.toml`**:
+- Bump `version` to match
+- Update the `automated-actions-client==` dependency pin to the new client version
+
+### 2.6 Regenerate client + fix CLI tests
 
 1. Run `make generate-client` — regenerates `packages/automated_actions_client/` from the
    updated OpenAPI spec. This requires Docker (spins up LocalStack + the app).
@@ -180,7 +191,7 @@ Three test files need updates:
    new command name to the set.
 3. Run `make test` to verify everything passes.
 
-### 2.6 Verification
+### 2.7 Verification
 
 ```bash
 make format     # ruff lint + format
