@@ -30,7 +30,7 @@ USER 1001
 # Builder image
 #
 FROM registry.access.redhat.com/ubi9/python-314@sha256:4cca61a792eccb28b5536daedf3ffddb380a22d02115ba4107627b56b836f15d AS builder
-COPY --from=ghcr.io/astral-sh/uv:0.11.26@sha256:3d868e555f8f1dbc324afa005066cd11e1053fc4743b9808ca8025283e65efa5 /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.27@sha256:4d01caf3b22dfd11003455e2e68153da08c4ee1fa54fdbd166c6282d22693419 /uv /bin/uv
 
 ENV \
     # use venv from ubi image
@@ -61,7 +61,7 @@ RUN cd ./packages/integration_tests/ && uv sync
 # Test image
 #
 FROM base AS test
-COPY --from=ghcr.io/astral-sh/uv:0.11.26@sha256:3d868e555f8f1dbc324afa005066cd11e1053fc4743b9808ca8025283e65efa5 /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.27@sha256:4d01caf3b22dfd11003455e2e68153da08c4ee1fa54fdbd166c6282d22693419 /uv /bin/uv
 
 COPY --from=builder --chown=1001:0 ${APP_ROOT} ${APP_ROOT}
 COPY packages/integration_tests/Makefile ./packages/integration_tests/
