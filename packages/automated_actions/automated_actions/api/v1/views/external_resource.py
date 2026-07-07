@@ -13,6 +13,12 @@ from automated_actions.celery.external_resource.tasks import (
 from automated_actions.celery.external_resource.tasks import (
     external_resource_rds_snapshot as external_resource_rds_snapshot_task,
 )
+from automated_actions.celery.external_resource.tasks import (
+    external_resource_rds_start as external_resource_rds_start_task,
+)
+from automated_actions.celery.external_resource.tasks import (
+    external_resource_rds_stop as external_resource_rds_stop_task,
+)
 from automated_actions.db.models import (
     Action,
     ActionSchemaOut,
@@ -23,6 +29,8 @@ router = APIRouter()
 log = logging.getLogger(__name__)
 
 EXTERNAL_RESOURCE_RDS_REBOOT_ACTION_ID = "external-resource-rds-reboot"
+EXTERNAL_RESOURCE_RDS_START_ACTION_ID = "external-resource-rds-start"
+EXTERNAL_RESOURCE_RDS_STOP_ACTION_ID = "external-resource-rds-stop"
 EXTERNAL_RESOURCE_FLUSH_ELASTICACHE_ACTION_ID = "external-resource-flush-elasticache"
 EXTERNAL_RESOURCE_RDS_SNAPSHOT_ACTION_ID = "external-resource-rds-snapshot"
 
@@ -74,6 +82,98 @@ def external_resource_rds_reboot(
             "account": account,
             "identifier": identifier,
             "force_failover": force_failover,
+            "action": action,
+        },
+        task_id=action.action_id,
+    )
+    return action.dump()
+
+
+def get_action_external_resource_rds_start(
+    action_mgr: Annotated[ActionManager, Depends(get_action_manager)], user: UserDep
+) -> Action:
+    """Get a new action object for the user.
+
+    Args:
+        action_mgr: The action manager dependency.
+        user: The user dependency.
+
+    Returns:
+        A new Action object.
+    """
+    return action_mgr.create_action(
+        name=EXTERNAL_RESOURCE_RDS_START_ACTION_ID, owner=user
+    )
+
+
+@router.post(
+    "/external-resource/rds-start/{account}/{identifier}",
+    operation_id=EXTERNAL_RESOURCE_RDS_START_ACTION_ID,
+    status_code=202,
+    tags=["Actions"],
+)
+def external_resource_rds_start(
+    account: Annotated[str, Path(description="AWS account name")],
+    identifier: Annotated[str, Path(description="RDS instance identifier")],
+    action: Annotated[Action, Depends(get_action_external_resource_rds_start)],
+) -> ActionSchemaOut:
+    """Start a stopped RDS instance.
+
+    This action initiates a start of a specified stopped RDS instance in a given AWS account.
+    """
+    log.info(
+        f"Starting RDS {identifier} in AWS account {account}. action_id={action.action_id}"
+    )
+    external_resource_rds_start_task.apply_async(
+        kwargs={
+            "account": account,
+            "identifier": identifier,
+            "action": action,
+        },
+        task_id=action.action_id,
+    )
+    return action.dump()
+
+
+def get_action_external_resource_rds_stop(
+    action_mgr: Annotated[ActionManager, Depends(get_action_manager)], user: UserDep
+) -> Action:
+    """Get a new action object for the user.
+
+    Args:
+        action_mgr: The action manager dependency.
+        user: The user dependency.
+
+    Returns:
+        A new Action object.
+    """
+    return action_mgr.create_action(
+        name=EXTERNAL_RESOURCE_RDS_STOP_ACTION_ID, owner=user
+    )
+
+
+@router.post(
+    "/external-resource/rds-stop/{account}/{identifier}",
+    operation_id=EXTERNAL_RESOURCE_RDS_STOP_ACTION_ID,
+    status_code=202,
+    tags=["Actions"],
+)
+def external_resource_rds_stop(
+    account: Annotated[str, Path(description="AWS account name")],
+    identifier: Annotated[str, Path(description="RDS instance identifier")],
+    action: Annotated[Action, Depends(get_action_external_resource_rds_stop)],
+) -> ActionSchemaOut:
+    """Stop a running RDS instance.
+
+    This action initiates a stop of a specified running RDS instance in a given AWS account.
+    """
+    log.info(
+        f"Stopping RDS {identifier} in AWS account {account}. action_id={action.action_id}"
+    )
+    external_resource_rds_stop_task.apply_async(
+        kwargs={
+            "account": account,
+            "identifier": identifier,
             "action": action,
         },
         task_id=action.action_id,

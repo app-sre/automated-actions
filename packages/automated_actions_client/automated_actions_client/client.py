@@ -34,6 +34,32 @@ def external_resource_rds_reboot(
     return result
 
 
+@client.post("/api/v1/external-resource/rds-start/{account}/{identifier}")
+def external_resource_rds_start(
+    result: schemas.ActionSchemaOut, account: str, identifier: str
+) -> schemas.ActionSchemaOut:
+    """External Resource Rds Start
+
+        Start a stopped RDS instance.
+
+    This action initiates a start of a specified stopped RDS instance in a given AWS account.
+    """
+    return result
+
+
+@client.post("/api/v1/external-resource/rds-stop/{account}/{identifier}")
+def external_resource_rds_stop(
+    result: schemas.ActionSchemaOut, account: str, identifier: str
+) -> schemas.ActionSchemaOut:
+    """External Resource Rds Stop
+
+        Stop a running RDS instance.
+
+    This action initiates a stop of a specified running RDS instance in a given AWS account.
+    """
+    return result
+
+
 @client.post(
     "/api/v1/external-resource/rds-snapshot/{account}/{identifier}/{snapshot_identifier}"
 )

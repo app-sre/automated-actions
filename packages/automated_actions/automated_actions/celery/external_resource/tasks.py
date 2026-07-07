@@ -90,6 +90,64 @@ def external_resource_rds_snapshot(
         )
 
 
+class ExternalResourceRDSStart:
+    def __init__(self, aws_api: AWSApi, rds: ExternalResource) -> None:
+        self.aws_api = aws_api
+        self.rds = rds
+
+    def run(self) -> None:
+        self.aws_api.start_rds_instance(identifier=self.rds.identifier)
+
+
+@app.task(base=AutomatedActionTask)
+def external_resource_rds_start(
+    account: str,
+    identifier: str,
+    *,
+    action: Action,  # noqa: ARG001
+) -> None:
+    rds = get_external_resource(
+        account=account,
+        identifier=identifier,
+        provider=ExternalResourceProvider.RDS,
+    )
+
+    credentials = get_aws_credentials(
+        vault_secret=rds.account.automation_token, region=rds.account.region
+    )
+    with AWSApi(credentials=credentials, region=rds.region) as aws_api:
+        ExternalResourceRDSStart(aws_api, rds).run()
+
+
+class ExternalResourceRDSStop:
+    def __init__(self, aws_api: AWSApi, rds: ExternalResource) -> None:
+        self.aws_api = aws_api
+        self.rds = rds
+
+    def run(self) -> None:
+        self.aws_api.stop_rds_instance(identifier=self.rds.identifier)
+
+
+@app.task(base=AutomatedActionTask)
+def external_resource_rds_stop(
+    account: str,
+    identifier: str,
+    *,
+    action: Action,  # noqa: ARG001
+) -> None:
+    rds = get_external_resource(
+        account=account,
+        identifier=identifier,
+        provider=ExternalResourceProvider.RDS,
+    )
+
+    credentials = get_aws_credentials(
+        vault_secret=rds.account.automation_token, region=rds.account.region
+    )
+    with AWSApi(credentials=credentials, region=rds.region) as aws_api:
+        ExternalResourceRDSStop(aws_api, rds).run()
+
+
 class ExternalResourceFlushElastiCache:
     def __init__(
         self, action: Action, oc: OpenshiftClient, elasticache: ExternalResource
