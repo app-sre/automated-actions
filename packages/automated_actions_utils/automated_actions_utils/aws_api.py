@@ -115,6 +115,24 @@ class AWSApi:
             DBInstanceIdentifier=identifier, ForceFailover=force_failover
         )
 
+    def start_rds_instance(self, identifier: str) -> None:
+        """Starts a stopped RDS database instance.
+
+        Args:
+            identifier: The DB instance identifier.
+        """
+        log.info(f"Starting RDS instance {identifier}")
+        self.rds_client.start_db_instance(DBInstanceIdentifier=identifier)
+
+    def stop_rds_instance(self, identifier: str) -> None:
+        """Stops a running RDS database instance.
+
+        Args:
+            identifier: The DB instance identifier.
+        """
+        log.info(f"Stopping RDS instance {identifier}")
+        self.rds_client.stop_db_instance(DBInstanceIdentifier=identifier)
+
     def rds_get_events(
         self,
         identifier: str,

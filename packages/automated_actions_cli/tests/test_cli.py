@@ -21,6 +21,8 @@ EXPECTED_COMMANDS = {
     "external-resource-flush-elasticache",
     "external-resource-rds-reboot",
     "external-resource-rds-snapshot",
+    "external-resource-rds-start",
+    "external-resource-rds-stop",
     "me",
     "no-op",
     "openshift-trigger-cronjob",

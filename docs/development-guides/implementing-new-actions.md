@@ -11,7 +11,7 @@ Welcome to the guide on implementing new actions within the Automated Actions sy
 - [ ] Write integration tests for the new action.
 - [ ] Regenerate the `automated-actions-client` using `make generate-client`.
 - [ ] Update the action documentation in `actions.md`.
-- [ ] Update the [automated-actions-config](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/automated_actions/config/integration.py) integrattion and the [/app-sre/automated-action-1.yml schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/app-sre/automated-action-1.yml)
+- [ ] Update the [automated-actions-config](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/automated_actions/config/integration.py) integration and the [/app-sre/automated-action-1.yml schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/app-sre/automated-action-1.yml)
 - [ ] Configure the integration tests in app-interface to  allow and include the new action.
 - [ ] Update the app-interface documentation to include the new action.
 
