@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from automated_actions_utils.aws_api import (
     RDS_TERMINAL_ERROR_STATES,
     AWSApi,
+    RdsInstanceStatus,
     get_aws_credentials,
 )
 from automated_actions_utils.cluster_connection import get_cluster_connection_data
@@ -107,12 +108,12 @@ class ExternalResourceRDSStart:
     def run(self) -> bool:
         """Returns True if the instance is available, False if a retry is needed."""
         status = self.aws_api.get_rds_instance_status(self.rds.identifier)
-        if status == "available":
+        if status == RdsInstanceStatus.AVAILABLE:
             return True
         if status in RDS_TERMINAL_ERROR_STATES:
             msg = f"RDS instance {self.rds.identifier} entered terminal error state '{status}'"
             raise RuntimeError(msg)
-        if status == "stopped":
+        if status == RdsInstanceStatus.STOPPED:
             self.aws_api.start_rds_instance(identifier=self.rds.identifier)
         return False
 
@@ -149,12 +150,12 @@ class ExternalResourceRDSStop:
     def run(self) -> bool:
         """Returns True if the instance is stopped, False if a retry is needed."""
         status = self.aws_api.get_rds_instance_status(self.rds.identifier)
-        if status == "stopped":
+        if status == RdsInstanceStatus.STOPPED:
             return True
         if status in RDS_TERMINAL_ERROR_STATES:
             msg = f"RDS instance {self.rds.identifier} entered terminal error state '{status}'"
             raise RuntimeError(msg)
-        if status == "available":
+        if status == RdsInstanceStatus.AVAILABLE:
             self.aws_api.stop_rds_instance(identifier=self.rds.identifier)
         return False
 

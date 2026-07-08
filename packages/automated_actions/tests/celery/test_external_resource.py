@@ -3,7 +3,11 @@ from typing import TYPE_CHECKING
 from unittest.mock import ANY, Mock
 
 import pytest
-from automated_actions_utils.aws_api import AWSApi, AWSStaticCredentials
+from automated_actions_utils.aws_api import (
+    AWSApi,
+    AWSStaticCredentials,
+    RdsInstanceStatus,
+)
 from automated_actions_utils.cluster_connection import ClusterConnectionData
 from automated_actions_utils.external_resource import (
     AwsAccount,
@@ -143,7 +147,7 @@ def test_external_resource_rds_reboot_task_non_retryable_failure(
 def test_external_resource_rds_start_run_already_available(
     mock_aws: Mock, er: ExternalResource
 ) -> None:
-    mock_aws.get_rds_instance_status.return_value = "available"
+    mock_aws.get_rds_instance_status.return_value = RdsInstanceStatus.AVAILABLE
     automated_action = ExternalResourceRDSStart(aws_api=mock_aws, rds=er)
 
     assert automated_action.run() is True
@@ -153,7 +157,7 @@ def test_external_resource_rds_start_run_already_available(
 def test_external_resource_rds_start_run_from_stopped(
     mock_aws: Mock, er: ExternalResource
 ) -> None:
-    mock_aws.get_rds_instance_status.return_value = "stopped"
+    mock_aws.get_rds_instance_status.return_value = RdsInstanceStatus.STOPPED
     automated_action = ExternalResourceRDSStart(aws_api=mock_aws, rds=er)
 
     assert automated_action.run() is False
@@ -163,7 +167,7 @@ def test_external_resource_rds_start_run_from_stopped(
 def test_external_resource_rds_start_run_starting(
     mock_aws: Mock, er: ExternalResource
 ) -> None:
-    mock_aws.get_rds_instance_status.return_value = "starting"
+    mock_aws.get_rds_instance_status.return_value = RdsInstanceStatus.STARTING
     automated_action = ExternalResourceRDSStart(aws_api=mock_aws, rds=er)
 
     assert automated_action.run() is False
@@ -173,7 +177,7 @@ def test_external_resource_rds_start_run_starting(
 def test_external_resource_rds_start_run_terminal_error(
     mock_aws: Mock, er: ExternalResource
 ) -> None:
-    mock_aws.get_rds_instance_status.return_value = "failed"
+    mock_aws.get_rds_instance_status.return_value = RdsInstanceStatus.FAILED
     automated_action = ExternalResourceRDSStart(aws_api=mock_aws, rds=er)
 
     with pytest.raises(RuntimeError, match="terminal error state 'failed'"):
@@ -255,7 +259,7 @@ def test_external_resource_rds_start_task_non_retryable_failure(
 def test_external_resource_rds_stop_run_already_stopped(
     mock_aws: Mock, er: ExternalResource
 ) -> None:
-    mock_aws.get_rds_instance_status.return_value = "stopped"
+    mock_aws.get_rds_instance_status.return_value = RdsInstanceStatus.STOPPED
     automated_action = ExternalResourceRDSStop(aws_api=mock_aws, rds=er)
 
     assert automated_action.run() is True
@@ -265,7 +269,7 @@ def test_external_resource_rds_stop_run_already_stopped(
 def test_external_resource_rds_stop_run_from_available(
     mock_aws: Mock, er: ExternalResource
 ) -> None:
-    mock_aws.get_rds_instance_status.return_value = "available"
+    mock_aws.get_rds_instance_status.return_value = RdsInstanceStatus.AVAILABLE
     automated_action = ExternalResourceRDSStop(aws_api=mock_aws, rds=er)
 
     assert automated_action.run() is False
@@ -275,7 +279,7 @@ def test_external_resource_rds_stop_run_from_available(
 def test_external_resource_rds_stop_run_stopping(
     mock_aws: Mock, er: ExternalResource
 ) -> None:
-    mock_aws.get_rds_instance_status.return_value = "stopping"
+    mock_aws.get_rds_instance_status.return_value = RdsInstanceStatus.STOPPING
     automated_action = ExternalResourceRDSStop(aws_api=mock_aws, rds=er)
 
     assert automated_action.run() is False
@@ -285,7 +289,7 @@ def test_external_resource_rds_stop_run_stopping(
 def test_external_resource_rds_stop_run_terminal_error(
     mock_aws: Mock, er: ExternalResource
 ) -> None:
-    mock_aws.get_rds_instance_status.return_value = "failed"
+    mock_aws.get_rds_instance_status.return_value = RdsInstanceStatus.FAILED
     automated_action = ExternalResourceRDSStop(aws_api=mock_aws, rds=er)
 
     with pytest.raises(RuntimeError, match="terminal error state 'failed'"):

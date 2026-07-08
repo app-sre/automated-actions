@@ -1,6 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Literal, Protocol, Self
+from enum import StrEnum
+from typing import Any, Protocol, Self
 
 from automated_actions.config import settings
 from boto3 import Session
@@ -13,19 +14,46 @@ from automated_actions_utils.vault_client import SecretFieldNotFoundError, Vault
 
 log = logging.getLogger(__name__)
 
-RDS_TERMINAL_ERROR_STATES = frozenset({
-    "failed",
-    "incompatible-network",
-    "incompatible-option-group",
-    "incompatible-parameters",
-    "incompatible-restore",
-    "inaccessible-encryption-credentials",
-    "inaccessible-encryption-credentials-recoverable",
-    "restore-error",
-    "storage-full",
-})
 
-type RdsTargetStatus = Literal["available", "stopped"]
+class RdsInstanceStatus(StrEnum):
+    """Known RDS DB instance statuses."""
+
+    AVAILABLE = "available"
+    BACKING_UP = "backing-up"
+    CREATING = "creating"
+    DELETING = "deleting"
+    FAILED = "failed"
+    INACCESSIBLE_ENCRYPTION_CREDENTIALS = "inaccessible-encryption-credentials"
+    INACCESSIBLE_ENCRYPTION_CREDENTIALS_RECOVERABLE = (
+        "inaccessible-encryption-credentials-recoverable"
+    )
+    INCOMPATIBLE_NETWORK = "incompatible-network"
+    INCOMPATIBLE_OPTION_GROUP = "incompatible-option-group"
+    INCOMPATIBLE_PARAMETERS = "incompatible-parameters"
+    INCOMPATIBLE_RESTORE = "incompatible-restore"
+    MAINTENANCE = "maintenance"
+    MODIFYING = "modifying"
+    REBOOTING = "rebooting"
+    RESTORE_ERROR = "restore-error"
+    STARTING = "starting"
+    STOPPED = "stopped"
+    STOPPING = "stopping"
+    STORAGE_FULL = "storage-full"
+    STORAGE_OPTIMIZATION = "storage-optimization"
+    UPGRADING = "upgrading"
+
+
+RDS_TERMINAL_ERROR_STATES = frozenset({
+    RdsInstanceStatus.FAILED,
+    RdsInstanceStatus.INCOMPATIBLE_NETWORK,
+    RdsInstanceStatus.INCOMPATIBLE_OPTION_GROUP,
+    RdsInstanceStatus.INCOMPATIBLE_PARAMETERS,
+    RdsInstanceStatus.INCOMPATIBLE_RESTORE,
+    RdsInstanceStatus.INACCESSIBLE_ENCRYPTION_CREDENTIALS,
+    RdsInstanceStatus.INACCESSIBLE_ENCRYPTION_CREDENTIALS_RECOVERABLE,
+    RdsInstanceStatus.RESTORE_ERROR,
+    RdsInstanceStatus.STORAGE_FULL,
+})
 
 
 class VaultSecret(Protocol):
@@ -147,19 +175,19 @@ class AWSApi:
         log.info(f"Stopping RDS instance {identifier}")
         self.rds_client.stop_db_instance(DBInstanceIdentifier=identifier)
 
-    def get_rds_instance_status(self, identifier: str) -> str:
+    def get_rds_instance_status(self, identifier: str) -> RdsInstanceStatus:
         """Returns the current status of an RDS instance.
 
         Args:
             identifier: The DB instance identifier.
 
         Returns:
-            The DBInstanceStatus string (e.g. "available", "stopped", "stopping", "starting").
+            The RdsInstanceStatus enum value.
         """
         response = self.rds_client.describe_db_instances(
             DBInstanceIdentifier=identifier
         )
-        return response["DBInstances"][0]["DBInstanceStatus"]
+        return RdsInstanceStatus(response["DBInstances"][0]["DBInstanceStatus"])
 
     def rds_get_events(
         self,

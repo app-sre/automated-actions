@@ -9,6 +9,7 @@ from pytest_mock import MockerFixture
 from automated_actions_utils.aws_api import (
     AWSApi,
     AWSStaticCredentials,
+    RdsInstanceStatus,
     get_aws_credentials,
 )
 from automated_actions_utils.vault_client import SecretFieldNotFoundError
@@ -392,9 +393,9 @@ def test_aws_api_rds_get_events(
 @pytest.mark.parametrize(
     ("region", "identifier", "expected_status"),
     [
-        ("us-east-1", "test-db-instance", "available"),
-        ("eu-west-1", "stopped-db", "stopped"),
-        ("ap-south-1", "starting-db", "starting"),
+        ("us-east-1", "test-db-instance", RdsInstanceStatus.AVAILABLE),
+        ("eu-west-1", "stopped-db", RdsInstanceStatus.STOPPED),
+        ("ap-south-1", "starting-db", RdsInstanceStatus.STARTING),
     ],
     ids=["available", "stopped", "starting"],
 )
@@ -403,19 +404,20 @@ def test_aws_api_get_rds_instance_status(
     mocker: MockerFixture,
     region: str,
     identifier: str,
-    expected_status: str,
+    expected_status: RdsInstanceStatus,
 ) -> None:
     aws_api = AWSApi(credentials=mock_aws_credentials, region=region)
 
     mock_rds_client = mocker.MagicMock()
     aws_api.rds_client = mock_rds_client
     mock_rds_client.describe_db_instances.return_value = {
-        "DBInstances": [{"DBInstanceStatus": expected_status}]
+        "DBInstances": [{"DBInstanceStatus": expected_status.value}]
     }
 
     status = aws_api.get_rds_instance_status(identifier=identifier)
 
     assert status == expected_status
+    assert isinstance(status, RdsInstanceStatus)
     mock_rds_client.describe_db_instances.assert_called_once_with(
         DBInstanceIdentifier=identifier
     )
