@@ -191,7 +191,30 @@ New actions add endpoints to the client, so both client and CLI packages need ve
    new command name to the set.
 3. Run `make test` to verify everything passes.
 
-### 2.7 Verification
+### 2.7 Update actions.md
+
+**File:** `actions.md` (repo root)
+
+Add entries for the new action(s) in the **Available Actions** section. Insert alphabetically
+among the existing entries. Follow the existing format:
+
+```markdown
+* **`external-resource-rds-start`**:
+  * **Description**: Starts a stopped RDS instance.
+  * **Use Case**: Useful for DR scenarios or starting instances after maintenance windows.
+  * **Required Parameters**: The AWS account name and the RDS instance identifier.
+  * **Usage Example (CLI)**: `automated-actions external-resource-rds-start --account aws-account-name --identifier my-rds-instance`
+```
+
+### 2.8 Write integration tests
+
+**File:** `packages/integration_tests/tests/actions/test_<action_name>.py`
+
+Create or update integration tests that exercise the full end-to-end flow (API → Celery → target
+system). Refer to existing integration tests in `packages/integration_tests/tests/actions/` for
+the pattern. Integration tests use a running LocalStack and the test app via Docker Compose.
+
+### 2.9 Verification
 
 ```bash
 make format     # ruff lint + format
@@ -388,7 +411,18 @@ automated-action external-resource-rds-start \
 \```
 ```
 
-### 5.2 Action YAML files (per-service, user decides)
+### 5.2 Configure integration tests in app-interface
+
+Tell the user: to run integration tests for the new action, the app-interface integration test
+configuration needs to be updated. This involves:
+
+1. Creating an action YAML file with `maxOps: 0` referencing the integration instance
+2. Adding the action to the integration test permission file
+
+See the [RDS reboot integration test MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/145517)
+for an example.
+
+### 5.4 Action YAML files (per-service, user decides)
 
 Tell the user: to enable this action for a specific service, create an action file at:
 
@@ -423,7 +457,7 @@ instances:
 - $ref: /dependencies/automated-actions/integration.yml
 ```
 
-### 5.3 Permission files (per-service, user decides)
+### 5.5 Permission files (per-service, user decides)
 
 Tell the user: to grant a team access to the action, add a `$ref` to the relevant permission
 file at:

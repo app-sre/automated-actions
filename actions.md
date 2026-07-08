@@ -18,6 +18,18 @@ These are the core operations that users can request the system to perform.
   * **Required Parameters**: The AWS account name and the RDS instance identifier.
   * **Usage Example (CLI)**: `automated-actions external-resource-rds-reboot --account aws-account-name --identifier my-rds-instance`
 
+* **`external-resource-rds-start`**:
+  * **Description**: Starts a stopped Amazon RDS instance.
+  * **Use Case**: Useful for disaster recovery scenarios or starting instances after scheduled maintenance windows.
+  * **Required Parameters**: The AWS account name and the RDS instance identifier.
+  * **Usage Example (CLI)**: `automated-actions external-resource-rds-start --account aws-account-name --identifier my-rds-instance`
+
+* **`external-resource-rds-stop`**:
+  * **Description**: Stops a running Amazon RDS instance.
+  * **Use Case**: Useful for cost savings on non-production instances or controlled shutdown during maintenance windows.
+  * **Required Parameters**: The AWS account name and the RDS instance identifier.
+  * **Usage Example (CLI)**: `automated-actions external-resource-rds-stop --account aws-account-name --identifier my-rds-instance`
+
 * **`external-resource-rds-snapshot`**:
   * **Description**: Create a snapshot of an RDS instance.
   * **Use Case**: Typically used before maintenance or applying updates.
