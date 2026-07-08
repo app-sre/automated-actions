@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Protocol, Self
+from typing import Any, Literal, Protocol, Self
 
 from automated_actions.config import settings
 from boto3 import Session
@@ -12,6 +12,20 @@ from types_boto3_rds.type_defs import EventTypeDef
 from automated_actions_utils.vault_client import SecretFieldNotFoundError, VaultClient
 
 log = logging.getLogger(__name__)
+
+RDS_TERMINAL_ERROR_STATES = frozenset({
+    "failed",
+    "incompatible-network",
+    "incompatible-option-group",
+    "incompatible-parameters",
+    "incompatible-restore",
+    "inaccessible-encryption-credentials",
+    "inaccessible-encryption-credentials-recoverable",
+    "restore-error",
+    "storage-full",
+})
+
+type RdsTargetStatus = Literal["available", "stopped"]
 
 
 class VaultSecret(Protocol):
@@ -132,6 +146,20 @@ class AWSApi:
         """
         log.info(f"Stopping RDS instance {identifier}")
         self.rds_client.stop_db_instance(DBInstanceIdentifier=identifier)
+
+    def get_rds_instance_status(self, identifier: str) -> str:
+        """Returns the current status of an RDS instance.
+
+        Args:
+            identifier: The DB instance identifier.
+
+        Returns:
+            The DBInstanceStatus string (e.g. "available", "stopped", "stopping", "starting").
+        """
+        response = self.rds_client.describe_db_instances(
+            DBInstanceIdentifier=identifier
+        )
+        return response["DBInstances"][0]["DBInstanceStatus"]
 
     def rds_get_events(
         self,

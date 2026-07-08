@@ -1,6 +1,10 @@
 from typing import TYPE_CHECKING
 
-from automated_actions_utils.aws_api import AWSApi, get_aws_credentials
+from automated_actions_utils.aws_api import (
+    RDS_TERMINAL_ERROR_STATES,
+    AWSApi,
+    get_aws_credentials,
+)
 from automated_actions_utils.cluster_connection import get_cluster_connection_data
 from automated_actions_utils.external_resource import (
     ExternalResource,
@@ -19,6 +23,9 @@ from automated_actions.config import settings
 
 if TYPE_CHECKING:
     from automated_actions.db.models import Action
+    from celery import Task
+
+RDS_STATUS_POLL_COUNTDOWN = 30
 
 
 class ExternalResourceRDSReboot:
@@ -91,16 +98,28 @@ def external_resource_rds_snapshot(
 
 
 class ExternalResourceRDSStart:
+    """Idempotent RDS start — safe to retry on worker restart."""
+
     def __init__(self, aws_api: AWSApi, rds: ExternalResource) -> None:
         self.aws_api = aws_api
         self.rds = rds
 
-    def run(self) -> None:
-        self.aws_api.start_rds_instance(identifier=self.rds.identifier)
+    def run(self) -> bool:
+        """Returns True if the instance is available, False if a retry is needed."""
+        status = self.aws_api.get_rds_instance_status(self.rds.identifier)
+        if status == "available":
+            return True
+        if status in RDS_TERMINAL_ERROR_STATES:
+            msg = f"RDS instance {self.rds.identifier} entered terminal error state '{status}'"
+            raise RuntimeError(msg)
+        if status == "stopped":
+            self.aws_api.start_rds_instance(identifier=self.rds.identifier)
+        return False
 
 
-@app.task(base=AutomatedActionTask)
+@app.task(bind=True, base=AutomatedActionTask, max_retries=60)
 def external_resource_rds_start(
+    self: Task,
     account: str,
     identifier: str,
     *,
@@ -116,20 +135,33 @@ def external_resource_rds_start(
         vault_secret=rds.account.automation_token, region=rds.account.region
     )
     with AWSApi(credentials=credentials, region=rds.region) as aws_api:
-        ExternalResourceRDSStart(aws_api, rds).run()
+        if not ExternalResourceRDSStart(aws_api, rds).run():
+            raise self.retry(countdown=RDS_STATUS_POLL_COUNTDOWN)
 
 
 class ExternalResourceRDSStop:
+    """Idempotent RDS stop — safe to retry on worker restart."""
+
     def __init__(self, aws_api: AWSApi, rds: ExternalResource) -> None:
         self.aws_api = aws_api
         self.rds = rds
 
-    def run(self) -> None:
-        self.aws_api.stop_rds_instance(identifier=self.rds.identifier)
+    def run(self) -> bool:
+        """Returns True if the instance is stopped, False if a retry is needed."""
+        status = self.aws_api.get_rds_instance_status(self.rds.identifier)
+        if status == "stopped":
+            return True
+        if status in RDS_TERMINAL_ERROR_STATES:
+            msg = f"RDS instance {self.rds.identifier} entered terminal error state '{status}'"
+            raise RuntimeError(msg)
+        if status == "available":
+            self.aws_api.stop_rds_instance(identifier=self.rds.identifier)
+        return False
 
 
-@app.task(base=AutomatedActionTask)
+@app.task(bind=True, base=AutomatedActionTask, max_retries=60)
 def external_resource_rds_stop(
+    self: Task,
     account: str,
     identifier: str,
     *,
@@ -145,7 +177,8 @@ def external_resource_rds_stop(
         vault_secret=rds.account.automation_token, region=rds.account.region
     )
     with AWSApi(credentials=credentials, region=rds.region) as aws_api:
-        ExternalResourceRDSStop(aws_api, rds).run()
+        if not ExternalResourceRDSStop(aws_api, rds).run():
+            raise self.retry(countdown=RDS_STATUS_POLL_COUNTDOWN)
 
 
 class ExternalResourceFlushElastiCache:

@@ -44,6 +44,42 @@ For actions that require asynchronous processing, implement a Celery task:
 
 A good example of a Celery task can be found in the [no-op](/packages/automated_actions/automated_actions/celery/external_resource/tasks.py) action.
 
+### Long-Running Tasks (Waiting for External State)
+
+If your action needs to wait for an external system to reach a target state (e.g., an RDS instance becoming `available` after a start), **do not use `time.sleep()` in a loop**. A sleep-loop blocks the Celery worker for the entire duration and is not resilient to worker restarts — if the worker is killed (OOM, deployment), the action gets stuck in `RUNNING` forever.
+
+Instead, use Celery's **retry-based polling** pattern:
+
+1. Use `bind=True` and a high `max_retries` on the task decorator:
+   ```python
+   @app.task(bind=True, base=AutomatedActionTask, max_retries=60)
+   def my_task(self: Task, ..., *, action: Action) -> None:
+   ```
+
+2. Make the task **idempotent** — on each execution, check the current state before triggering the operation:
+   ```python
+   class MyAction:
+       def run(self) -> bool:
+           status = self.api.get_status(self.identifier)
+           if status == "target_state":
+               return True    # Done — task succeeds
+           if status in ERROR_STATES:
+               raise RuntimeError(f"Terminal error: {status}")  # Fail fast
+           if status == "source_state":
+               self.api.trigger_operation(self.identifier)  # Only trigger if not already in progress
+           return False       # Not done — retry needed
+   ```
+
+3. In the task function, retry when the target state is not yet reached:
+   ```python
+   if not MyAction(api, resource).run():
+       raise self.retry(countdown=30)
+   ```
+
+Each retry is a separate task execution — the worker is free between polls, and pending retries survive worker restarts via the SQS message broker.
+
+See `ExternalResourceRDSStart` / `ExternalResourceRDSStop` in [`tasks.py`](/packages/automated_actions/automated_actions/celery/external_resource/tasks.py) for the reference implementation.
+
 ### Write Tests
 
 Testing is crucial to ensure your new action works as expected. You need to implement both unit tests for the action logic and integration tests for the FastAPI endpoint.

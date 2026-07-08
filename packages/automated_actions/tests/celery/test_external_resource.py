@@ -140,12 +140,44 @@ def test_external_resource_rds_reboot_task_non_retryable_failure(
     )
 
 
-def test_external_resource_rds_start_run(mock_aws: Mock, er: ExternalResource) -> None:
+def test_external_resource_rds_start_run_already_available(
+    mock_aws: Mock, er: ExternalResource
+) -> None:
+    mock_aws.get_rds_instance_status.return_value = "available"
     automated_action = ExternalResourceRDSStart(aws_api=mock_aws, rds=er)
 
-    automated_action.run()
+    assert automated_action.run() is True
+    mock_aws.start_rds_instance.assert_not_called()
 
+
+def test_external_resource_rds_start_run_from_stopped(
+    mock_aws: Mock, er: ExternalResource
+) -> None:
+    mock_aws.get_rds_instance_status.return_value = "stopped"
+    automated_action = ExternalResourceRDSStart(aws_api=mock_aws, rds=er)
+
+    assert automated_action.run() is False
     mock_aws.start_rds_instance.assert_called_once_with(identifier=er.identifier)
+
+
+def test_external_resource_rds_start_run_starting(
+    mock_aws: Mock, er: ExternalResource
+) -> None:
+    mock_aws.get_rds_instance_status.return_value = "starting"
+    automated_action = ExternalResourceRDSStart(aws_api=mock_aws, rds=er)
+
+    assert automated_action.run() is False
+    mock_aws.start_rds_instance.assert_not_called()
+
+
+def test_external_resource_rds_start_run_terminal_error(
+    mock_aws: Mock, er: ExternalResource
+) -> None:
+    mock_aws.get_rds_instance_status.return_value = "failed"
+    automated_action = ExternalResourceRDSStart(aws_api=mock_aws, rds=er)
+
+    with pytest.raises(RuntimeError, match="terminal error state 'failed'"):
+        automated_action.run()
 
 
 def test_external_resource_rds_start_task(
@@ -163,7 +195,7 @@ def test_external_resource_rds_start_task(
             region="us-west-2",
         ),
     )
-    mock_rds_start_run = mocker.patch.object(ExternalResourceRDSStart, "run")
+    mocker.patch.object(ExternalResourceRDSStart, "run", return_value=True)
 
     action_id = str(uuid.uuid4())
     task_args = {
@@ -175,7 +207,6 @@ def test_external_resource_rds_start_task(
         task_id=action_id,
     ).apply()
 
-    mock_rds_start_run.assert_called_once()
     mock_action.set_status.assert_called_once_with(ActionStatus.RUNNING)
     mock_action.set_final_state.assert_called_once_with(
         status=ActionStatus.SUCCESS, result="ok", task_args=task_args
@@ -197,7 +228,7 @@ def test_external_resource_rds_start_task_non_retryable_failure(
             region="us-west-2",
         ),
     )
-    mock_rds_start_run = mocker.patch.object(
+    mocker.patch.object(
         ExternalResourceRDSStart,
         "run",
         side_effect=Exception("what a failure!"),
@@ -213,7 +244,6 @@ def test_external_resource_rds_start_task_non_retryable_failure(
         task_id=action_id,
     ).apply()
 
-    mock_rds_start_run.assert_called_once()
     mock_action.set_status.assert_called_once_with(ActionStatus.RUNNING)
     mock_action.set_final_state.assert_called_once_with(
         status=ActionStatus.FAILURE,
@@ -222,12 +252,44 @@ def test_external_resource_rds_start_task_non_retryable_failure(
     )
 
 
-def test_external_resource_rds_stop_run(mock_aws: Mock, er: ExternalResource) -> None:
+def test_external_resource_rds_stop_run_already_stopped(
+    mock_aws: Mock, er: ExternalResource
+) -> None:
+    mock_aws.get_rds_instance_status.return_value = "stopped"
     automated_action = ExternalResourceRDSStop(aws_api=mock_aws, rds=er)
 
-    automated_action.run()
+    assert automated_action.run() is True
+    mock_aws.stop_rds_instance.assert_not_called()
 
+
+def test_external_resource_rds_stop_run_from_available(
+    mock_aws: Mock, er: ExternalResource
+) -> None:
+    mock_aws.get_rds_instance_status.return_value = "available"
+    automated_action = ExternalResourceRDSStop(aws_api=mock_aws, rds=er)
+
+    assert automated_action.run() is False
     mock_aws.stop_rds_instance.assert_called_once_with(identifier=er.identifier)
+
+
+def test_external_resource_rds_stop_run_stopping(
+    mock_aws: Mock, er: ExternalResource
+) -> None:
+    mock_aws.get_rds_instance_status.return_value = "stopping"
+    automated_action = ExternalResourceRDSStop(aws_api=mock_aws, rds=er)
+
+    assert automated_action.run() is False
+    mock_aws.stop_rds_instance.assert_not_called()
+
+
+def test_external_resource_rds_stop_run_terminal_error(
+    mock_aws: Mock, er: ExternalResource
+) -> None:
+    mock_aws.get_rds_instance_status.return_value = "failed"
+    automated_action = ExternalResourceRDSStop(aws_api=mock_aws, rds=er)
+
+    with pytest.raises(RuntimeError, match="terminal error state 'failed'"):
+        automated_action.run()
 
 
 def test_external_resource_rds_stop_task(
@@ -245,7 +307,7 @@ def test_external_resource_rds_stop_task(
             region="us-west-2",
         ),
     )
-    mock_rds_stop_run = mocker.patch.object(ExternalResourceRDSStop, "run")
+    mocker.patch.object(ExternalResourceRDSStop, "run", return_value=True)
 
     action_id = str(uuid.uuid4())
     task_args = {
@@ -257,7 +319,6 @@ def test_external_resource_rds_stop_task(
         task_id=action_id,
     ).apply()
 
-    mock_rds_stop_run.assert_called_once()
     mock_action.set_status.assert_called_once_with(ActionStatus.RUNNING)
     mock_action.set_final_state.assert_called_once_with(
         status=ActionStatus.SUCCESS, result="ok", task_args=task_args
@@ -279,7 +340,7 @@ def test_external_resource_rds_stop_task_non_retryable_failure(
             region="us-west-2",
         ),
     )
-    mock_rds_stop_run = mocker.patch.object(
+    mocker.patch.object(
         ExternalResourceRDSStop,
         "run",
         side_effect=Exception("what a failure!"),
@@ -295,7 +356,6 @@ def test_external_resource_rds_stop_task_non_retryable_failure(
         task_id=action_id,
     ).apply()
 
-    mock_rds_stop_run.assert_called_once()
     mock_action.set_status.assert_called_once_with(ActionStatus.RUNNING)
     mock_action.set_final_state.assert_called_once_with(
         status=ActionStatus.FAILURE,

@@ -390,6 +390,38 @@ def test_aws_api_rds_get_events(
 
 
 @pytest.mark.parametrize(
+    ("region", "identifier", "expected_status"),
+    [
+        ("us-east-1", "test-db-instance", "available"),
+        ("eu-west-1", "stopped-db", "stopped"),
+        ("ap-south-1", "starting-db", "starting"),
+    ],
+    ids=["available", "stopped", "starting"],
+)
+def test_aws_api_get_rds_instance_status(
+    mock_aws_credentials: MagicMock,
+    mocker: MockerFixture,
+    region: str,
+    identifier: str,
+    expected_status: str,
+) -> None:
+    aws_api = AWSApi(credentials=mock_aws_credentials, region=region)
+
+    mock_rds_client = mocker.MagicMock()
+    aws_api.rds_client = mock_rds_client
+    mock_rds_client.describe_db_instances.return_value = {
+        "DBInstances": [{"DBInstanceStatus": expected_status}]
+    }
+
+    status = aws_api.get_rds_instance_status(identifier=identifier)
+
+    assert status == expected_status
+    mock_rds_client.describe_db_instances.assert_called_once_with(
+        DBInstanceIdentifier=identifier
+    )
+
+
+@pytest.mark.parametrize(
     ("region", "identifier", "snapshot_identifier"),
     [
         ("eu-central-1", "test-db-instance", "test-snapshot-identifier"),
