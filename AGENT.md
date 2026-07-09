@@ -157,6 +157,20 @@ Follow the checklist in `docs/development-guides/implementing-new-actions.md`:
 5. Regenerate client with `make generate-client`
 6. Update documentation in `actions.md`
 
+### Long-Running Celery Tasks (Retry-Based Polling)
+
+For actions that wait on an external state change (e.g., RDS instance reaching "available" or "stopped"), **never use `time.sleep()` in a loop**. It blocks the worker and is not resilient to worker restarts.
+
+Instead, use Celery's `self.retry(countdown=N)` pattern:
+
+- **`bind=True`** on the task to access `self.retry()`
+- **`max_retries=60`** (or appropriate value) to allow enough polling attempts
+- **Task must be idempotent**: check the current state before triggering the operation. On each retry, the task re-executes from scratch — it must not re-send an API call that's already in progress.
+- **`run()` returns `bool`**: `True` = target state reached (task succeeds), `False` = retry needed
+- **Terminal error detection**: check for error states and raise `RuntimeError` to fail fast instead of polling until timeout
+
+See `ExternalResourceRDSStart` / `ExternalResourceRDSStop` in `automated_actions/celery/external_resource/tasks.py` for the reference implementation.
+
 ### Testing Strategy
 
 - Unit tests for individual components
