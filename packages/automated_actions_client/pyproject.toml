@@ -17,10 +17,10 @@ documentation = "https://github.com/app-sre/automated-actions"
 dev = [
     # Development dependencies
     "clientele[cli]==2.2.2",
-    "mypy==2.2.0",
+    "mypy==2.3.0",
     "pytest-cov==7.1.0",
     "pytest==9.1.1",
-    "ruff==0.15.21",
+    "ruff==0.15.22",
 ]
 
 [build-system]

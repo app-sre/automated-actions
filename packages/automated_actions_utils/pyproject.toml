@@ -7,15 +7,15 @@ license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.14.0"
 dependencies = [
-    "boto3==1.43.45",
+    "boto3==1.43.52",
     "gql==4.0.0",
     "hvac==2.4.0",
-    "kubernetes==36.0.2",
+    "kubernetes==36.0.3",
     "openshift==0.13.2",
     "pydantic==2.13.4",
     "sretoolbox==4.0.1",
-    "types-boto3-lite[rds]==1.43.45",
-    "types-hvac==2.4.0.20260610",
+    "types-boto3-lite[rds]==1.43.52",
+    "types-hvac==2.4.0.20260718",
 ]
 
 [project.urls]
@@ -26,12 +26,12 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "mypy==2.2.0",
+    "mypy==2.3.0",
     "pytest-cov==7.1.0",
     "pytest-mock==3.15.1",
     "pytest==9.1.1",
     "qenerate==0.10.0",
-    "ruff==0.15.21",
+    "ruff==0.15.22",
 ]
 
 [build-system]
