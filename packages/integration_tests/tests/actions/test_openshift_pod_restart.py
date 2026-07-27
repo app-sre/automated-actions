@@ -81,7 +81,7 @@ def test_openshift_pod_restart_ok(
     )
     assert len(pod_names) == parent.replicas
 
-    pod_to_delete = random.choice(pod_names)  # noqa: S311
+    pod_to_delete = random.choice(pod_names)  # ruff: ignore[suspicious-non-cryptographic-random-usage]
     action = openshift_workload_restart(
         cluster=cluster,
         namespace=namespace,

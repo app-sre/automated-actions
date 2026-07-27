@@ -46,7 +46,7 @@ def external_resource_rds_reboot(
     identifier: str,
     *,
     force_failover: bool,
-    action: Action,  # noqa: ARG001
+    action: Action,  # ruff: ignore[unused-function-argument]
 ) -> None:
     rds = get_external_resource(
         account=account,
@@ -81,7 +81,7 @@ def external_resource_rds_snapshot(
     identifier: str,
     snapshot_identifier: str,
     *,
-    action: Action,  # noqa: ARG001
+    action: Action,  # ruff: ignore[unused-function-argument]
 ) -> None:
     rds = get_external_resource(
         account=account,
@@ -124,7 +124,7 @@ def external_resource_rds_start(
     account: str,
     identifier: str,
     *,
-    action: Action,  # noqa: ARG001
+    action: Action,  # ruff: ignore[unused-function-argument]
 ) -> None:
     rds = get_external_resource(
         account=account,
@@ -166,7 +166,7 @@ def external_resource_rds_stop(
     account: str,
     identifier: str,
     *,
-    action: Action,  # noqa: ARG001
+    action: Action,  # ruff: ignore[unused-function-argument]
 ) -> None:
     rds = get_external_resource(
         account=account,

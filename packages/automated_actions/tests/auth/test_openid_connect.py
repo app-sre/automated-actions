@@ -1,4 +1,4 @@
-# ruff: noqa: S106
+# ruff: file-ignore[hardcoded-password-func-arg]
 
 
 from datetime import UTC
@@ -70,7 +70,7 @@ def test_openid_connect_init_endpoints(openid_connect: OpenIDConnect) -> None:
 
 
 def test_openid_connect_init_router(openid_connect: OpenIDConnect) -> None:
-    assert len(openid_connect.router.routes) == 3  # noqa: PLR2004
+    assert len(openid_connect.router.routes) == 3  # ruff: ignore[magic-value-comparison]
     assert isinstance(openid_connect.router.routes[0], APIRoute)
     assert openid_connect.router.routes[0].path == "/login"
     assert openid_connect.router.routes[0].endpoint == openid_connect.login

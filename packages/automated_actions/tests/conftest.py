@@ -1,4 +1,4 @@
-# ruff: noqa: S105, S106, PLC0415
+# ruff: file-ignore[hardcoded-password-string, hardcoded-password-func-arg, import-outside-top-level]
 import os
 from typing import TYPE_CHECKING, Any, Self
 
@@ -102,7 +102,7 @@ def client() -> Callable[[FastAPI], TestClient]:
 
     def _client(app: FastAPI) -> TestClient:
         client = TestClient(app)
-        client.__enter__()  # noqa: PLC2801
+        client.__enter__()  # ruff: ignore[unnecessary-dunder-call]
         return client
 
     return _client

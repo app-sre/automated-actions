@@ -67,7 +67,7 @@ BANNER = """
 def no_traceback_exception_hook(
     exc_type: type[BaseException],
     exc_value: BaseException,
-    tb: TracebackType | None,  # noqa: ARG001
+    tb: TracebackType | None,  # ruff: ignore[unused-function-argument]
 ) -> None:
     """Custom exception hook to display exceptions without traceback."""
     msg = str(exc_value)
@@ -88,7 +88,7 @@ def version_callback(*, value: bool) -> None:
 
 
 @app.callback(no_args_is_help=True)
-def main(  # noqa: C901, PLR0912
+def main(  # ruff: ignore[complex-structure, too-many-branches]
     ctx: typer.Context,
     *,
     url: Annotated[
@@ -105,7 +105,7 @@ def main(  # noqa: C901, PLR0912
             envvar="AA_SCREEN_CAPTURE_FILE",
         ),
     ] = None,
-    version: Annotated[  # noqa: ARG001
+    version: Annotated[  # ruff: ignore[unused-function-argument]
         bool | None, typer.Option(callback=version_callback, help="Display version")
     ] = None,
     quiet: Annotated[

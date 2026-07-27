@@ -56,7 +56,7 @@ def openshift_workload_restart(
     namespace: str,
     kind: str,
     name: str,
-    action: Action,  # noqa: ARG001
+    action: Action,  # ruff: ignore[unused-function-argument]
 ) -> None:
     cluster_connection = get_cluster_connection_data(cluster, settings)
     oc = OpenshiftClient(
@@ -99,7 +99,7 @@ def openshift_workload_delete(
     api_version: str,
     kind: str,
     name: str,
-    action: Action,  # noqa: ARG001
+    action: Action,  # ruff: ignore[unused-function-argument]
 ) -> None:
     cluster_connection = get_cluster_connection_data(cluster, settings)
     oc = OpenshiftClient(

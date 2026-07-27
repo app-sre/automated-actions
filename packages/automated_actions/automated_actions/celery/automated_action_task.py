@@ -20,20 +20,20 @@ class AutomatedActionTask(Task):
     default_retry_delay = 5
     max_retries = 3
 
-    def before_start(  # noqa: PLR6301
+    def before_start(  # ruff: ignore[no-self-use]
         self,
-        task_id: str,  # noqa: ARG002
-        args: tuple,  # noqa: ARG002
+        task_id: str,  # ruff: ignore[unused-method-argument]
+        args: tuple,  # ruff: ignore[unused-method-argument]
         kwargs: dict,
     ) -> None:
         kwargs["action"].set_status(ActionStatus.RUNNING)
         log.info("status=%s", ActionStatus.RUNNING)
 
-    def on_success(  # noqa: PLR6301
+    def on_success(  # ruff: ignore[no-self-use]
         self,
-        retval: Any,  # noqa: ARG002
-        task_id: str,  # noqa: ARG002
-        args: tuple,  # noqa: ARG002
+        retval: Any,  # ruff: ignore[unused-method-argument]
+        task_id: str,  # ruff: ignore[unused-method-argument]
+        args: tuple,  # ruff: ignore[unused-method-argument]
         kwargs: dict,
     ) -> None:
         result = "ok"
@@ -52,13 +52,13 @@ class AutomatedActionTask(Task):
             name=kwargs["action"].name, status=ActionStatus.SUCCESS
         ).observe(amount=elapsed_time)
 
-    def on_failure(  # noqa: PLR6301
+    def on_failure(  # ruff: ignore[no-self-use]
         self,
         exc: Exception,
-        task_id: str,  # noqa: ARG002
-        args: tuple,  # noqa: ARG002
+        task_id: str,  # ruff: ignore[unused-method-argument]
+        args: tuple,  # ruff: ignore[unused-method-argument]
         kwargs: dict,
-        einfo: ExceptionInfo,  # noqa: ARG002
+        einfo: ExceptionInfo,  # ruff: ignore[unused-method-argument]
     ) -> None:
         result = str(exc)
         kwargs["action"].set_final_state(
@@ -76,13 +76,13 @@ class AutomatedActionTask(Task):
             name=kwargs["action"].name, status=ActionStatus.FAILURE
         ).observe(amount=elapsed_time)
 
-    def on_retry(  # noqa: PLR6301
+    def on_retry(  # ruff: ignore[no-self-use]
         self,
         exc: Exception,
-        task_id: str,  # noqa: ARG002
-        args: tuple,  # noqa: ARG002
-        kwargs: dict,  # noqa: ARG002
-        einfo: ExceptionInfo,  # noqa: ARG002
+        task_id: str,  # ruff: ignore[unused-method-argument]
+        args: tuple,  # ruff: ignore[unused-method-argument]
+        kwargs: dict,  # ruff: ignore[unused-method-argument]
+        einfo: ExceptionInfo,  # ruff: ignore[unused-method-argument]
     ) -> None:
         log.debug("retrying due to %s", exc)
 

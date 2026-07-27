@@ -34,7 +34,7 @@ def cli(config: Config) -> AACli:
             )
         except CalledProcessError as e:
             # If the command fails, we want to print the stderr for debugging.
-            print(  # noqa: T201
+            print(  # ruff: ignore[print]
                 f"Command failed with return code {e.returncode}: {e.stdout}\n {e.stderr}"
             )
             raise
@@ -94,7 +94,7 @@ def test_cli_required_option_not_given(cli: AACli) -> None:
     with pytest.raises(CalledProcessError) as e:
         cli("json", "action-detail")
 
-    assert e.value.returncode == 2  # noqa: PLR2004
+    assert e.value.returncode == 2  # ruff: ignore[magic-value-comparison]
     assert "Missing option '--action-id'" in e.value.stderr, e.value.stderr
 
 

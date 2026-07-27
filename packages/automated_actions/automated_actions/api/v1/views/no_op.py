@@ -3,7 +3,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from automated_actions.api.v1.dependencies import UserDep  # noqa: TC001
+from automated_actions.api.v1.dependencies import (
+    UserDep,  # ruff: ignore[typing-only-first-party-import]
+)
 from automated_actions.celery.no_op.tasks import no_op as no_op_task
 from automated_actions.db.models import (
     Action,

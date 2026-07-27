@@ -79,7 +79,7 @@ def test_external_resource_rds_reboot_task(
         "automated_actions.celery.external_resource.tasks.get_aws_credentials",
         return_value=AWSStaticCredentials(
             access_key_id="test-access-key",
-            secret_access_key="test-secret-key",  # noqa: S106
+            secret_access_key="test-secret-key",  # ruff: ignore[hardcoded-password-func-arg]
             region="us-west-2",
         ),
     )
@@ -114,7 +114,7 @@ def test_external_resource_rds_reboot_task_non_retryable_failure(
         "automated_actions.celery.external_resource.tasks.get_aws_credentials",
         return_value=AWSStaticCredentials(
             access_key_id="test-access-key",
-            secret_access_key="test-secret-key",  # noqa: S106
+            secret_access_key="test-secret-key",  # ruff: ignore[hardcoded-password-func-arg]
             region="us-west-2",
         ),
     )
@@ -195,7 +195,7 @@ def test_external_resource_rds_start_task(
         "automated_actions.celery.external_resource.tasks.get_aws_credentials",
         return_value=AWSStaticCredentials(
             access_key_id="test-access-key",
-            secret_access_key="test-secret-key",  # noqa: S106
+            secret_access_key="test-secret-key",  # ruff: ignore[hardcoded-password-func-arg]
             region="us-west-2",
         ),
     )
@@ -228,7 +228,7 @@ def test_external_resource_rds_start_task_non_retryable_failure(
         "automated_actions.celery.external_resource.tasks.get_aws_credentials",
         return_value=AWSStaticCredentials(
             access_key_id="test-access-key",
-            secret_access_key="test-secret-key",  # noqa: S106
+            secret_access_key="test-secret-key",  # ruff: ignore[hardcoded-password-func-arg]
             region="us-west-2",
         ),
     )
@@ -307,7 +307,7 @@ def test_external_resource_rds_stop_task(
         "automated_actions.celery.external_resource.tasks.get_aws_credentials",
         return_value=AWSStaticCredentials(
             access_key_id="test-access-key",
-            secret_access_key="test-secret-key",  # noqa: S106
+            secret_access_key="test-secret-key",  # ruff: ignore[hardcoded-password-func-arg]
             region="us-west-2",
         ),
     )
@@ -340,7 +340,7 @@ def test_external_resource_rds_stop_task_non_retryable_failure(
         "automated_actions.celery.external_resource.tasks.get_aws_credentials",
         return_value=AWSStaticCredentials(
             access_key_id="test-access-key",
-            secret_access_key="test-secret-key",  # noqa: S106
+            secret_access_key="test-secret-key",  # ruff: ignore[hardcoded-password-func-arg]
             region="us-west-2",
         ),
     )
@@ -381,7 +381,7 @@ def test_external_resource_flush_elasticache_run(
         image="test-image",
         command=["test-command"],
         args=["arg1"],
-        secret_name="test-secret",  # noqa: S106
+        secret_name="test-secret",  # ruff: ignore[hardcoded-password-func-arg]
         env_secret_mappings={"ENV_VAR": "test-key"},
     )
 
@@ -399,7 +399,7 @@ def test_external_resource_flush_elasticache_task(
         "automated_actions.celery.external_resource.tasks.get_cluster_connection_data",
         return_value=ClusterConnectionData(
             url="https://test-cluster-url",
-            token="test-cluster-token",  # noqa: S106
+            token="test-cluster-token",  # ruff: ignore[hardcoded-password-func-arg]
         ),
     )
     mocker.patch(
@@ -437,7 +437,7 @@ def test_external_resource_flush_elasticache_task_non_retryable_failure(
         "automated_actions.celery.external_resource.tasks.get_cluster_connection_data",
         return_value=ClusterConnectionData(
             url="https://test-cluster-url",
-            token="test-cluster-token",  # noqa: S106
+            token="test-cluster-token",  # ruff: ignore[hardcoded-password-func-arg]
         ),
     )
     mocker.patch(

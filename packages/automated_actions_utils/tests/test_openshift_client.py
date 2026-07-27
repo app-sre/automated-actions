@@ -34,7 +34,7 @@ def now(mocker: MockerFixture) -> dt:
 
 @pytest.fixture
 def openshift_client() -> OpenshiftClient:
-    return OpenshiftClient(server_url="https://example.com", token="fake-token")  # noqa: S106
+    return OpenshiftClient(server_url="https://example.com", token="fake-token")  # ruff: ignore[hardcoded-password-func-arg]
 
 
 def test_rolling_restart_success(

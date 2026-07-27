@@ -1,4 +1,4 @@
-# ruff: noqa: S106, SLF001
+# ruff: file-ignore[hardcoded-password-func-arg, private-member-access]
 from unittest.mock import MagicMock
 
 import hvac

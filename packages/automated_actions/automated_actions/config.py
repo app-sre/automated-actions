@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     sqs_url: str = "http://localhost:4566/000000000000/automated-actions"
     broker_aws_region: str = "us-east-1"
     broker_aws_access_key_id: str = "localstack"
-    broker_aws_secret_access_key: str = "localstack"  # noqa: S105
+    broker_aws_secret_access_key: str = "localstack"  # ruff: ignore[hardcoded-password-string]
     retries: int | None = None
     retry_delay: int = 10
 
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     dynamodb_url: str = "http://localhost:4566"
     dynamodb_aws_region: str = "us-east-1"
     dynamodb_aws_access_key_id: str = "localstack"
-    dynamodb_aws_secret_access_key: str = "localstack"  # noqa: S105
+    dynamodb_aws_secret_access_key: str = "localstack"  # ruff: ignore[hardcoded-password-string]
 
     # OIDC config
     oidc_issuer: str = "https://auth.redhat.com/auth/realms/EmployeeIDP"
