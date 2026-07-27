@@ -3,7 +3,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query
 
-from automated_actions.api.v1.dependencies import UserDep  # noqa: TC001
+from automated_actions.api.v1.dependencies import (
+    UserDep,  # ruff: ignore[typing-only-first-party-import]
+)
 from automated_actions.celery.external_resource.tasks import (
     external_resource_flush_elasticache as external_resource_flush_elasticache_task,
 )

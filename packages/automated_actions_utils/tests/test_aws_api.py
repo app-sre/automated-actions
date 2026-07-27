@@ -1,4 +1,4 @@
-# ruff: noqa: S105
+# ruff: file-ignore[hardcoded-password-string]
 from typing import Any
 from unittest.mock import MagicMock
 

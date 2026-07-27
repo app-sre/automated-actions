@@ -30,7 +30,7 @@ class VaultClientMissingArgsError(Exception):
     pass
 
 
-SECRET_VERSION_LATEST = "LATEST"  # noqa: S105
+SECRET_VERSION_LATEST = "LATEST"  # ruff: ignore[hardcoded-password-string]
 
 
 class VaultClient:

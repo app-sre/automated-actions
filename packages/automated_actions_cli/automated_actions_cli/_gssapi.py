@@ -70,8 +70,8 @@ def _negotiate_value(response: Response) -> bytes | None:
 def _sanitize_response(response: Response) -> None:
     """When mutual authentication is required and an HTTP error is to be returned, this method is used to sanitize the response which cannot be trusted."""
     response.is_stream_consumed = True
-    response._content = b""  # noqa: SLF001
-    response._cookies = httpx2.Cookies()  # noqa: SLF001
+    response._content = b""  # ruff: ignore[private-member-access]
+    response._cookies = httpx2.Cookies()  # ruff: ignore[private-member-access]
     headers = response.headers
     response.headers = httpx2.Headers({"content-length": "0"})
     for header in ("date", "server"):
@@ -271,7 +271,7 @@ class HTTPSPNEGOAuth(Auth):
         return ctx
 
     @_handle_gsserror(gss_stage="stepping", result=False)
-    def authenticate_server(self, response: Response, ctx: SecurityContext) -> bool:  # noqa: PLR6301
+    def authenticate_server(self, response: Response, ctx: SecurityContext) -> bool:  # ruff: ignore[no-self-use]
         """Authenticate the server via GSSAPI negotiate token.
 
         Returns True on success, False on failure.

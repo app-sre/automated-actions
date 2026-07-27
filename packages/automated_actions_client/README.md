@@ -55,8 +55,12 @@ from automated_actions_client.types import Response
 client = AuthenticatedClient(base_url="http://localhost:8080", token="your-auth-token")
 
 # Submit an action
-action_data = ActionRequest(action_name="restart_pod", parameters={"pod_name": "my-app-123"})
-response: Response[ActionStatus] = submit_action.sync(client=client, json_body=action_data)
+action_data = ActionRequest(
+    action_name="restart_pod", parameters={"pod_name": "my-app-123"}
+)
+response: Response[ActionStatus] = submit_action.sync(
+    client=client, json_body=action_data
+)
 
 if response.status_code == 202 and response.parsed:
     task_id = response.parsed.task_id

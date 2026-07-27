@@ -1,4 +1,4 @@
-# ruff: noqa: S105
+# ruff: file-ignore[hardcoded-password-string]
 import os
 
 os.environ["AA_ENVIRONMENT"] = "unit_tests"

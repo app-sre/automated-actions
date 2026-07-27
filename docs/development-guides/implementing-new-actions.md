@@ -62,12 +62,14 @@ Instead, use Celery's **retry-based polling** pattern:
        def run(self) -> bool:
            status = self.api.get_status(self.identifier)
            if status == "target_state":
-               return True    # Done — task succeeds
+               return True  # Done — task succeeds
            if status in ERROR_STATES:
                raise RuntimeError(f"Terminal error: {status}")  # Fail fast
            if status == "source_state":
-               self.api.trigger_operation(self.identifier)  # Only trigger if not already in progress
-           return False       # Not done — retry needed
+               self.api.trigger_operation(
+                   self.identifier
+               )  # Only trigger if not already in progress
+           return False  # Not done — retry needed
    ```
 
 3. In the task function, retry when the target state is not yet reached:

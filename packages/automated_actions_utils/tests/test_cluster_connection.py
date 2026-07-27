@@ -1,4 +1,4 @@
-# ruff: noqa:  S106
+# ruff: file-ignore[hardcoded-password-func-arg]
 from unittest.mock import MagicMock
 
 import pytest

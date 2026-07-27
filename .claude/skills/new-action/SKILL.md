@@ -122,6 +122,7 @@ Three pieces:
            name=EXTERNAL_RESOURCE_RDS_START_ACTION_ID, owner=user
        )
 
+
    @router.post(
        "/external-resource/rds-start/{account}/{identifier}",
        operation_id=EXTERNAL_RESOURCE_RDS_START_ACTION_ID,

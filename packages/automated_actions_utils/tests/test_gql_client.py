@@ -10,7 +10,7 @@ def gql(requests_mock: Mocker) -> GQLClient:
         "http://example.com/graphql",
         json={"data": {"test": "test"}},
     )
-    return GQLClient(url="http://example.com/graphql", token="test_token")  # noqa: S106
+    return GQLClient(url="http://example.com/graphql", token="test_token")  # ruff: ignore[hardcoded-password-func-arg]
 
 
 def test_gql_client_query(gql: GQLClient) -> None:

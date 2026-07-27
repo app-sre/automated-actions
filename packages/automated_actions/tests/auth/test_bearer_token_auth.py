@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 def bearer_token_auth(usermodel: type) -> BearerTokenAuth:
     return BearerTokenAuth[usermodel](  # type: ignore[valid-type]
         issuer="http://dev.com",
-        secret="secret",  # noqa: S106
+        secret="secret",  # ruff: ignore[hardcoded-password-func-arg]
         user_model=usermodel,
     )
 

@@ -4,8 +4,8 @@ from typer.core import TyperCommand, TyperGroup, TyperOption
 from typer.main import get_command
 
 from automated_actions_cli.cli import (
-    _get_help_panel,  # noqa: PLC2701
-    _serialize_result,  # noqa: PLC2701
+    _get_help_panel,  # ruff: ignore[import-private-name]
+    _serialize_result,  # ruff: ignore[import-private-name]
     app,
 )
 
