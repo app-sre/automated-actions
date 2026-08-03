@@ -92,16 +92,17 @@ class VaultClient:
                 f"{mount_point} mount_point."
             )
 
-        if version == SECRET_VERSION_LATEST:
+        version_int = None
+        if version != SECRET_VERSION_LATEST:
             # https://github.com/hvac/hvac/blob/
             # ec048ded30d21c13c21cfa950d148c8bfc1467b0/
             # hvac/api/secrets_engines/kv_v2.py#L85
-            version = None
+            version_int = int(version)
         try:
             secret = self._client.secrets.kv.v2.read_secret_version(
                 mount_point=mount_point,
                 path=read_path,
-                version=version,
+                version=version_int,
             )
         except hvac.exceptions.InvalidPath:
             msg = f"version '{version}' not found for secret with path '{mount_point}/{read_path}'."
