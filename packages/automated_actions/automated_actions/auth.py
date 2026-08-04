@@ -167,7 +167,9 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         if session_token:
             # already authenticated
             try:
-                access_token = self.session_serializer.loads(session_token)
+                access_token = self.session_serializer.loads(
+                    session_token, max_age=self.session_timeout_secs
+                )
                 return self.get_user_info(access_token)
             except Exception:
                 log.exception("Access token cannot be loaded or is outdated")
@@ -242,6 +244,8 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
             key="session",
             value=session_token,
             secure=self.enforce_https,
+            httponly=True,
+            samesite="lax",
             expires=self.session_timeout_secs,
         )
         return response
