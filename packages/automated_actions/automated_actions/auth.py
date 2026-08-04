@@ -1,10 +1,11 @@
 import logging
 import re
+import secrets
 from datetime import UTC
 from datetime import datetime as dt
 from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any, Protocol, Self
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 import httpxyz as httpx
 import jwt
@@ -17,6 +18,26 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
 log = logging.getLogger(__name__)
+
+# How long a /login -> /callback round trip may take before the signed OIDC
+# state (and its matching cookie) is considered expired.
+OIDC_STATE_MAX_AGE_SECS = 600
+
+
+def _is_safe_next_url(next_url: str) -> bool:
+    r"""Only allow same-origin relative paths as post-login redirect targets.
+
+    Rejects absolute URLs and protocol-relative URLs (`//evil.com`) to prevent
+    open redirects. Backslashes are rejected too: some browsers normalize a
+    leading `/\` into `//`, turning it into a protocol-relative URL that
+    `urlsplit` alone would not catch.
+    """
+    if not next_url.startswith("/") or next_url.startswith("//"):
+        return False
+    if "\\" in next_url:
+        return False
+    parsed = urlsplit(next_url)
+    return not parsed.scheme and not parsed.netloc
 
 
 class AccessToken(BaseModel):
@@ -90,6 +111,11 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
 
         self.session_serializer = URLSafeTimedSerializer(session_secret)
         self.session_timeout_secs = session_timeout_secs
+        # Separate salt so a leaked/forged state token can't be replayed as a
+        # session token (or vice versa) even though both share session_secret.
+        self.state_serializer = URLSafeTimedSerializer(
+            session_secret, salt="oidc-state"
+        )
 
     @classmethod
     async def create(
@@ -126,12 +152,15 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         )
 
     async def __call__(self, request: Request) -> UserModel:
+        next_url = request.url.path
+        if request.url.query:
+            next_url += f"?{request.url.query}"
         enforce_login = HTTPException(
             status_code=307,
             detail="Not authenticated",
             headers={
                 "Location": str(request.url_for("login"))
-                + f"?next_url={quote(str(request.url))}"
+                + f"?next_url={quote(next_url)}"
             },
         )
         session_token = request.cookies.get("session")
@@ -147,17 +176,50 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         raise enforce_login
 
     def login(self, request: Request, next_url: str = "") -> Response:
+        safe_next_url = next_url if _is_safe_next_url(next_url) else "/"
+        state_token = self.state_serializer.dumps({
+            "nonce": secrets.token_urlsafe(16),
+            "next_url": safe_next_url,
+        })
         auth_url = (
             f"{self.authorization_endpoint}?response_type=code"
             f"&scope={quote(self.scope)}"
             f"&client_id={quote(self.client_id)}"
             f"&redirect_uri={quote(str(request.url_for('callback')), safe='')}"
-            f"&state={quote(next_url)}"
+            f"&state={quote(state_token)}"
         )
-        return RedirectResponse(auth_url)
+        response = RedirectResponse(auth_url)
+        # Double-submit cookie: callback() only accepts a state that matches
+        # this cookie, binding the callback to the browser that started this
+        # specific login (RFC 6749 section 10.12 login-CSRF protection).
+        response.set_cookie(
+            key="oidc_state",
+            value=state_token,
+            secure=self.enforce_https,
+            httponly=True,
+            samesite="lax",
+            max_age=OIDC_STATE_MAX_AGE_SECS,
+        )
+        return response
 
     async def callback(self, request: Request, code: str, state: str) -> Response:
         """Keycloak callback."""
+        state_cookie = request.cookies.get("oidc_state")
+        if not state_cookie or state_cookie != state:
+            raise HTTPException(status_code=400, detail="Invalid or missing state")
+        try:
+            state_data = self.state_serializer.loads(
+                state, max_age=OIDC_STATE_MAX_AGE_SECS
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=400, detail="Invalid or expired state"
+            ) from e
+
+        next_url = state_data.get("next_url", "/")
+        if not _is_safe_next_url(next_url):
+            next_url = "/"
+
         async with httpx.AsyncClient() as client:
             token_response = await client.post(
                 self.token_endpoint,
@@ -174,7 +236,8 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
 
         token_data = token_response.json()
         session_token = self.session_serializer.dumps(token_data["access_token"])
-        response = RedirectResponse(url=state)
+        response = RedirectResponse(url=next_url)
+        response.delete_cookie("oidc_state")
         response.set_cookie(
             key="session",
             value=session_token,

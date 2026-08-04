@@ -6,12 +6,14 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
+from urllib.parse import parse_qs, urlparse
 
 import jwt
 import pytest
 from fastapi import FastAPI, HTTPException, status
 from fastapi.routing import APIRoute
 from httpx import HTTPStatusError
+from starlette.datastructures import URL
 
 from automated_actions.auth import OpenIDConnect
 
@@ -92,6 +94,7 @@ async def test_openid_connect_call(
     mocker.patch.object(
         openid_connect, "get_user_info", return_value=usermodel.load("test_user")
     )
+    mock_request.url = URL("/")
     session = openid_connect.session_serializer.dumps("session_data")
     mock_request.cookies.get.return_value = session
     user_info = await openid_connect(mock_request)
@@ -104,7 +107,7 @@ async def test_openid_connect_call_no_session(
 ) -> None:
     mock_request.cookies.get.return_value = None
     mock_request.url_for.return_value = "/login"
-    mock_request.url = "/next"
+    mock_request.url = URL("/next")
     with pytest.raises(HTTPException) as exc_info:
         await openid_connect(mock_request)
     assert exc_info.value.status_code == status.HTTP_307_TEMPORARY_REDIRECT
@@ -118,7 +121,7 @@ async def test_openid_connect_call_bad_session(
 ) -> None:
     mock_request.cookies.get.return_value = None
     mock_request.url_for.return_value = "/login"
-    mock_request.url = "/next"
+    mock_request.url = URL("/next")
     mock_request.cookies.get.return_value = "invalid_session"
     with pytest.raises(HTTPException) as exc_info:
         await openid_connect(mock_request)
@@ -135,7 +138,7 @@ async def test_openid_connect_call_bad_token(
 ) -> None:
     mock_request.cookies.get.return_value = None
     mock_request.url_for.return_value = "/login"
-    mock_request.url = "/next"
+    mock_request.url = URL("/next")
 
     mocker.patch.object(
         openid_connect,
@@ -163,10 +166,33 @@ def test_openid_connect_login(
         "/api/v1/auth/login", params={"next_url": "/foobar"}, follow_redirects=False
     )
     assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
-    assert (
-        response.headers["Location"]
-        == f"{openid_connect.authorization_endpoint}?response_type=code&scope=openid%20email%20profile&client_id=test_client_id&redirect_uri=http%3A%2F%2Ftestserver%2Fapi%2Fv1%2Fauth%2Fcallback&state=/foobar"
+
+    query = parse_qs(urlparse(response.headers["Location"]).query)
+    assert query["response_type"] == ["code"]
+    assert query["scope"] == ["openid email profile"]
+    assert query["client_id"] == ["test_client_id"]
+    assert query["redirect_uri"] == ["http://testserver/api/v1/auth/callback"]
+
+    state_token = query["state"][0]
+    assert response.cookies["oidc_state"] == state_token
+    state_data = openid_connect.state_serializer.loads(state_token)
+    assert state_data["next_url"] == "/foobar"
+
+
+def test_openid_connect_login_rejects_open_redirect(
+    openid_connect: OpenIDConnect,
+    full_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+) -> None:
+    """FIND-003: an absolute/off-site next_url must not survive into state."""
+    response = client(full_app).get(
+        "/api/v1/auth/login",
+        params={"next_url": "https://evil.example.com"},
+        follow_redirects=False,
     )
+    state_token = parse_qs(urlparse(response.headers["Location"]).query)["state"][0]
+    state_data = openid_connect.state_serializer.loads(state_token)
+    assert state_data["next_url"] == "/"
 
 
 def test_openid_connect_callback_endpoint(
@@ -184,14 +210,21 @@ def test_openid_connect_callback_endpoint(
         json={"access_token": "not_a_real_token"},
     )
 
-    response = client(full_app).get(
+    test_client = client(full_app)
+    login_response = test_client.get(
+        "/api/v1/auth/login", params={"next_url": "/foobar"}, follow_redirects=False
+    )
+    state_token = login_response.cookies["oidc_state"]
+
+    response = test_client.get(
         "/api/v1/auth/callback",
-        params={"code": "test_code", "state": "/foobar"},
+        params={"code": "test_code", "state": state_token},
         follow_redirects=False,
     )
     assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
     assert response.headers["Location"] == "/foobar"
     assert response.cookies["session"]
+    assert "oidc_state" not in response.cookies
 
 
 def test_openid_connect_callback_endpoint_error(
@@ -205,12 +238,51 @@ def test_openid_connect_callback_endpoint_error(
         status_code=status.HTTP_400_BAD_REQUEST,
     )
 
-    response = client(full_app).get(
+    test_client = client(full_app)
+    login_response = test_client.get(
+        "/api/v1/auth/login", params={"next_url": "/foobar"}, follow_redirects=False
+    )
+    state_token = login_response.cookies["oidc_state"]
+
+    response = test_client.get(
         "/api/v1/auth/callback",
-        params={"code": "test_code", "state": "/foobar"},
+        params={"code": "test_code", "state": state_token},
         follow_redirects=False,
     )
 
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_openid_connect_callback_rejects_missing_state_cookie(
+    full_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+) -> None:
+    """FIND-003: a callback with no matching oidc_state cookie is login-CSRF."""
+    response = client(full_app).get(
+        "/api/v1/auth/callback",
+        params={"code": "attacker_code", "state": "/foobar"},
+        follow_redirects=False,
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_openid_connect_callback_rejects_tampered_state(
+    full_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+) -> None:
+    """FIND-003: an unsigned state is rejected.
+
+    This holds even if an attacker manages to also set a matching cookie value.
+    """
+    test_client = client(full_app)
+    forged_state = "not-a-validly-signed-token"
+    test_client.cookies.set("oidc_state", forged_state)
+
+    response = test_client.get(
+        "/api/v1/auth/callback",
+        params={"code": "attacker_code", "state": forged_state},
+        follow_redirects=False,
+    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
