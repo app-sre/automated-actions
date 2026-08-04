@@ -1,3 +1,9 @@
+# ubi-minimal (not ubi-micro) is required here: OPA runs as a sidecar bound to
+# 127.0.0.1 only (see openshift/template.yaml), so kubelet's httpGet/tcpSocket
+# probes can't reach it from outside the pod netns. Liveness/readiness/startup
+# probes instead exec `curl` inside this container against 127.0.0.1:8181 —
+# provided by ubi-minimal's curl-minimal package. Do not slim this image down
+# without replacing that probe mechanism.
 FROM registry.access.redhat.com/ubi10/ubi-minimal@sha256:f0ed153f25c9a3df530ccf2c49ec04430efef206083cbbc16ca76a866ef096b5 AS base
 COPY --from=openpolicyagent/opa:1.19.0-static@sha256:2f42ca765bb739b40fc23ee625b3287012acdf8120ad4fcbdab68433a17be144 /opa /opa
 

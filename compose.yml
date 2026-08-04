@@ -53,6 +53,10 @@ services:
       - AA_BROKER_URL=sqs://localstack:4566
       - AA_SQS_URL=http://localstack:4566/000000000000/automated-actions
       - AA_DYNAMODB_URL=http://localstack:4566
+      # opa now defaults to a localhost-only sidecar in OpenShift (see
+      # openshift/template.yaml), but this compose file still runs it as its
+      # own container/service - point at it explicitly.
+      - AA_OPA_HOST=http://opa:8181
     build:
       context: .
       dockerfile: Dockerfile
