@@ -166,8 +166,8 @@ The OIDC client must have the following settings configured in the OIDC provider
 Settings for connecting to an OPA instance for authorization decisions.
 
 * **`AA_OPA_HOST`**:
-  * **Description**: The URL of the Open Policy Agent (OPA) server. The API server queries OPA to make authorization decisions.
-  * **Default**: `http://opa:8181`
+  * **Description**: The URL of the Open Policy Agent (OPA) server. The API server queries OPA to make authorization decisions. OPA runs as a sidecar bound to `127.0.0.1` in the same pod as the API, not a separate Service.
+  * **Default**: `http://localhost:8181`
   * **Impact**: If the API server cannot reach OPA, authorization checks will fail.
 
 * **`OPA_ACTION_API_URL`**:

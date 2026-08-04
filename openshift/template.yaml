@@ -138,6 +138,80 @@ objects:
               memory: ${{AA_API_MEMORY_REQUESTS}}
             limits:
               memory: ${{AA_API_MEMORY_LIMITS}}
+        # OPA sidecar: co-located in the api pod and bound to 127.0.0.1 only,
+        # so it is reachable exclusively from the web container above and
+        # never from another pod, even a co-tenant in the same namespace
+        # (OpenShift's default NetworkPolicy only blocks cross-namespace
+        # traffic, not same-namespace pod-to-pod traffic). This closes
+        # FIND-001 (APPSRE-14970) without needing a NetworkPolicy.
+        # httpGet/tcpSocket probes can't reach a loopback-only port from the
+        # kubelet, so probes here exec curl from inside the container instead.
+        - name: opa
+          image: "${OPA_IMAGE}:${IMAGE_TAG}"
+          args:
+          - run
+          - --ignore=.*
+          - --server
+          - --log-level=info
+          - --disable-telemetry
+          - --addr=127.0.0.1:${AA_OPA_PORT}
+          - --watch
+          - /authz # rego policy and default roles
+          - /policies # app-interface roles
+          envFrom:
+          - secretRef:
+              name: automated-actions-secret
+              optional: true
+          - configMapRef:
+              name: automated-actions-config
+              optional: true
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - "-c"
+                - sleep 2
+          livenessProbe:
+            exec:
+              command:
+              - curl
+              - -sf
+              - http://127.0.0.1:${AA_OPA_PORT}/health
+            initialDelaySeconds: 5
+            periodSeconds: 60
+          readinessProbe:
+            # Include bundle activation in readiness
+            exec:
+              command:
+              - curl
+              - -sf
+              - http://127.0.0.1:${AA_OPA_PORT}/health?bundle=true
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          startupProbe:
+            exec:
+              command:
+              - curl
+              - -sf
+              - http://127.0.0.1:${AA_OPA_PORT}/health
+            initialDelaySeconds: 1
+            periodSeconds: 5
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: ${{AA_OPA_CPU_REQUESTS}}
+              memory: ${{AA_OPA_MEMORY_REQUESTS}}
+            limits:
+              memory: ${{AA_OPA_MEMORY_LIMITS}}
+          volumeMounts:
+          - name: policy-volume
+            mountPath: /policies
+            readOnly: true
+        volumes:
+        - name: policy-volume
+          configMap:
+            name: automated-actions-policy
 
 # ---------- API SERVICE -----------
 - apiVersion: v1
@@ -287,141 +361,6 @@ objects:
       app.kubernetes.io/component: worker
       app.kubernetes.io/name: automated-actions
 
-# ---------- Open Policy Agent (OPA) DEPLOYMENT --------------
-- apiVersion: policy/v1
-  kind: PodDisruptionBudget
-  metadata:
-    name: opa
-  spec:
-    minAvailable: 1
-    selector:
-      matchLabels:
-        app.kubernetes.io/component: opa
-
-- apiVersion: v1
-  kind: ServiceAccount
-  imagePullSecrets: "${{IMAGE_PULL_SECRETS}}"
-  metadata:
-    name: opa
-    labels:
-      app.kubernetes.io/component: opa
-      app.kubernetes.io/name: automated-actions
-
-- apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    annotations:
-      ignore-check.kube-linter.io/unset-cpu-requirements: "no cpu limits"
-    labels:
-      app.kubernetes.io/component: opa
-      app.kubernetes.io/name: automated-actions
-    name: opa
-  spec:
-    replicas: ${{AA_OPA_REPLICAS}}
-    selector:
-      matchLabels:
-        app.kubernetes.io/component: opa
-        app.kubernetes.io/name: automated-actions
-    template:
-      metadata:
-        labels:
-          app.kubernetes.io/component: opa
-          app.kubernetes.io/name: automated-actions
-      spec:
-        restartPolicy: Always
-        serviceAccountName: opa
-        affinity:
-          podAntiAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                - key: app.kubernetes.io/component
-                  operator: In
-                  values:
-                  - opa
-              topologyKey: "kubernetes.io/hostname"
-        containers:
-        - name: opa
-          image: "${OPA_IMAGE}:${IMAGE_TAG}"
-          args:
-          - run
-          - --ignore=.*
-          - --server
-          - --log-level=info
-          - --disable-telemetry
-          - --addr=0.0.0.0:8181
-          - --watch
-          - /authz # rego policy and default roles
-          - /policies # app-interface roles
-          ports:
-          - name: http
-            containerPort: ${{AA_OPA_PORT}}
-          envFrom:
-          - secretRef:
-              name: automated-actions-secret
-              optional: true
-          - configMapRef:
-              name: automated-actions-config
-              optional: true
-          lifecycle:
-            preStop:
-              exec:
-                command:
-                - sh
-                - "-c"
-                - sleep 2
-          livenessProbe:
-            httpGet:
-              path: /health
-              scheme: HTTP
-              port: ${{AA_OPA_PORT}}
-            initialDelaySeconds: 5
-            periodSeconds: 60
-          readinessProbe:
-            httpGet:
-              path: /health?bundle=true # Include bundle activation in readiness
-              scheme: HTTP
-              port: ${{AA_OPA_PORT}}
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          startupProbe:
-            tcpSocket:
-              port: ${{AA_OPA_PORT}}
-            initialDelaySeconds: 1
-            periodSeconds: 5
-            timeoutSeconds: 5
-          resources:
-            requests:
-              cpu: ${{AA_OPA_CPU_REQUESTS}}
-              memory: ${{AA_OPA_MEMORY_REQUESTS}}
-            limits:
-              memory: ${{AA_OPA_MEMORY_LIMITS}}
-          volumeMounts:
-          - name: policy-volume
-            mountPath: /policies
-            readOnly: true
-        volumes:
-        - name: policy-volume
-          configMap:
-            name: automated-actions-policy
-
-# ---------- Open Policy Agent (OPA) SERVICE --------------
-- apiVersion: v1
-  kind: Service
-  metadata:
-    labels:
-      app.kubernetes.io/component: opa
-      app.kubernetes.io/name: automated-actions
-    name: opa
-  spec:
-    ports:
-    - name: http
-      port: ${{AA_OPA_PORT}}
-      targetPort: ${{AA_OPA_PORT}}
-    selector:
-      app.kubernetes.io/component: opa
-      app.kubernetes.io/name: automated-actions
-
 parameters:
 # Global config
 - name: IMAGE
@@ -521,18 +460,13 @@ parameters:
   value: "100m"
   required: true
 
-# OPA config
+# OPA config (sidecar in the api pod, bound to 127.0.0.1 only)
 - name: AA_OPA_PORT
-  description: Port to expose the OPA app on
+  description: Port OPA listens on (loopback-only, no Service)
   value: "8181"
   required: true
 
-## OPA Pod limits
-- name: AA_OPA_REPLICAS
-  description: OPA replicas
-  value: "3"
-  required: true
-
+## OPA sidecar limits
 - name: AA_OPA_MEMORY_REQUESTS
   description: OPA memory requests
   value: "50Mi"

@@ -57,7 +57,9 @@ class Settings(BaseSettings):
     token_secret: str
 
     # AuthZ
-    opa_host: str = "http://opa:8181"
+    # OPA runs as a sidecar bound to 127.0.0.1 in the api pod, not a separate
+    # Service - see openshift/template.yaml.
+    opa_host: str = "http://localhost:8181"
 
     # worker metrics config
     worker_metrics_port: int = 8000
