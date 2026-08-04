@@ -1,6 +1,6 @@
 #
 # Base image with defaults for all stages
-FROM registry.access.redhat.com/ubi9/python-314-minimal@sha256:3132aa18ce0d6843d256f8f646d660b6c5bc1ac9f60957d752204012bd3a5b4a AS base
+FROM registry.access.redhat.com/ubi9/python-314-minimal@sha256:fdba8bdfccb317d1c6b48125153f1d802c9000be18a92671635860ae6d09dcd4 AS base
 
 COPY LICENSE /licenses/
 
