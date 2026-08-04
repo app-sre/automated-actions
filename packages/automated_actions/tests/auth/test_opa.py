@@ -7,7 +7,7 @@ from fastapi import HTTPException, status
 from automated_actions.auth import OPA
 
 if TYPE_CHECKING:
-    from pytest_httpx import HTTPXMock
+    from pytest_httpx2 import HTTPXMock
 
     from tests.conftest import MockUserModel
 

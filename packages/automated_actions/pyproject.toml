@@ -10,7 +10,7 @@ dependencies = [
     "automated-actions-utils",
     "celery[sqs]==5.6.3",
     "fastapi==0.141.1",
-    "httpxyz==0.31.2",
+    "httpx2==2.9.1",
     "hvac==2.4.0",
     "itsdangerous==2.2.0",
     "kubernetes==36.0.3",
@@ -33,19 +33,15 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
+    "httpx2-pytest==1.0.1",
     "mypy==2.3.0",
     "pytest-asyncio==1.4.0",
     "pytest-cov==7.1.0",
-    "pytest-httpx==0.36.2",
     "pytest-mock==3.15.1",
     "pytest==9.1.1",
     "requests-mock==1.12.1",
     "ruff==0.16.1",
 ]
-
-[[tool.uv.dependency-metadata]]
-name = "pytest-httpx"
-requires-dist = ["httpxyz>=0.31", "pytest==9.*"]
 
 [build-system]
 requires = ["hatchling"]
@@ -159,6 +155,3 @@ omit = ["*/tests/*"]
 
 # [tool.coverage.report]
 # fail_under = 90
-
-[tool.pytest.ini_options]
-addopts = "-p httpxyz"

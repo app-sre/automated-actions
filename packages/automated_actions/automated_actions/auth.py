@@ -7,7 +7,7 @@ from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any, Protocol, Self
 from urllib.parse import quote, urlsplit
 
-import httpxyz as httpx
+import httpx2
 import jwt
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from itsdangerous import URLSafeTimedSerializer
@@ -130,7 +130,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         enforce_https: bool = True,
         user_model: type[UserModel],
     ) -> OpenIDConnect[UserModel]:
-        async with httpx.AsyncClient() as client:
+        async with httpx2.AsyncClient() as client:
             res = await client.get(
                 issuer.rstrip("/") + "/.well-known/openid-configuration", timeout=5
             )
@@ -220,7 +220,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
         if not _is_safe_next_url(next_url):
             next_url = "/"
 
-        async with httpx.AsyncClient() as client:
+        async with httpx2.AsyncClient() as client:
             token_response = await client.post(
                 self.token_endpoint,
                 data={
@@ -231,7 +231,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
                 auth=(self.client_id, self.client_secret),
             )
 
-        if not httpx.codes.is_success(token_response.status_code):
+        if not httpx2.codes.is_success(token_response.status_code):
             raise HTTPException(status_code=400, detail="Token request failed")
 
         token_data = token_response.json()
@@ -254,7 +254,7 @@ class OpenIDConnect[UserModel: UserModelProtocol]:
 
     def get_user_info(self, access_token: str) -> UserModel:
         # Check against the userinfo endpoint
-        response = httpx.get(
+        response = httpx2.get(
             self.userinfo_endpoint,
             headers={"Authorization": f"Bearer {access_token}"},
             timeout=5,
@@ -300,7 +300,7 @@ class OPA[UserModel: UserModelProtocol]:
         data["input"]["obj"] = obj
         data["input"]["params"] = params
 
-        async with httpx.AsyncClient() as client:
+        async with httpx2.AsyncClient() as client:
             opa_decision = await client.post(f"{self.opa_url}", json=data, timeout=5)
 
         if opa_decision.status_code != status.HTTP_200_OK:
