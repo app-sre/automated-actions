@@ -21,7 +21,7 @@ dependencies = [
     "pynamodb==6.1.0",
     "requests-toolbelt==1.0.0",
     "types-hvac==2.4.0.20260731",
-    "uvicorn==0.52.0",
+    "uvicorn==0.52.1",
     "watchdog==6.0.0",
 ]
 
