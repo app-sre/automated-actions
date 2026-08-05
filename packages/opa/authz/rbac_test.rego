@@ -133,6 +133,40 @@ test_user_denied_params if {
 		with data.roles as _test_roles
 }
 
+# The "cluster" pattern ("^cluster-1$") is already anchored by the role author,
+# so valid_params wraps it a second time (producing "^(?i:^cluster-1$)$"). ^ and
+# $ are zero-width, so nesting them is a no-op: exact matches still succeed and
+# substrings are still denied, not accidentally allowed or rejected outright.
+test_user_double_anchored_pattern_denied_substring_suffix if {
+	not authz.authorized with input as {
+		"username": "user1",
+		"obj": "restart",
+		"params": {
+			"cluster": "cluster-1-prod",
+			"namespace": "example",
+			"kind": "pod",
+			"name": "foobar-123",
+		},
+	}
+		with data.users as _test_users
+		with data.roles as _test_roles
+}
+
+test_user_double_anchored_pattern_denied_substring_prefix if {
+	not authz.authorized with input as {
+		"username": "user1",
+		"obj": "restart",
+		"params": {
+			"cluster": "other-cluster-1",
+			"namespace": "example",
+			"kind": "pod",
+			"name": "foobar-123",
+		},
+	}
+		with data.users as _test_users
+		with data.roles as _test_roles
+}
+
 # A param pattern must match the whole value, not just a substring of it.
 test_user_denied_namespace_substring_suffix if {
 	not authz.authorized with input as {
