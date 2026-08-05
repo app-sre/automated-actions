@@ -15,10 +15,12 @@ roles:
       action_user: null
   - obj: action-detail
     max_ops: null
-    params: {}
+    params:
+      owner: "$username"
   - obj: action-cancel
     max_ops: null
-    params: {}
+    params:
+      owner: "$username"
   opa:
   # the OPA service account must be allowed to retrieve the actions for any user!
   - obj: action-list

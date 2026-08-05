@@ -23,7 +23,7 @@ authorized if {
 check_role_permissions(role_permissions, username, current_input_obj, current_input_params) if {
 	some permission in role_permissions
 	object_matches(permission.obj, current_input_obj)
-	valid_params(permission.params, current_input_params)
+	valid_params(permission.params, current_input_params, username)
 }
 
 # Match any input if permission_obj is "*"
@@ -33,18 +33,26 @@ object_matches(permission_obj, input_obj) if {
 	permission_obj == input_obj
 }
 
-valid_params(expected, provided) if {
+valid_params(expected, provided, username) if {
 	# Check that null values in expected mean that the key should not be present in provided
 	null_keys := {k | expected[k] == null}
 	every k in null_keys {
 		not provided[k]
 	}
 
-	# For non-null values, ensure they match using regex. Anchor the pattern so it
-	# must match the whole value, not just a substring of it (e.g. namespace "foo"
-	# must not match "foo-bar" or "team-foo").
+	# For non-null values, ensure they match (either against the caller's own
+	# username, or as a regex, see param_matches)
 	non_null_keys := {k | expected[k] != null}
 	every k in non_null_keys {
-		regex.match(sprintf("^(?i:%s)$", [expected[k]]), provided[k])
+		param_matches(expected[k], provided[k], username)
 	}
+}
+
+# "$username" means the param must equal the caller's own username, e.g. to scope
+# a role to only the actions it owns rather than a fixed, per-role pattern.
+param_matches("$username", value, username) if value == username
+
+param_matches(pattern, value, _) if {
+	pattern != "$username"
+	regex.match(sprintf("^(?i:%s)$", [pattern]), value)
 }
