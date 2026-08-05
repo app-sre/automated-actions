@@ -1,13 +1,15 @@
 # ruff: file-ignore[hardcoded-password-func-arg]
 
 
+import time
 from datetime import UTC
 from datetime import datetime as dt
 from datetime import timedelta as td
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from urllib.parse import parse_qs, urlparse
 
+import itsdangerous
 import jwt
 import pytest
 from fastapi import FastAPI, HTTPException, status
@@ -329,3 +331,63 @@ def test_openid_connect_get_user_info_error(
     )
     with pytest.raises(HTTPStatusError):
         openid_connect.get_user_info("access_token")
+
+
+def test_openid_connect_callback_session_cookie_is_httponly_and_samesite(
+    openid_connect: OpenIDConnect,
+    full_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+    httpx_mock: HTTPXMock,
+) -> None:
+    """FIND-004: the session cookie must not be readable from JS (XSS mitigation)."""
+    httpx_mock.add_response(
+        url=openid_connect.token_endpoint,
+        json={"access_token": "not_a_real_token"},
+    )
+    test_client = client(full_app)
+    login_response = test_client.get(
+        "/api/v1/auth/login", params={"next_url": "/foobar"}, follow_redirects=False
+    )
+    state_token = login_response.cookies["oidc_state"]
+    response = test_client.get(
+        "/api/v1/auth/callback",
+        params={"code": "test_code", "state": state_token},
+        follow_redirects=False,
+    )
+    session_cookie_header = next(
+        h for h in response.headers.get_list("set-cookie") if h.startswith("session=")
+    )
+    assert "httponly" in session_cookie_header.lower()
+    assert "samesite=lax" in session_cookie_header.lower()
+
+
+@pytest.mark.asyncio
+async def test_openid_connect_call_rejects_expired_session(
+    openid_connect: OpenIDConnect,
+    mock_request: MagicMock,
+    mocker: MockerFixture,
+    usermodel: MockUserModel,
+) -> None:
+    """FIND-004: a session older than session_timeout_secs must be rejected.
+
+    This must be enforced server-side, not just via the cookie's client-enforced
+    expiry.
+    """
+    mocker.patch.object(
+        openid_connect, "get_user_info", return_value=usermodel.load("test_user")
+    )
+    mock_request.url = URL("/")
+    mock_request.url_for.return_value = "/login"
+    # Only fake the clock while dumping, so loads() compares against the real
+    # current time and actually sees the token as stale.
+    with patch.object(
+        itsdangerous.TimestampSigner,
+        "get_timestamp",
+        return_value=int(time.time()) - openid_connect.session_timeout_secs - 1,
+    ):
+        stale_session = openid_connect.session_serializer.dumps("session_data")
+    mock_request.cookies.get.return_value = stale_session
+
+    with pytest.raises(HTTPException) as exc_info:
+        await openid_connect(mock_request)
+    assert exc_info.value.status_code == status.HTTP_307_TEMPORARY_REDIRECT
