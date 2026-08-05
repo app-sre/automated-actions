@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
     from fastapi import FastAPI
-    from pytest_httpx import HTTPXMock
+    from pytest_httpx2 import HTTPXMock
 
 os.environ["AA_ENVIRONMENT"] = "unit_tests"
 os.environ["AA_OIDC_ISSUER"] = "http://dev.com"
