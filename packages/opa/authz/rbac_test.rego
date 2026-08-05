@@ -118,6 +118,40 @@ test_user_denied_obj if {
 		with data.roles as _test_roles
 }
 
+# The "name" pattern ("^foobar.*") is a genuine wildcard: anchoring must not
+# collapse ".*" into matching only the one exact value used by other tests, so
+# this uses a distinct suffix, plus the zero-length boundary where ".*" matches
+# nothing at all.
+test_user_allowed_wildcard_matches_varying_suffix if {
+	authz.authorized with input as {
+		"username": "user1",
+		"obj": "restart",
+		"params": {
+			"cluster": "cluster-1",
+			"namespace": "example",
+			"kind": "pod",
+			"name": "foobar-something-completely-different",
+		},
+	}
+		with data.users as _test_users
+		with data.roles as _test_roles
+}
+
+test_user_allowed_wildcard_matches_empty_suffix if {
+	authz.authorized with input as {
+		"username": "user1",
+		"obj": "restart",
+		"params": {
+			"cluster": "cluster-1",
+			"namespace": "example",
+			"kind": "pod",
+			"name": "foobar",
+		},
+	}
+		with data.users as _test_users
+		with data.roles as _test_roles
+}
+
 test_user_denied_params if {
 	not authz.authorized with input as {
 		"username": "user1",
