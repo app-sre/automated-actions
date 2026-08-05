@@ -114,6 +114,17 @@ ignore = [
 [tool.ruff.format]
 preview = true
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    "hardcoded-password-string",    # tests use fake secrets/tokens
+    "hardcoded-password-func-arg",
+    "import-outside-top-level",    # tests import lazily to control env var/mock setup timing
+    "unused-class-method-argument",    # test stub/fake classes match a wider interface
+    "unnecessary-dunder-call",    # TestClient.__enter__() usage
+    "magic-value-comparison",
+    "unused-async",    # async test doubles matching an async interface (e.g. OPA.__call__)
+]
+
 [tool.ruff.lint.isort]
 known-first-party = ["automated_actions"]
 

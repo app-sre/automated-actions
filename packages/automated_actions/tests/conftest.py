@@ -1,4 +1,3 @@
-# ruff: file-ignore[hardcoded-password-string, hardcoded-password-func-arg, import-outside-top-level]
 import os
 from typing import TYPE_CHECKING, Any, Self
 
@@ -62,6 +61,16 @@ def get_authz_fake() -> Callable:
 
 
 @pytest.fixture
+def get_opa_instance_fake() -> Callable:
+    async def _noop_authz(*_: Any, **__: Any) -> None: ...
+
+    def _get_opa_instance() -> Callable:
+        return _noop_authz
+
+    return _get_opa_instance
+
+
+@pytest.fixture
 def full_app(httpx_mock: HTTPXMock) -> FastAPI:
     """FastAPI app with authentication and authorization setup but without DynamoDB."""
     from automated_actions.app_factory import create_app
@@ -80,16 +89,26 @@ def full_app(httpx_mock: HTTPXMock) -> FastAPI:
 
 
 @pytest.fixture
-def app(get_user_fake: Callable, get_authz_fake: Callable, usermodel: type) -> FastAPI:
+def app(
+    get_user_fake: Callable,
+    get_authz_fake: Callable,
+    get_opa_instance_fake: Callable,
+    usermodel: type,
+) -> FastAPI:
     """FastAPI app without authentication, authorization, and DynamoDB."""
     # import here to have all os.env variables set before importing the settings module
-    from automated_actions.api.v1.dependencies import get_authz, get_user
+    from automated_actions.api.v1.dependencies import (
+        get_authz,
+        get_opa_instance,
+        get_user,
+    )
     from automated_actions.app_factory import create_app
     from automated_actions.auth import BearerTokenAuth
 
     test_app = create_app(run_db_init=False, run_auth_init=False)
     test_app.dependency_overrides[get_user] = get_user_fake
     test_app.dependency_overrides[get_authz] = get_authz_fake
+    test_app.dependency_overrides[get_opa_instance] = get_opa_instance_fake
     test_app.state.token = BearerTokenAuth[usermodel](  # type: ignore[valid-type]
         issuer="http://dev.com", secret="fake", user_model=usermodel
     )
@@ -102,7 +121,7 @@ def client() -> Callable[[FastAPI], TestClient]:
 
     def _client(app: FastAPI) -> TestClient:
         client = TestClient(app)
-        client.__enter__()  # ruff: ignore[unnecessary-dunder-call]
+        client.__enter__()
         return client
 
     return _client

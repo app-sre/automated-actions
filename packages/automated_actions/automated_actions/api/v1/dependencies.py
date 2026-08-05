@@ -30,3 +30,10 @@ async def get_authz(request: Request, user: UserDep) -> OPA:
 
 
 AuthZDep = Annotated[OPA, Depends(get_authz)]
+
+
+def get_opa_instance(request: Request) -> OPA:
+    return request.app.state.authz
+
+
+OpaInstanceDep = Annotated[OPA, Depends(get_opa_instance)]

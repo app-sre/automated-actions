@@ -1,4 +1,3 @@
-# ruff: file-ignore[unused-class-method-argument]
 from __future__ import annotations
 
 import pytest

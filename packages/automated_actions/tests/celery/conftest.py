@@ -27,4 +27,4 @@ def mock_action(mocker: MockerFixture) -> Mock:
 
 @pytest.fixture
 def cluster_connection_data() -> ClusterConnectionData:
-    return ClusterConnectionData(url="url", token="token")  # ruff: ignore[hardcoded-password-func-arg]
+    return ClusterConnectionData(url="url", token="token")

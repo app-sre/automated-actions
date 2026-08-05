@@ -1,12 +1,12 @@
-# ruff: file-ignore[unused-class-method-argument]
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
-from fastapi import FastAPI, status
+from fastapi import FastAPI, HTTPException, status
 from pynamodb.attributes import DynamicMapAttribute
 
+from automated_actions.api.v1.dependencies import get_opa_instance, get_user
 from automated_actions.db.models import (
     ActionManager,
     ActionSchemaOut,
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from fastapi.testclient import TestClient
 
     from automated_actions.db.models._action import ActionSchemaIn
+    from tests.conftest import MockUserModel
 
 
 class ActionStub(ActionSchemaOut):
@@ -161,3 +162,70 @@ def test_action_cancel(
     )
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert response.json()["status"] == ActionStatus.CANCELLED
+
+
+def _make_owner_enforcing_authz(calls: list[dict[str, Any]]) -> Callable:
+    """Stand-in for OPA: records each call and denies if owner != caller."""
+
+    async def _authz(
+        _request: Any, user: Any, extra_params: dict[str, str] | None = None
+    ) -> None:
+        calls.append({"username": user.username, "extra_params": extra_params})
+        if extra_params and extra_params.get("owner") != user.username:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized"
+            )
+
+    return _authz
+
+
+@pytest.mark.parametrize(
+    ("method", "operation_id"),
+    [("get", "action_detail"), ("post", "action_cancel")],
+)
+def test_action_detail_and_cancel_pass_action_owner_to_authz(
+    testing_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+    method: str,
+    operation_id: str,
+) -> None:
+    """ActionStub("1").owner == "test_user" == the default fake user's username."""
+    calls: list[dict[str, Any]] = []
+    testing_app.dependency_overrides[get_opa_instance] = lambda: (
+        _make_owner_enforcing_authz(calls)
+    )
+
+    response = getattr(client(testing_app), method)(
+        testing_app.url_path_for(operation_id, action_id="1"),
+    )
+
+    assert response.status_code in {status.HTTP_200_OK, status.HTTP_202_ACCEPTED}
+    assert calls == [{"username": "test_user", "extra_params": {"owner": "test_user"}}]
+
+
+@pytest.mark.parametrize(
+    ("method", "operation_id"),
+    [("get", "action_detail"), ("post", "action_cancel")],
+)
+def test_action_detail_and_cancel_deny_other_users_action(
+    testing_app: FastAPI,
+    client: Callable[[FastAPI], TestClient],
+    usermodel: type[MockUserModel],
+    method: str,
+    operation_id: str,
+) -> None:
+    """FIND-005: a user must not be able to view/cancel another user's action."""
+    calls: list[dict[str, Any]] = []
+    testing_app.dependency_overrides[get_opa_instance] = lambda: (
+        _make_owner_enforcing_authz(calls)
+    )
+    testing_app.dependency_overrides[get_user] = lambda: usermodel(
+        username="other_user"
+    )
+
+    response = getattr(client(testing_app), method)(
+        testing_app.url_path_for(operation_id, action_id="1"),
+    )
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert calls == [{"username": "other_user", "extra_params": {"owner": "test_user"}}]
