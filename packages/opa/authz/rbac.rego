@@ -40,9 +40,11 @@ valid_params(expected, provided) if {
 		not provided[k]
 	}
 
-	# For non-null values, ensure they match using regex
+	# For non-null values, ensure they match using regex. Anchor the pattern so it
+	# must match the whole value, not just a substring of it (e.g. namespace "foo"
+	# must not match "foo-bar" or "team-foo").
 	non_null_keys := {k | expected[k] != null}
 	every k in non_null_keys {
-		regex.match(sprintf("(?i)%s", [expected[k]]), provided[k])
+		regex.match(sprintf("^(?i:%s)$", [expected[k]]), provided[k])
 	}
 }
