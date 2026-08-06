@@ -1,8 +1,8 @@
 from http.cookiejar import MozillaCookieJar
 from typing import TYPE_CHECKING
 
-import click
 import pytest
+import typer
 from automated_actions_client.schemas import ActionSchemaOut, ActionStatus
 from typer.core import TyperCommand, TyperGroup, TyperOption
 from typer.main import get_command
@@ -247,7 +247,7 @@ def _run_main_with_kerberos_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(cli, "kinit", lambda: None)
     monkeypatch.setattr(cli, "me", lambda: None)
     monkeypatch.setattr(cli.atexit, "register", lambda func, *a, **kw: func(*a, **kw))
-    ctx = click.Context(click.Command("test"))
+    ctx = typer.Context(click_app)
     main(ctx, quiet=True)  # type: ignore[call-arg]
 
 
