@@ -170,6 +170,9 @@ def main(  # ruff: ignore[complex-structure, too-many-branches]
         cookiejar = MozillaCookieJar(filename=config.cookies_file)
         with contextlib.suppress(FileNotFoundError):
             cookiejar.load()
+        # persist the session cookie set during login so subsequent CLI
+        # invocations don't have to redo the full SSO redirect/token exchange
+        atexit.register(cookiejar.save, ignore_discard=True)
 
         aa_client.configure(
             config=Config(
