@@ -111,6 +111,8 @@ objects:
     labels:
       app.kubernetes.io/component: api
       app.kubernetes.io/name: automated-actions
+  # api and its opa sidecar never call the in-cluster K8s API (FIND-009 / APPSRE-14976).
+  automountServiceAccountToken: false
 
 - apiVersion: apps/v1
   kind: Deployment
