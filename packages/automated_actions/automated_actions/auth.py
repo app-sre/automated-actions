@@ -339,7 +339,12 @@ class OPA[UserModel: UserModelProtocol]:
                 detail="Action rate limit exceeded!",
             )
 
-    async def __call__(self, request: Request, user: UserModel) -> None:
+    async def __call__(
+        self,
+        request: Request,
+        user: UserModel,
+        extra_params: dict[str, str] | None = None,
+    ) -> None:
         # allow endpoints without authorization
         if self.should_skip_endpoint(request.url.path):
             return
@@ -347,6 +352,8 @@ class OPA[UserModel: UserModelProtocol]:
         # check if user is authorized to access endpoint
         params = request.path_params.copy()
         params.update(request.query_params)
+        if extra_params:
+            params.update(extra_params)
         opa_data = await self.query_opa(
             user, obj=request["route"].operation_id, params=params
         )

@@ -1,6 +1,3 @@
-# ruff: file-ignore[hardcoded-password-func-arg]
-
-
 import time
 from datetime import UTC
 from datetime import datetime as dt
@@ -74,7 +71,7 @@ def test_openid_connect_init_endpoints(openid_connect: OpenIDConnect) -> None:
 
 
 def test_openid_connect_init_router(openid_connect: OpenIDConnect) -> None:
-    assert len(openid_connect.router.routes) == 3  # ruff: ignore[magic-value-comparison]
+    assert len(openid_connect.router.routes) == 3
     assert isinstance(openid_connect.router.routes[0], APIRoute)
     assert openid_connect.router.routes[0].path == "/login"
     assert openid_connect.router.routes[0].endpoint == openid_connect.login

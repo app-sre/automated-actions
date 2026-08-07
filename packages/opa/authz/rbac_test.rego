@@ -260,3 +260,22 @@ test_user_alternation_pattern_denied_partial_match if {
 		with data.users as {"user1": ["alt-team"]}
 		with data.roles as _test_roles_alternation
 }
+
+_test_roles_privileged_owner := {"support-team": [{
+	"obj": "action-detail",
+	"max_ops": null,
+	"params": {"owner": ".*"},
+}]}
+
+# A privileged role's own regex pattern (e.g. app-sre's "owner: .*" grant) is a
+# static per-role pattern, not the "$username" sentinel, and must keep matching
+# any owner regardless of who's asking.
+test_user_privileged_owner_pattern_allows_any_owner if {
+	authz.authorized with input as {
+		"username": "support-user",
+		"obj": "action-detail",
+		"params": {"owner": "someone-else"},
+	}
+		with data.users as {"support-user": ["support-team"]}
+		with data.roles as _test_roles_privileged_owner
+}

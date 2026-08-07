@@ -123,6 +123,37 @@ async def test_opa_call(
 
 
 @pytest.mark.asyncio
+async def test_opa_call_with_extra_params(
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+) -> None:
+    """extra_params (e.g. an action's owner) must be merged into the params sent to OPA."""
+    user = usermodel.load("test_user")
+    route_mock = MagicMock()
+    route_mock.operation_id = "action-detail"
+    mock_request.__getitem__.return_value = route_mock
+    mock_request.path_params = {"action_id": "1"}
+    mock_request.url = MagicMock()
+    mock_request.url.path = "/actions/1"
+
+    httpx_mock.add_response(
+        method="POST",
+        match_json={
+            "input": {
+                "username": "test_user",
+                "name": "test user",
+                "email": "test@example.com",
+                "created_at": 1,
+                "updated_at": 2,
+                "obj": "action-detail",
+                "params": {"action_id": "1", "owner": "test_user"},
+            }
+        },
+        json={"result": {"authorized": True, "within_rate_limits": True}},
+    )
+    await opa(request=mock_request, user=user, extra_params={"owner": "test_user"})
+
+
+@pytest.mark.asyncio
 async def test_opa_call_skipped(
     opa: OPA, usermodel: MockUserModel, mock_request: MagicMock
 ) -> None:
