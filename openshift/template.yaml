@@ -24,8 +24,73 @@ objects:
     AA_DEBUG: "${AA_DEBUG}"
     AA_ROOT_PATH: "${AA_ROOT_PATH}"
     AA_URL: "${AA_URL}"
+    AA_ENVIRONMENT: "${AA_ENVIRONMENT}"
+    AA_VAULT_SERVER_URL: "${AA_VAULT_SERVER_URL}"
+    AA_QONTRACT_SERVER_URL: "${AA_QONTRACT_SERVER_URL}"
     OPA_ACTION_API_URL: "http://automated-actions:${AA_APP_PORT}/api/v1"
     OPA_MAX_AGE_MINUTES: "60"
+
+# -------- SECRETS ----------
+# One Secret per component so a compromised container only exposes the
+# credentials it actually uses (FIND-010). automated-actions-secret (built
+# separately by app-interface, see resources/services/automated-actions/
+# secrets.yaml.j2) still carries AA_BROKER_URL, which needs the SQS access
+# key/secret composed into a URL and can't be expressed as a plain parameter.
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    annotations:
+      qontract.recycle: "true"
+    labels:
+      app.kubernetes.io/name: automated-actions
+    name: automated-actions-api-secret
+  type: Opaque
+  stringData:
+    AA_OIDC_CLIENT_ID: "${AA_OIDC_CLIENT_ID}"
+    AA_OIDC_CLIENT_SECRET: "${AA_OIDC_CLIENT_SECRET}"
+    AA_SESSION_SECRET: "${AA_SESSION_SECRET}"
+    AA_TOKEN_SECRET: "${AA_TOKEN_SECRET}"
+    AA_DYNAMODB_URL: "${AA_DYNAMODB_URL}"
+    AA_DYNAMODB_AWS_REGION: "${AA_DYNAMODB_AWS_REGION}"
+    AA_DYNAMODB_AWS_ACCESS_KEY_ID: "${AA_DYNAMODB_AWS_ACCESS_KEY_ID}"
+    AA_DYNAMODB_AWS_SECRET_ACCESS_KEY: "${AA_DYNAMODB_AWS_SECRET_ACCESS_KEY}"
+    AA_SQS_URL: "${AA_SQS_URL}"
+    AA_BROKER_AWS_REGION: "${AA_BROKER_AWS_REGION}"
+    AA_BROKER_AWS_ACCESS_KEY_ID: "${AA_BROKER_AWS_ACCESS_KEY_ID}"
+    AA_BROKER_AWS_SECRET_ACCESS_KEY: "${AA_BROKER_AWS_SECRET_ACCESS_KEY}"
+
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    annotations:
+      qontract.recycle: "true"
+    labels:
+      app.kubernetes.io/name: automated-actions
+    name: automated-actions-worker-secret
+  type: Opaque
+  stringData:
+    AA_DYNAMODB_URL: "${AA_DYNAMODB_URL}"
+    AA_DYNAMODB_AWS_REGION: "${AA_DYNAMODB_AWS_REGION}"
+    AA_DYNAMODB_AWS_ACCESS_KEY_ID: "${AA_DYNAMODB_AWS_ACCESS_KEY_ID}"
+    AA_DYNAMODB_AWS_SECRET_ACCESS_KEY: "${AA_DYNAMODB_AWS_SECRET_ACCESS_KEY}"
+    AA_SQS_URL: "${AA_SQS_URL}"
+    AA_BROKER_AWS_REGION: "${AA_BROKER_AWS_REGION}"
+    AA_BROKER_AWS_ACCESS_KEY_ID: "${AA_BROKER_AWS_ACCESS_KEY_ID}"
+    AA_BROKER_AWS_SECRET_ACCESS_KEY: "${AA_BROKER_AWS_SECRET_ACCESS_KEY}"
+    AA_VAULT_ROLE_ID: "${AA_VAULT_ROLE_ID}"
+    AA_VAULT_SECRET_ID: "${AA_VAULT_SECRET_ID}"
+
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    annotations:
+      qontract.recycle: "true"
+    labels:
+      app.kubernetes.io/name: automated-actions
+    name: automated-actions-opa-secret
+  type: Opaque
+  stringData:
+    OPA_ACTION_API_TOKEN: "${OPA_ACTION_API_TOKEN}"
 
 # ------- API DEPLOYMENT --------------------
 - apiVersion: policy/v1
@@ -99,6 +164,9 @@ objects:
             value: "${AA_APP_PORT}"
           envFrom:
           - secretRef:
+              name: automated-actions-api-secret
+              optional: true
+          - secretRef:
               name: automated-actions-secret
               optional: true
           - configMapRef:
@@ -160,7 +228,7 @@ objects:
           - /policies # app-interface roles
           envFrom:
           - secretRef:
-              name: automated-actions-secret
+              name: automated-actions-opa-secret
               optional: true
           - configMapRef:
               name: automated-actions-config
@@ -304,6 +372,9 @@ objects:
             value: /worker-temp-dir
           envFrom:
           - secretRef:
+              name: automated-actions-worker-secret
+              optional: true
+          - secretRef:
               name: automated-actions-secret
               optional: true
           - configMapRef:
@@ -412,6 +483,18 @@ parameters:
   description: URL of the API
   required: true
 
+- name: AA_ENVIRONMENT
+  description: Deployment environment (used e.g. in the DynamoDB table name)
+  required: true
+
+- name: AA_VAULT_SERVER_URL
+  description: Vault server URL
+  required: true
+
+- name: AA_QONTRACT_SERVER_URL
+  description: qontract-server GraphQL URL
+  required: true
+
 ## Api Pod limits
 - name: AA_API_REPLICAS
   description: Web replicas
@@ -480,4 +563,67 @@ parameters:
 - name: AA_OPA_CPU_REQUESTS
   description: OPA cpu requests
   value: "100m"
+  required: true
+
+# Secrets, provisioned via app-interface secretParameters - split per component
+# so a compromised container only exposes the credentials it uses (FIND-010,
+# APPSRE-14977). See the Secret objects above for which component uses which.
+- name: AA_OIDC_CLIENT_ID
+  description: OIDC client ID
+  required: true
+
+- name: AA_OIDC_CLIENT_SECRET
+  description: OIDC client secret
+  required: true
+
+- name: AA_SESSION_SECRET
+  description: Session signing secret
+  required: true
+
+- name: AA_TOKEN_SECRET
+  description: Bearer token signing secret
+  required: true
+
+- name: AA_DYNAMODB_URL
+  description: DynamoDB endpoint URL
+  required: true
+
+- name: AA_DYNAMODB_AWS_REGION
+  description: DynamoDB AWS region
+  required: true
+
+- name: AA_DYNAMODB_AWS_ACCESS_KEY_ID
+  description: DynamoDB AWS access key ID
+  required: true
+
+- name: AA_DYNAMODB_AWS_SECRET_ACCESS_KEY
+  description: DynamoDB AWS secret access key
+  required: true
+
+- name: AA_SQS_URL
+  description: SQS queue URL used as the Celery broker
+  required: true
+
+- name: AA_BROKER_AWS_REGION
+  description: Celery broker (SQS) AWS region
+  required: true
+
+- name: AA_BROKER_AWS_ACCESS_KEY_ID
+  description: Celery broker (SQS) AWS access key ID
+  required: true
+
+- name: AA_BROKER_AWS_SECRET_ACCESS_KEY
+  description: Celery broker (SQS) AWS secret access key
+  required: true
+
+- name: AA_VAULT_ROLE_ID
+  description: Vault AppRole role ID (worker only)
+  required: true
+
+- name: AA_VAULT_SECRET_ID
+  description: Vault AppRole secret ID (worker only)
+  required: true
+
+- name: OPA_ACTION_API_TOKEN
+  description: Bearer token OPA uses to call back into the API for rate limiting (opa sidecar only)
   required: true
