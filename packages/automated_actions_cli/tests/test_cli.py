@@ -1,13 +1,23 @@
+from http.cookiejar import MozillaCookieJar
+from typing import TYPE_CHECKING
+
 import pytest
+import typer
 from automated_actions_client.schemas import ActionSchemaOut, ActionStatus
 from typer.core import TyperCommand, TyperGroup, TyperOption
 from typer.main import get_command
 
+from automated_actions_cli import cli
 from automated_actions_cli.cli import (
     _get_help_panel,  # ruff: ignore[import-private-name]
     _serialize_result,  # ruff: ignore[import-private-name]
     app,
+    main,
 )
+from automated_actions_cli.config import Config
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _cmd = get_command(app)
 assert isinstance(_cmd, TyperGroup)
@@ -221,3 +231,64 @@ def test_openshift_workload_delete_params() -> None:
         "name",
         "api_version",
     }
+
+
+# --- Kerberos cookie jar persistence ---
+
+
+def _run_main_with_kerberos_auth(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Invoke main() through the Kerberos auth branch with all I/O stubbed out.
+
+    Registers `atexit.register`'d callbacks to run immediately (instead of at
+    real process exit) so their effect can be asserted within the test.
+    """
+    monkeypatch.delenv("AA_TOKEN", raising=False)
+    monkeypatch.setattr(cli, "kerberos_available", lambda: True)
+    monkeypatch.setattr(cli, "kinit", lambda: None)
+    monkeypatch.setattr(cli, "me", lambda: None)
+    monkeypatch.setattr(cli.atexit, "register", lambda func, *a, **kw: func(*a, **kw))
+    ctx = typer.Context(click_app)
+    main(ctx, quiet=True)  # type: ignore[call-arg]
+
+
+def test_kerberos_auth_persists_cookie_jar_to_disk(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A CLI process authenticating via Kerberos must save the session cookie.
+
+    Without this, every separate CLI invocation starts from an empty cookie
+    jar and has to redo the full SSO redirect/token-exchange dance, even
+    though the server-side session cookie is still valid.
+    """
+    cookies_file = tmp_path / "cookies.txt"
+    monkeypatch.setattr(Config, "cookies_file", cookies_file)
+
+    _run_main_with_kerberos_auth(monkeypatch)
+
+    assert cookies_file.exists()
+
+
+def test_kerberos_auth_saves_cookie_jar_ignoring_discard(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The jar must be saved with ignore_discard=True.
+
+    Otherwise a cookie that ever comes back without an explicit expiry (a
+    true browser-session cookie) would silently be dropped from the file.
+    """
+    cookies_file = tmp_path / "cookies.txt"
+    monkeypatch.setattr(Config, "cookies_file", cookies_file)
+
+    save_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    original_save = MozillaCookieJar.save
+
+    def spy_save(self: MozillaCookieJar, *args: object, **kwargs: object) -> None:
+        save_calls.append((args, kwargs))
+        original_save(self, *args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(MozillaCookieJar, "save", spy_save)
+
+    _run_main_with_kerberos_auth(monkeypatch)
+
+    assert len(save_calls) == 1
+    assert save_calls[0][1].get("ignore_discard") is True
