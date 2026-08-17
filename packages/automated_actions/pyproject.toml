@@ -10,18 +10,18 @@ dependencies = [
     "automated-actions-utils",
     "celery[sqs]==5.6.3",
     "fastapi==0.141.1",
-    "httpx2==2.9.1",
+    "httpx2==2.10.0",
     "hvac==2.4.0",
     "itsdangerous==2.2.0",
     "kubernetes==36.0.3",
     "prometheus-fastapi-instrumentator==8.1.0",
-    "pydantic-settings==2.14.2",
+    "pydantic-settings==2.15.0",
     "pydantic==2.13.4",
     "pyjwt==2.13.0",
     "pynamodb==6.1.0",
     "requests-toolbelt==1.0.0",
     "types-hvac==2.4.0.20260731",
-    "uvicorn==0.52.1",
+    "uvicorn==0.52.3",
     "watchdog==6.0.0",
 ]
 
@@ -40,7 +40,7 @@ dev = [
     "pytest-mock==3.15.1",
     "pytest==9.1.1",
     "requests-mock==1.12.1",
-    "ruff==0.16.1",
+    "ruff==0.16.3",
 ]
 
 [build-system]
