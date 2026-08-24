@@ -14,7 +14,7 @@ dependencies = [
     "pydantic-settings==2.15.0",
     "pytest==9.1.1",
     "pytest-order==1.5.0",
-    "pytest-rerunfailures==16.5",
+    "pytest-rerunfailures==16.6",
     "pyyaml==6.0.3",
 ]
 
@@ -26,9 +26,9 @@ documentation = "https://github.com/app-sre/automated-actions"
 [dependency-groups]
 dev = [
     # Development dependencies
-    "mypy==2.3.0",
-    "ruff==0.16.3",
-    "types-pyyaml==6.0.12.20260724",
+    "mypy==2.3.1",
+    "ruff==0.16.4",
+    "types-pyyaml==6.0.12.20260815",
 ]
 
 [build-system]
