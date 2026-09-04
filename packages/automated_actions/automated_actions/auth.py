@@ -326,8 +326,11 @@ class OPA[UserModel: UserModelProtocol]:
     def user_is_authorized(opa_data: dict[str, Any]) -> None:
         """Check if user is authorized to access endpoint."""
         if not opa_data.get("authorized"):
+            # 403, not 401: the user is authenticated, they're just not permitted to
+            # perform this action. Keeping this distinct from authentication failures
+            # (401) lets clients tell the two apart.
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized"
             )
 
     @staticmethod
@@ -338,6 +341,30 @@ class OPA[UserModel: UserModelProtocol]:
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Action rate limit exceeded!",
             )
+
+    @staticmethod
+    def _apply_declared_query_defaults(route: Any, params: dict[str, str]) -> None:
+        """Backfill optional query params the client omitted with their declared default.
+
+        A client is allowed to omit an optional query param and rely on the server-side
+        default (e.g. api_version="v1"). But valid_params (rbac.rego) treats a missing
+        key as "does not match", even against a wildcard pattern, since regex.match on
+        an undefined value is itself undefined. So input.params must reflect the
+        effective value the endpoint will actually use, not just whatever happened to
+        be on the wire.
+
+        A default of None (e.g. action-list's action_user) is different: it means "no
+        value", not "the value None", so the key must stay absent rather than becoming
+        the literal string "None" — default_roles.yml relies on that absence (e.g.
+        action_user: null) to authorize the unfiltered case.
+        """
+        for field in route.dependant.query_params:
+            if (
+                field.alias not in params
+                and not field.field_info.is_required()
+                and field.default is not None
+            ):
+                params[field.alias] = str(field.default)
 
     async def __call__(
         self,
@@ -350,13 +377,13 @@ class OPA[UserModel: UserModelProtocol]:
             return
 
         # check if user is authorized to access endpoint
+        route = request["route"]
         params = request.path_params.copy()
         params.update(request.query_params)
+        self._apply_declared_query_defaults(route, params)
         if extra_params:
             params.update(extra_params)
-        opa_data = await self.query_opa(
-            user, obj=request["route"].operation_id, params=params
-        )
+        opa_data = await self.query_opa(user, obj=route.operation_id, params=params)
         self.user_is_authorized(opa_data)
         self.user_is_within_rate_limits(opa_data)
         user.set_allowed_actions(allowed_actions=opa_data.get("objects", []))
@@ -382,8 +409,17 @@ class BearerTokenAuth[UserModel: UserModelProtocol]:
             token = authorization.split(" ")[1]
             try:
                 return self.get_user_info(token)
-            except Exception:
+            except Exception as e:
                 log.exception("Access token cannot be loaded or is not valid anymore")
+                # Fail authentication directly instead of returning None: returning
+                # None here would make get_user() silently fall through to the
+                # browser-oriented OIDC redirect flow, which is useless (and
+                # confusing) for a client that already tried a Bearer token.
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid or expired token.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                ) from e
 
         return None
 

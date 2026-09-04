@@ -71,12 +71,13 @@ async def test_bearer_auth_missing_authorization(
 async def test_bearer_auth_invalid_token(
     bearer_token_auth: BearerTokenAuth, mock_request: MagicMock
 ) -> None:
+    """A rejected Bearer token must fail with 401, not fall through to the OIDC redirect."""
     mock_request.headers["Authorization"] = "Bearer invalid_token"
 
-    user = await bearer_token_auth(mock_request)
+    with pytest.raises(HTTPException) as exc_info:
+        await bearer_token_auth(mock_request)
 
-    # Assertions
-    assert user is None
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 @pytest.mark.asyncio
@@ -91,7 +92,7 @@ async def test_bearer_auth_expired_token(
     )
     mock_request.headers["Authorization"] = f"Bearer {token}"
 
-    user = await bearer_token_auth(mock_request)
+    with pytest.raises(HTTPException) as exc_info:
+        await bearer_token_auth(mock_request)
 
-    # Assertions
-    assert user is None
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
