@@ -239,6 +239,43 @@ async def test_opa_call_does_not_override_explicit_query_param(
 
 
 @pytest.mark.asyncio
+async def test_opa_call_does_not_backfill_none_default(
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+) -> None:
+    """A None default (e.g. action-list's action_user) means "omit the key entirely".
+
+    default_roles.yml's default role allows action-list only while action_user is
+    *absent* (`action_user: null`). Backfilling it as the literal string "None" would
+    turn an ordinary omitted-filter request into a denied one.
+    """
+    user = usermodel.load("test_user")
+    route_mock = MagicMock()
+    route_mock.operation_id = "action-list"
+    route_mock.dependant.query_params = [_fake_query_param("action_user", None)]
+    mock_request.__getitem__.return_value = route_mock
+    mock_request.path_params = {}
+    mock_request.url = MagicMock()
+    mock_request.url.path = "/actions"
+
+    httpx_mock.add_response(
+        method="POST",
+        match_json={
+            "input": {
+                "username": "test_user",
+                "name": "test user",
+                "email": "test@example.com",
+                "created_at": 1,
+                "updated_at": 2,
+                "obj": "action-list",
+                "params": {},
+            }
+        },
+        json={"result": {"authorized": True, "within_rate_limits": True}},
+    )
+    await opa(request=mock_request, user=user)
+
+
+@pytest.mark.asyncio
 async def test_opa_call_skipped(
     opa: OPA, usermodel: MockUserModel, mock_request: MagicMock
 ) -> None:

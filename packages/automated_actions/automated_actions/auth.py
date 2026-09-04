@@ -352,9 +352,18 @@ class OPA[UserModel: UserModelProtocol]:
         an undefined value is itself undefined. So input.params must reflect the
         effective value the endpoint will actually use, not just whatever happened to
         be on the wire.
+
+        A default of None (e.g. action-list's action_user) is different: it means "no
+        value", not "the value None", so the key must stay absent rather than becoming
+        the literal string "None" — default_roles.yml relies on that absence (e.g.
+        action_user: null) to authorize the unfiltered case.
         """
         for field in route.dependant.query_params:
-            if field.alias not in params and not field.field_info.is_required():
+            if (
+                field.alias not in params
+                and not field.field_info.is_required()
+                and field.default is not None
+            ):
                 params[field.alias] = str(field.default)
 
     async def __call__(
