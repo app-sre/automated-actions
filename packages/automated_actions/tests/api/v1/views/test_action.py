@@ -173,7 +173,7 @@ def _make_owner_enforcing_authz(calls: list[dict[str, Any]]) -> Callable:
         calls.append({"username": user.username, "extra_params": extra_params})
         if extra_params and extra_params.get("owner") != user.username:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized"
             )
 
     return _authz
@@ -227,5 +227,5 @@ def test_action_detail_and_cancel_deny_other_users_action(
         testing_app.url_path_for(operation_id, action_id="1"),
     )
 
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.status_code == status.HTTP_403_FORBIDDEN
     assert calls == [{"username": "other_user", "extra_params": {"owner": "test_user"}}]

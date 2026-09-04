@@ -57,15 +57,16 @@ def test_opa_user_is_authorized(opa: OPA) -> None:
 
 
 def test_opa_user_is_authorized_denied(opa: OPA) -> None:
+    """Denial is an authorization (403) failure, distinct from authentication (401)."""
     with pytest.raises(HTTPException) as excinfo:
         opa.user_is_authorized({"authorized": False})
-    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_opa_user_is_authorized_missing_result(opa: OPA) -> None:
     with pytest.raises(HTTPException) as excinfo:
         opa.user_is_authorized({"foobar": False})
-    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_opa_user_is_within_rate_limits(opa: OPA) -> None:
@@ -153,6 +154,90 @@ async def test_opa_call_with_extra_params(
     await opa(request=mock_request, user=user, extra_params={"owner": "test_user"})
 
 
+def _fake_query_param(
+    alias: str, default: object, *, required: bool = False
+) -> MagicMock:
+    """Build a fake FastAPI ModelField, as found in APIRoute.dependant.query_params."""
+    field = MagicMock()
+    field.alias = alias
+    field.field_info.is_required.return_value = required
+    field.default = default
+    return field
+
+
+@pytest.mark.asyncio
+async def test_opa_call_backfills_missing_optional_query_param_defaults(
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+) -> None:
+    """A client may omit an optional query param and rely on the server-side default.
+
+    E.g. api_version="v1" on openshift-workload-delete. OPA's valid_params policy
+    treats a missing key as "does not match", even against a wildcard pattern, so
+    input.params must reflect the effective (defaulted) value, not the raw wire value.
+    """
+    user = usermodel.load("test_user")
+    route_mock = MagicMock()
+    route_mock.operation_id = "endpoint"
+    route_mock.dependant.query_params = [
+        _fake_query_param("api_version", "v1"),
+        _fake_query_param("required_field", ..., required=True),
+    ]
+    mock_request.__getitem__.return_value = route_mock
+    mock_request.path_params = {"foo": "bar"}
+    mock_request.url = MagicMock()
+    mock_request.url.path = "/endpoint"
+
+    httpx_mock.add_response(
+        method="POST",
+        match_json={
+            "input": {
+                "username": "test_user",
+                "name": "test user",
+                "email": "test@example.com",
+                "created_at": 1,
+                "updated_at": 2,
+                "obj": "endpoint",
+                "params": {"foo": "bar", "api_version": "v1"},
+            }
+        },
+        json={"result": {"authorized": True, "within_rate_limits": True}},
+    )
+    await opa(request=mock_request, user=user)
+
+
+@pytest.mark.asyncio
+async def test_opa_call_does_not_override_explicit_query_param(
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+) -> None:
+    """A value explicitly sent by the client must win over the declared default."""
+    user = usermodel.load("test_user")
+    route_mock = MagicMock()
+    route_mock.operation_id = "endpoint"
+    route_mock.dependant.query_params = [_fake_query_param("api_version", "v1")]
+    mock_request.__getitem__.return_value = route_mock
+    mock_request.path_params = {"foo": "bar"}
+    mock_request.query_params = {"api_version": "v1000"}
+    mock_request.url = MagicMock()
+    mock_request.url.path = "/endpoint"
+
+    httpx_mock.add_response(
+        method="POST",
+        match_json={
+            "input": {
+                "username": "test_user",
+                "name": "test user",
+                "email": "test@example.com",
+                "created_at": 1,
+                "updated_at": 2,
+                "obj": "endpoint",
+                "params": {"foo": "bar", "api_version": "v1000"},
+            }
+        },
+        json={"result": {"authorized": True, "within_rate_limits": True}},
+    )
+    await opa(request=mock_request, user=user)
+
+
 @pytest.mark.asyncio
 async def test_opa_call_skipped(
     opa: OPA, usermodel: MockUserModel, mock_request: MagicMock
@@ -203,7 +288,7 @@ async def test_opa_call_not_authorized(
     with pytest.raises(HTTPException) as excinfo:
         await opa(request=mock_request, user=user)
 
-    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
     assert user.allowed_actions == []
 
 
