@@ -78,6 +78,7 @@ ignore = [
     "start-process-with-partial-path",      # subprocess.run w/o full path
     "raise-vanilla-args",                   # Avoid specifying long messages outside the exception class
     "try-consider-else",                    # try-consider-else
+    "pytest-fixture-autouse",               # Avoid using autouse=True in pytest.fixture decorators
     # pydoclint
     "DOC",
     # May conflict with the formatter, https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
