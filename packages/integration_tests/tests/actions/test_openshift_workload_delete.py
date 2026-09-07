@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 class OpenshiftWorkloadDeleteParameters(BaseModel):
     cluster: str
     namespace: str
-    api_version: str
     kind: str
     name: str
+    # don't include default api_version
 
 
 @pytest.fixture(scope="session")
@@ -33,7 +33,6 @@ def openshift_workload_delete_parameters(
     return OpenshiftWorkloadDeleteParameters(
         cluster=config.openshift_workload_delete.cluster,
         namespace=config.openshift_workload_delete.namespace,
-        api_version="v1",
         kind="ConfigMap",
         name="aa-integration-test-" + str(uuid.uuid4())[:20],
     )
@@ -61,7 +60,6 @@ def action_id(
     action = openshift_workload_delete(
         cluster=openshift_workload_delete_parameters.cluster,
         namespace=openshift_workload_delete_parameters.namespace,
-        api_version=openshift_workload_delete_parameters.api_version,
         kind=openshift_workload_delete_parameters.kind,
         name=openshift_workload_delete_parameters.name,
     )
@@ -80,7 +78,7 @@ def test_openshift_workload_delete_success(
 ) -> None:
     # create a test configmap
     api = openshift_client.dyn_client.resources.get(
-        api_version=openshift_workload_delete_parameters.api_version,
+        api_version="v1",
         kind=openshift_workload_delete_parameters.kind,
     )
     body = {
