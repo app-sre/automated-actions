@@ -14,7 +14,7 @@ dependencies = [
     "pydantic-settings==2.15.0",
     "pytest==9.1.1",
     "pytest-order==1.5.0",
-    "pytest-rerunfailures==16.6",
+    "pytest-rerunfailures==16.6.1",
     "pyyaml==6.0.3",
 ]
 
@@ -27,7 +27,7 @@ documentation = "https://github.com/app-sre/automated-actions"
 dev = [
     # Development dependencies
     "mypy==2.3.1",
-    "ruff==0.16.4",
+    "ruff==0.16.6",
     "types-pyyaml==6.0.12.20260815",
 ]
 
@@ -78,6 +78,7 @@ ignore = [
     "start-process-with-partial-path",      # subprocess.run w/o full path
     "raise-vanilla-args",                   # Avoid specifying long messages outside the exception class
     "try-consider-else",                    # try-consider-else
+    "pytest-fixture-autouse",               # Avoid using autouse=True in pytest.fixture decorators
     # pydoclint
     "DOC",
     # May conflict with the formatter, https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
