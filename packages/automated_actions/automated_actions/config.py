@@ -20,6 +20,22 @@ class ExternalResourceElastiCacheConfig(BaseSettings):
     }
 
 
+class PayloadTrackerCreatePartitionConfig(BaseSettings):
+    """Configuration for the payload-tracker create-partition action."""
+
+    image: str = "registry.redhat.io/rhel9/postgresql-16"
+    image_tag: str = "9.7"
+    # Name of the database credentials secret in the payload-tracker namespace.
+    db_secret_name: str = "payload-tracker-db-creds"  # ruff: ignore[hardcoded-password-string]
+    # Mapping of psql env var -> key within the db credentials secret.
+    env_secret_mappings: dict[str, str] = {
+        "PGHOST": "db.host",
+        "PGDATABASE": "db.name",
+        "PGUSER": "db.user",
+        "PGPASSWORD": "db.password",
+    }
+
+
 class Settings(BaseSettings):
     # pydantic config
     model_config = {
@@ -78,6 +94,11 @@ class Settings(BaseSettings):
     # external resources - ElastiCache
     external_resource_elasticache: ExternalResourceElastiCacheConfig = (
         ExternalResourceElastiCacheConfig()
+    )
+
+    # payload-tracker
+    payload_tracker_create_partition: PayloadTrackerCreatePartitionConfig = (
+        PayloadTrackerCreatePartitionConfig()
     )
 
 
