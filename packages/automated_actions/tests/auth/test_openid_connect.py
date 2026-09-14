@@ -42,8 +42,8 @@ def openid_connect(usermodel: type) -> OpenIDConnect:
 
 
 @pytest.mark.asyncio
-async def test_openid_connect_create(httpx_mock: HTTPXMock, usermodel: type) -> None:
-    httpx_mock.add_response(
+async def test_openid_connect_create(httpx2_mock: HTTPXMock, usermodel: type) -> None:
+    httpx2_mock.add_response(
         url="http://dev.com/.well-known/openid-configuration",
         json={
             "authorization_endpoint": "http://dev.com/authorize",
@@ -198,9 +198,9 @@ def test_openid_connect_callback_endpoint(
     openid_connect: OpenIDConnect,
     full_app: FastAPI,
     client: Callable[[FastAPI], TestClient],
-    httpx_mock: HTTPXMock,
+    httpx2_mock: HTTPXMock,
 ) -> None:
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         url=openid_connect.token_endpoint,
         match_headers={
             # Basic auth with client_id:client_secret
@@ -230,9 +230,9 @@ def test_openid_connect_callback_endpoint_error(
     openid_connect: OpenIDConnect,
     full_app: FastAPI,
     client: Callable[[FastAPI], TestClient],
-    httpx_mock: HTTPXMock,
+    httpx2_mock: HTTPXMock,
 ) -> None:
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         url=openid_connect.token_endpoint,
         status_code=status.HTTP_400_BAD_REQUEST,
     )
@@ -298,7 +298,7 @@ def test_openid_connect_logout_endpoint(
 
 
 def test_openid_connect_get_user_info(
-    openid_connect: OpenIDConnect, httpx_mock: HTTPXMock
+    openid_connect: OpenIDConnect, httpx2_mock: HTTPXMock
 ) -> None:
     access_token = jwt.encode(
         {
@@ -312,7 +312,7 @@ def test_openid_connect_get_user_info(
         "not-a-secret",
         algorithm="HS256",
     )
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         url=openid_connect.userinfo_endpoint,
         match_headers={"Authorization": f"Bearer {access_token}"},
     )
@@ -321,9 +321,9 @@ def test_openid_connect_get_user_info(
 
 
 def test_openid_connect_get_user_info_error(
-    openid_connect: OpenIDConnect, httpx_mock: HTTPXMock
+    openid_connect: OpenIDConnect, httpx2_mock: HTTPXMock
 ) -> None:
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         url=openid_connect.userinfo_endpoint, status_code=status.HTTP_400_BAD_REQUEST
     )
     with pytest.raises(HTTPStatusError):
@@ -334,10 +334,10 @@ def test_openid_connect_callback_session_cookie_is_httponly_and_samesite(
     openid_connect: OpenIDConnect,
     full_app: FastAPI,
     client: Callable[[FastAPI], TestClient],
-    httpx_mock: HTTPXMock,
+    httpx2_mock: HTTPXMock,
 ) -> None:
     """FIND-004: the session cookie must not be readable from JS (XSS mitigation)."""
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         url=openid_connect.token_endpoint,
         json={"access_token": "not_a_real_token"},
     )
