@@ -30,10 +30,10 @@ def test_opa_should_skip_endpoint(opa: OPA, endpoint: str, *, expected: bool) ->
 
 @pytest.mark.asyncio
 async def test_opa_query_opa(
-    opa: OPA, usermodel: MockUserModel, httpx_mock: HTTPXMock
+    opa: OPA, usermodel: MockUserModel, httpx2_mock: HTTPXMock
 ) -> None:
     user = usermodel.load("test_user")
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         method="POST",
         match_json={
             "input": {
@@ -87,7 +87,7 @@ def test_opa_user_is_within_rate_limits_missing_result(opa: OPA) -> None:
 
 @pytest.mark.asyncio
 async def test_opa_call(
-    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx2_mock: HTTPXMock
 ) -> None:
     user = usermodel.load("test_user")
     route_mock = MagicMock()
@@ -98,7 +98,7 @@ async def test_opa_call(
     mock_request.url.path = "/endpoint"
 
     # user_is_authorized
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         method="POST",
         match_json={
             "input": {
@@ -125,7 +125,7 @@ async def test_opa_call(
 
 @pytest.mark.asyncio
 async def test_opa_call_with_extra_params(
-    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx2_mock: HTTPXMock
 ) -> None:
     """extra_params (e.g. an action's owner) must be merged into the params sent to OPA."""
     user = usermodel.load("test_user")
@@ -136,7 +136,7 @@ async def test_opa_call_with_extra_params(
     mock_request.url = MagicMock()
     mock_request.url.path = "/actions/1"
 
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         method="POST",
         match_json={
             "input": {
@@ -167,7 +167,7 @@ def _fake_query_param(
 
 @pytest.mark.asyncio
 async def test_opa_call_backfills_missing_optional_query_param_defaults(
-    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx2_mock: HTTPXMock
 ) -> None:
     """A client may omit an optional query param and rely on the server-side default.
 
@@ -187,7 +187,7 @@ async def test_opa_call_backfills_missing_optional_query_param_defaults(
     mock_request.url = MagicMock()
     mock_request.url.path = "/endpoint"
 
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         method="POST",
         match_json={
             "input": {
@@ -207,7 +207,7 @@ async def test_opa_call_backfills_missing_optional_query_param_defaults(
 
 @pytest.mark.asyncio
 async def test_opa_call_does_not_override_explicit_query_param(
-    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx2_mock: HTTPXMock
 ) -> None:
     """A value explicitly sent by the client must win over the declared default."""
     user = usermodel.load("test_user")
@@ -220,7 +220,7 @@ async def test_opa_call_does_not_override_explicit_query_param(
     mock_request.url = MagicMock()
     mock_request.url.path = "/endpoint"
 
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         method="POST",
         match_json={
             "input": {
@@ -240,7 +240,7 @@ async def test_opa_call_does_not_override_explicit_query_param(
 
 @pytest.mark.asyncio
 async def test_opa_call_does_not_backfill_none_default(
-    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx2_mock: HTTPXMock
 ) -> None:
     """A None default (e.g. action-list's action_user) means "omit the key entirely".
 
@@ -257,7 +257,7 @@ async def test_opa_call_does_not_backfill_none_default(
     mock_request.url = MagicMock()
     mock_request.url.path = "/actions"
 
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         method="POST",
         match_json={
             "input": {
@@ -289,7 +289,7 @@ async def test_opa_call_skipped(
 
 @pytest.mark.asyncio
 async def test_opa_call_not_authorized(
-    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx2_mock: HTTPXMock
 ) -> None:
     user = usermodel.load("test_user")
     route_mock = MagicMock()
@@ -300,7 +300,7 @@ async def test_opa_call_not_authorized(
     mock_request.url.path = "/endpoint"
 
     # user_is_authorized
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         method="POST",
         match_json={
             "input": {
@@ -331,7 +331,7 @@ async def test_opa_call_not_authorized(
 
 @pytest.mark.asyncio
 async def test_opa_call_rate_limit_exceeded(
-    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx_mock: HTTPXMock
+    opa: OPA, usermodel: MockUserModel, mock_request: MagicMock, httpx2_mock: HTTPXMock
 ) -> None:
     user = usermodel.load("test_user")
     route_mock = MagicMock()
@@ -342,7 +342,7 @@ async def test_opa_call_rate_limit_exceeded(
     mock_request.url.path = "/endpoint"
 
     # user_is_authorized
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         method="POST",
         match_json={
             "input": {

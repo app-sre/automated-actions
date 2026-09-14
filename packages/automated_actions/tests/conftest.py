@@ -71,12 +71,12 @@ def get_opa_instance_fake() -> Callable:
 
 
 @pytest.fixture
-def full_app(httpx_mock: HTTPXMock) -> FastAPI:
+def full_app(httpx2_mock: HTTPXMock) -> FastAPI:
     """FastAPI app with authentication and authorization setup but without DynamoDB."""
     from automated_actions.app_factory import create_app
 
     # Mock the OpenID Connect configuration
-    httpx_mock.add_response(
+    httpx2_mock.add_response(
         url="http://dev.com/.well-known/openid-configuration",
         json={
             "authorization_endpoint": "http://dev.com/authorize",
