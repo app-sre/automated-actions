@@ -1,6 +1,6 @@
 #
 # Base image with defaults for all stages
-FROM registry.access.redhat.com/ubi9/python-314-minimal@sha256:916af371d6764cb329065704a556800e5beb67df9598f834c0bd08200b094579 AS base
+FROM registry.access.redhat.com/ubi9/python-314-minimal@sha256:b1507e5311ec330a8f1fff02087634ad09c0d15dfb8659008bacccfe845abb19 AS base
 
 COPY LICENSE /licenses/
 
@@ -29,7 +29,7 @@ USER 1001
 #
 # Builder image
 #
-FROM registry.access.redhat.com/ubi9/python-314@sha256:2ebacfe33b48ebb6defed8d313c8880b09fa4a4f9fb0becbdb11228df8f45cbf AS builder
+FROM registry.access.redhat.com/ubi9/python-314@sha256:f3bb89f4aa0c6637cee2711bbfdaea716989af9d570a9613eda9f45bbf36e047 AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.12.17@sha256:10787c682e4184e4f290de1171fd4703dc63de99221f10fe1c99002ce7fa9acc /uv /bin/uv
 
 ENV \

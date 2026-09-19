@@ -4,7 +4,7 @@
 # probes instead exec `curl` inside this container against 127.0.0.1:8181 —
 # provided by ubi-minimal's curl-minimal package. Do not slim this image down
 # without replacing that probe mechanism.
-FROM registry.access.redhat.com/ubi10/ubi-minimal@sha256:26dc3089ab24491c1ba01ab92a7d502d181425b6021e362a07484daee696a3aa AS base
+FROM registry.access.redhat.com/ubi10/ubi-minimal@sha256:04febb4a74cc9ef3eca05ef851d92957276cc6e82fe8cb1ee44abf5114d440d8 AS base
 COPY --from=openpolicyagent/opa:1.20.2-static@sha256:bb245e9e36be0d0ed486c240b606c56be7aba96014a4a87895fed4ba7a6dfa8d /opa /opa
 
 ENV PATH=${PATH}:/ \
