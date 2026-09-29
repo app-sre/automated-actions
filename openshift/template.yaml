@@ -36,6 +36,10 @@ objects:
 # separately by app-interface, see resources/services/automated-actions/
 # secrets.yaml.j2) still carries AA_BROKER_URL, which needs the SQS access
 # key/secret composed into a URL and can't be expressed as a plain parameter.
+# OIDC settings (issuer/client_id/client_secret) are not included here: they
+# live in the Secret named by AA_OIDC_SECRET_NAME, provisioned outside this
+# template (e.g. via an app-interface vault-secret resource) so the values
+# never pass through SaaS-pipeline template-parameter substitution.
 - apiVersion: v1
   kind: Secret
   metadata:
@@ -46,8 +50,6 @@ objects:
     name: automated-actions-api-secret
   type: Opaque
   stringData:
-    AA_OIDC_CLIENT_ID: "${AA_OIDC_CLIENT_ID}"
-    AA_OIDC_CLIENT_SECRET: "${AA_OIDC_CLIENT_SECRET}"
     AA_SESSION_SECRET: "${AA_SESSION_SECRET}"
     AA_TOKEN_SECRET: "${AA_TOKEN_SECRET}"
     AA_DYNAMODB_URL: "${AA_DYNAMODB_URL}"
@@ -164,6 +166,21 @@ objects:
             value: api
           - name: AA_APP_PORT
             value: "${AA_APP_PORT}"
+          - name: AA_OIDC_ISSUER
+            valueFrom:
+              secretKeyRef:
+                name: "${AA_OIDC_SECRET_NAME}"
+                key: issuer
+          - name: AA_OIDC_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: "${AA_OIDC_SECRET_NAME}"
+                key: client_id
+          - name: AA_OIDC_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: "${AA_OIDC_SECRET_NAME}"
+                key: client_secret
           envFrom:
           - secretRef:
               name: automated-actions-api-secret
@@ -567,15 +584,9 @@ parameters:
   value: "100m"
   required: true
 
-# Secrets, provisioned via app-interface secretParameters - split per component
-# so a compromised container only exposes the credentials it uses (FIND-010,
-# APPSRE-14977). See the Secret objects above for which component uses which.
-- name: AA_OIDC_CLIENT_ID
-  description: OIDC client ID
-  required: true
-
-- name: AA_OIDC_CLIENT_SECRET
-  description: OIDC client secret
+- name: AA_OIDC_SECRET_NAME
+  description: Name of the Secret (provisioned outside this template) holding the OIDC issuer/client_id/client_secret keys
+  value: "automated-actions-oidc"
   required: true
 
 - name: AA_SESSION_SECRET
