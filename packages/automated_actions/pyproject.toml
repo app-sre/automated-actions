@@ -9,7 +9,7 @@ requires-python = "~= 3.14.0"
 dependencies = [
     "automated-actions-utils",
     "celery[sqs]==5.6.3",
-    "fastapi==0.141.1",
+    "fastapi==0.142.2",
     "httpx2==2.13.1",
     "hvac==2.4.0",
     "itsdangerous==2.2.0",
@@ -17,11 +17,11 @@ dependencies = [
     "prometheus-fastapi-instrumentator==8.1.0",
     "pydantic-settings==2.15.0",
     "pydantic==2.13.5",
-    "pyjwt==2.15.0",
+    "pyjwt==2.15.1",
     "pynamodb==6.1.0",
     "requests-toolbelt==1.0.0",
     "types-hvac==2.4.0.20260731",
-    "uvicorn==0.53.0",
+    "uvicorn==0.54.0",
     "watchdog==6.0.0",
 ]
 
@@ -34,13 +34,13 @@ documentation = "https://github.com/app-sre/automated-actions"
 dev = [
     # Development dependencies
     "httpx2-pytest==2.0.0",
-    "mypy==2.3.1",
+    "mypy==2.4.0",
     "pytest-asyncio==1.4.0",
     "pytest-cov==7.1.0",
-    "pytest-mock==3.15.1",
+    "pytest-mock==3.16.0",
     "pytest==9.1.1",
     "requests-mock==1.12.1",
-    "ruff==0.16.9",
+    "ruff==0.16.10",
 ]
 
 [build-system]
