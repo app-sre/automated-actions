@@ -10,7 +10,7 @@ dependencies = [
     "boto3==1.43.102",
     "gql==4.0.0",
     "hvac==2.4.0",
-    "kubernetes==36.0.3",
+    "kubernetes==37.0.0",
     "openshift==0.13.2",
     "pydantic==2.13.5",
     "sretoolbox==4.0.1",

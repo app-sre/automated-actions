@@ -13,7 +13,7 @@ dependencies = [
     "httpx2==2.13.1",
     "hvac==2.4.0",
     "itsdangerous==2.2.0",
-    "kubernetes==36.0.3",
+    "kubernetes==37.0.0",
     "prometheus-fastapi-instrumentator==8.1.0",
     "pydantic-settings==2.15.0",
     "pydantic==2.13.5",
