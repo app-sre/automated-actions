@@ -60,6 +60,12 @@ These are the core operations that users can request the system to perform.
   * **Required Parameters**: Cluster name, namespace name, resource kind (e.g., `ConfigMap`, `Job`, `Secret`), resource name.
   * **Usage Example (CLI)**: `automated-actions openshift-workload-delete --cluster my-cluster --namespace my-namespace --kind ConfigMap --name my-configmap`
 
+* **`payload-tracker-create-partition`**:
+  * **Description**: Creates a payload-tracker database partition for a given date by running a one-off Job (calling the idempotent `create_partition` SQL function) in the payload-tracker namespace.
+  * **Use Case**: Recover a `payload_statuses` partition that the daily vacuum cronjob failed to create, without editing or un-suspending the cronjob. Safe to re-run.
+  * **Required Parameters**: Cluster name, namespace name, and the partition date (`YYYY-MM-DD`).
+  * **Usage Example (CLI)**: `automated-actions payload-tracker-create-partition --cluster my-cluster --namespace payload-tracker-prod --date 2026-10-01`
+
 ## Administrative & Utility Commands
 
 These commands are typically used for managing actions, retrieving information, or system administration rather than performing an automated task on an external system.

@@ -7,6 +7,7 @@ from .views.admin import router as admin_router
 from .views.external_resource import router as external_resource_router
 from .views.no_op import router as no_op_router
 from .views.openshift import router as openshift_router
+from .views.payload_tracker import router as payload_tracker_router
 from .views.user import router as user_router
 
 router = APIRouter()
@@ -27,3 +28,6 @@ router.include_router(
 router.include_router(action_owner_scoped_router, dependencies=[Depends(get_user)])
 router.include_router(user_router, dependencies=[Depends(get_authz)])
 router.include_router(no_op_router, dependencies=[Depends(get_authz)])
+router.include_router(
+    payload_tracker_router, dependencies=[Depends(get_user), Depends(get_authz)]
+)
