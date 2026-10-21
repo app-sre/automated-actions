@@ -30,7 +30,7 @@ dev = [
     "pytest-cov==7.1.0",
     "pytest-mock==3.17.0",
     "pytest==9.1.1",
-    "qenerate==0.10.0",
+    "qenerate==0.10.1",
     "ruff==0.17.1",
 ]
 
