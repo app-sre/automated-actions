@@ -11,8 +11,6 @@ from automated_actions_utils.openshift_client import OpenshiftClient
 from pydantic import BaseModel
 
 if TYPE_CHECKING:
-    from kubernetes.dynamic.resource import ResourceInstance
-
     from tests.conftest import Config
 
 
@@ -35,7 +33,7 @@ def _get_parent_resource(
     namespace: str,
     kind: str,
     name: str,
-) -> ResourceInstance:
+) -> ParentResourceData:
     v1_apps = openshift_client.dyn_client.resources.get(
         api_version="apps/v1", kind=kind
     )

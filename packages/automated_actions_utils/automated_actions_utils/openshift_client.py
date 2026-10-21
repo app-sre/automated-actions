@@ -237,7 +237,9 @@ class OpenshiftClient:
             if (
                 hasattr(job.status, "failed")
                 and job.status.failed is not None
-                and job.status.failed > job.spec.backoffLimit
+                and job.spec is not None
+                and job.spec.backoff_limit is not None
+                and job.status.failed > job.spec.backoff_limit
             ):
                 raise PodError(
                     f"Job '{job_name}' failed with {job.status.failed} failures. Check logs for details."
@@ -254,6 +256,10 @@ class OpenshiftClient:
         wait_for_completion: bool = True,
     ) -> None:
         """Run a Kubernetes Job and optionally wait for its completion."""
+        # make mypy happy
+        assert job.metadata is not None
+        assert job.metadata.name is not None
+
         log.info(f"Creating Job '{job.metadata.name}' in namespace '{namespace}'")
         self.batch_v1.create_namespaced_job(
             namespace=namespace,
