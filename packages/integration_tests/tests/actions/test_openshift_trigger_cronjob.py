@@ -65,8 +65,11 @@ def test_openshift_trigger_cronjob_success(
     for job in openshift_client.batch_v1.list_namespaced_job(
         namespace=config.openshift_trigger_cronjob.namespace
     ).items:
+        if not job.metadata or not job.metadata.name:
+            continue
         if (
             config.openshift_trigger_cronjob.cronjob in job.metadata.name
+            and job.metadata.creation_timestamp is not None
             and job.metadata.creation_timestamp >= dt.now(UTC) - timedelta(minutes=5)
         ):
             # found a recent job created from the cronjob

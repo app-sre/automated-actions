@@ -4,7 +4,16 @@ from datetime import datetime as dt
 from unittest.mock import MagicMock
 
 import pytest
-from kubernetes.client import ApiException
+from kubernetes.client import (
+    ApiException,
+    V1CronJobSpec,
+    V1Job,
+    V1JobSpec,
+    V1JobStatus,
+    V1JobTemplateSpec,
+    V1ObjectMeta,
+    V1PodTemplateSpec,
+)
 from kubernetes.dynamic.exceptions import NotFoundError
 from pytest_mock import MockerFixture
 
@@ -13,6 +22,7 @@ from automated_actions_utils.openshift_client import (
     OpenshiftClient,
     OpenshiftClientPodDeletionNotSupportedError,
     OpenshiftClientResourceNotFoundError,
+    PodError,
     RollingRestartResource,
     V1CronJob,
 )
@@ -182,14 +192,42 @@ def test_delete_success(
     assert result == {"status": "deleted"}
 
 
+def test_job_wait_raises_pod_error_when_failures_exceed_backoff_limit(
+    openshift_client: OpenshiftClient, mocker: MockerFixture
+) -> None:
+    job = V1Job(
+        metadata=V1ObjectMeta(name="test-job"),
+        spec=V1JobSpec(backoff_limit=4, template=V1PodTemplateSpec()),
+        status=V1JobStatus(failed=5, succeeded=None),
+    )
+    mocker.patch.object(
+        openshift_client.batch_v1, "read_namespaced_job", return_value=job
+    )
+    sleep_mock = mocker.patch.object(openshift_client_utils.time, "sleep")
+
+    with pytest.raises(PodError):
+        openshift_client.job_wait(
+            job_name="test-job", namespace="test-namespace", timeout_seconds=60
+        )
+
+    sleep_mock.assert_not_called()
+
+
 def test_trigger_cronjob_success(
     openshift_client: OpenshiftClient, mocker: MockerFixture
 ) -> None:
-    k8s_cronjob_mock = MagicMock(spec=V1CronJob)
+    job_template_spec = V1JobSpec(template=V1PodTemplateSpec())
+    k8s_cronjob = V1CronJob(
+        metadata=V1ObjectMeta(name="test-cronjob"),
+        spec=V1CronJobSpec(
+            schedule="* * * * *",
+            job_template=V1JobTemplateSpec(spec=job_template_spec),
+        ),
+    )
     read_namespaced_cron_job_mock = mocker.patch.object(
         openshift_client.batch_v1,
         "read_namespaced_cron_job",
-        return_value=k8s_cronjob_mock,
+        return_value=k8s_cronjob,
     )
     run_job_mock = mocker.patch.object(openshift_client, "run_job")
 
@@ -204,7 +242,7 @@ def test_trigger_cronjob_success(
     run_job_kwargs = run_job_mock.call_args[1]
     assert run_job_kwargs["namespace"] == namespace
     assert cronjob in run_job_kwargs["job"].metadata.name
-    assert run_job_kwargs["job"].spec == k8s_cronjob_mock.spec.job_template.spec
+    assert run_job_kwargs["job"].spec == job_template_spec
 
 
 def test_trigger_cronjob_failure(
