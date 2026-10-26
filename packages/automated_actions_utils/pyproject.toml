@@ -7,14 +7,14 @@ license = { text = "Apache 2.0" }
 readme = "README.md"
 requires-python = "~= 3.14.0"
 dependencies = [
-    "boto3==1.43.114",
+    "boto3==1.43.118",
     "gql==4.4.0",
     "hvac==2.4.0",
     "kubernetes==37.0.1",
     "openshift==0.13.2",
     "pydantic==2.14.1",
     "sretoolbox==4.0.1",
-    "types-boto3-lite[rds]==1.43.114",
+    "types-boto3-lite[rds]==1.43.118",
     "types-hvac==2.4.0.20260731",
 ]
 
@@ -31,7 +31,7 @@ dev = [
     "pytest-mock==3.17.0",
     "pytest==9.1.1",
     "qenerate==0.10.1",
-    "ruff==0.17.1",
+    "ruff==0.17.2",
 ]
 
 [build-system]
