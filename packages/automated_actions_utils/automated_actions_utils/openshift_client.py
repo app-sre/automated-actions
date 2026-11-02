@@ -30,6 +30,7 @@ from sretoolbox.utils.k8s import unique_job_name
 
 SUPPORTED_POD_OWNERS = {"ReplicaSet", "StatefulSet"}
 log = logging.getLogger(__name__)
+_sleep = time.sleep
 
 
 class OpenshiftClientResourceNotFoundError(Exception):
@@ -217,13 +218,13 @@ class OpenshiftClient:
             except ApiException as err:
                 if err.status == http.HTTPStatus.NOT_FOUND:
                     log.debug(f"Job '{job_name}' not found yet, retrying...")
-                    time.sleep(check_interval)
+                    _sleep(check_interval)
                     continue
                 raise
 
             if not job.status:
                 log.debug(f"Job '{job_name}' has no status yet, retrying...")
-                time.sleep(check_interval)
+                _sleep(check_interval)
                 continue
 
             if (
@@ -246,7 +247,7 @@ class OpenshiftClient:
                 )
 
             log.debug(f"Job '{job_name}' still running...")
-            time.sleep(check_interval)
+            _sleep(check_interval)
 
     def run_job(
         self,
