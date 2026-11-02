@@ -45,9 +45,26 @@ max_ops_limit_not_exceeded(_, 0, _) := true
 max_ops_limit_not_exceeded(current_obj, max_ops, username) if {
 	is_number(max_ops)
 
-	action_api_url := opa.runtime().env.OPA_ACTION_API_URL
-	action_api_token := opa.runtime().env.OPA_ACTION_API_TOKEN
-	max_age_minutes := opa.runtime().env.OPA_MAX_AGE_MINUTES
+	actions := fetch_recent_actions(username)
+
+	# Count the number of actions that match the current object attempt and are not cancelled
+	relevant_actions_count := count([
+	action |
+		some action in actions
+		action.name == current_obj
+		action.status != "CANCELLED"
+	])
+
+	# Check if the max_ops limit is not exceeded for the given action and user.
+	handle_max_ops(username, current_obj, relevant_actions_count, max_ops)
+}
+
+# Fetch the list of recent actions for a user from the action API.
+fetch_recent_actions(username) := response.body if {
+	runtime_env := opa.runtime().env
+	action_api_url := runtime_env.OPA_ACTION_API_URL
+	action_api_token := runtime_env.OPA_ACTION_API_TOKEN
+	max_age_minutes := runtime_env.OPA_MAX_AGE_MINUTES
 
 	# Prepare the API URL for the action list.
 	api_url := sprintf("%s/actions?action_user=%s&max_age_minutes=%s", [action_api_url, username, max_age_minutes])
@@ -64,17 +81,6 @@ max_ops_limit_not_exceeded(current_obj, max_ops, username) if {
 
 	# Handle the response from the API.
 	handle_response(api_url, username, response)
-
-	# Count the number of actions that match the current object attempt and are not cancelled
-	relevant_actions_count := count([
-	action |
-		some action in response.body
-		action.name == current_obj
-		action.status != "CANCELLED"
-	])
-
-	# Check if the max_ops limit is not exceeded for the given action and user.
-	handle_max_ops(username, current_obj, relevant_actions_count, max_ops)
 }
 
 handle_response(api_url, username, response) if {
