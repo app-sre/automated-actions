@@ -2,6 +2,8 @@ import http
 import logging
 import time
 from datetime import UTC, datetime
+
+_sleep = time.sleep
 from enum import StrEnum
 
 from kubernetes.client import (
@@ -217,13 +219,13 @@ class OpenshiftClient:
             except ApiException as err:
                 if err.status == http.HTTPStatus.NOT_FOUND:
                     log.debug(f"Job '{job_name}' not found yet, retrying...")
-                    time.sleep(check_interval)
+                    _sleep(check_interval)
                     continue
                 raise
 
             if not job.status:
                 log.debug(f"Job '{job_name}' has no status yet, retrying...")
-                time.sleep(check_interval)
+                _sleep(check_interval)
                 continue
 
             if (
@@ -246,7 +248,7 @@ class OpenshiftClient:
                 )
 
             log.debug(f"Job '{job_name}' still running...")
-            time.sleep(check_interval)
+            _sleep(check_interval)
 
     def run_job(
         self,

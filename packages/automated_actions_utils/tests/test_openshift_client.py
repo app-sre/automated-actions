@@ -203,7 +203,7 @@ def test_job_wait_raises_pod_error_when_failures_exceed_backoff_limit(
     mocker.patch.object(
         openshift_client.batch_v1, "read_namespaced_job", return_value=job
     )
-    sleep_mock = mocker.patch.object(openshift_client_utils.time, "sleep")
+    sleep_mock = mocker.patch.object(openshift_client_utils, "_sleep")
 
     with pytest.raises(PodError):
         openshift_client.job_wait(
