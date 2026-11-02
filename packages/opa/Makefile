@@ -1,4 +1,4 @@
 .PHONY: test
 test:
 	opa test -v authz
-	regal lint authz
+	regal lint --no-color authz
