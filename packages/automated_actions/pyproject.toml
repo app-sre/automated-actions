@@ -22,7 +22,7 @@ dependencies = [
     "requests-toolbelt==1.0.0",
     "types-hvac==2.4.0.20260731",
     "uvicorn==0.54.0",
-    "watchdog==6.0.0",
+    "watchdog==7.0.0",
 ]
 
 [project.urls]
