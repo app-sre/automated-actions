@@ -50,20 +50,31 @@ def get_cluster_connection_data(
     )
 
     cluster = cluster_data.cluster[0]
+    token_ref = (
+        next(
+            (
+                entry.secret
+                for entry in cluster.automation_tokens or []
+                if entry.active and not entry.delete and entry.secret is not None
+            ),
+            None,
+        )
+        or cluster.automation_token
+    )
 
-    if cluster.automation_token is None:
+    if token_ref is None:
         raise MissingAppInterfaceClusterAutomationTokenError(
             f"No automationToken for cluster {cluster_name}"
         )
 
     token = vault_client.read_secret(
-        path=cluster.automation_token.path,
-        version=str(cluster.automation_token.version),
-    ).get(cluster.automation_token.field)
+        path=token_ref.path,
+        version=str(token_ref.version),
+    ).get(token_ref.field)
 
     if not token:
         raise SecretFieldNotFoundError(
-            f"{cluster.automation_token.field} not found in secret {cluster.automation_token.path}"
+            f"{token_ref.field} not found in secret {token_ref.path}"
         )
 
     return ClusterConnectionData(url=cluster.server_url, token=token)

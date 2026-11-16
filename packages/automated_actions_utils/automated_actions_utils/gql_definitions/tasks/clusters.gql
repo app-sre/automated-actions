@@ -7,5 +7,14 @@ query Clusters($filter: JSON) {
     automationToken {
       ...VaultSecret
     }
+    automationTokens {
+      name
+      namespace
+      active
+      delete
+      secret {
+        ...VaultSecret
+      }
+    }
   }
 }
