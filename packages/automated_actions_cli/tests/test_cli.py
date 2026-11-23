@@ -192,8 +192,11 @@ def test_action_list_status_choices() -> None:
     status_param = next(
         p for p in _get_command("action-list").params if p.name == "status"
     )
-    assert hasattr(status_param.type, "choices")
-    assert set(status_param.type.choices) == {
+    # typer >= 0.29 exposes choices via type_descriptor instead of click's
+    # Option.type
+    type_descriptor = status_param.type_descriptor
+    assert type_descriptor.is_choice
+    assert {getattr(c, "value", c) for c in type_descriptor.choices} == {
         "PENDING",
         "RUNNING",
         "SUCCESS",
