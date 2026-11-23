@@ -362,11 +362,11 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "clientele", extras = ["core"], specifier = "==2.3.1" }]
+requires-dist = [{ name = "clientele", extras = ["core"], specifier = "==3.0.0" }]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "clientele", extras = ["cli"], specifier = "==2.3.1" },
+    { name = "clientele", extras = ["cli"], specifier = "==3.0.0" },
     { name = "mypy", specifier = "==2.4.1" },
     { name = "pytest", specifier = "==9.2.0" },
     { name = "pytest-cov", specifier = "==7.1.0" },
@@ -634,7 +634,7 @@ wheels = [
 
 [[package]]
 name = "clientele"
-version = "2.3.1"
+version = "3.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx2" },
@@ -642,9 +642,9 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "stamina" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0d/e9/ec62cde63160a28e5321d8132795e1d27bc56f4aa52dc6c19908510a69f8/clientele-2.3.1.tar.gz", hash = "sha256:c90e0a3d0de36f1ec50206eab4e0467aa58a32a989291a3eb23cf454387084e4", size = 1337082, upload-time = "2026-10-02T09:04:17.636Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3e/7f/f2625adc834b57785f4653d0ee3cd26b210d1dd804ec549bb3e78b1255a8/clientele-3.0.0.tar.gz", hash = "sha256:472230aa6bd4ec50c3b5d5d2fd3cbdd08acf398cb266ebe5929d36af0a668e33", size = 1414230, upload-time = "2026-11-09T14:48:36.979Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/40/4d/c504dfc8c1372782c7e2d1a23d8c6da14fb44eac5abeea3cb9897805d464/clientele-2.3.1-py3-none-any.whl", hash = "sha256:b38cd971e4b2957436a3cf025c43117984e66cf65aea0d6633437c61c046115d", size = 76828, upload-time = "2026-10-02T08:59:58.42Z" },
+    { url = "https://files.pythonhosted.org/packages/a9/e8/578fa5e6be909b40eb34693f40556ada0ea9d3949684f0cef638837c797c/clientele-3.0.0-py3-none-any.whl", hash = "sha256:c146bf74bf05eae6e0933b909f0e6fb4f3286627eda76f82915c528b9707a103", size = 82742, upload-time = "2026-11-09T14:48:35.582Z" },
 ]
 
 [package.optional-dependencies]
