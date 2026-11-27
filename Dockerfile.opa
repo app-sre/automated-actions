@@ -5,7 +5,7 @@
 # provided by ubi-minimal's curl-minimal package. Do not slim this image down
 # without replacing that probe mechanism.
 FROM registry.access.redhat.com/ubi10/ubi-minimal@sha256:d63890a635f8f19177bce1775f74f587a47f4456844f1392456c4e3673a48753 AS base
-COPY --from=openpolicyagent/opa:1.22.4-static@sha256:12cecac5a174368f7d3f09d3a19d040ebe0c91d576e520335ae7a985a26e39d3 /opa /opa
+COPY --from=openpolicyagent/opa:1.23.0-static@sha256:5eda3af02ff7b2c5f12bbf893a5bdebfde3adb8d6338e7fcf1f37d90b819e88d /opa /opa
 
 ENV PATH=${PATH}:/ \
     IS_TESTED_FLAG="/tmp/is_tested"
