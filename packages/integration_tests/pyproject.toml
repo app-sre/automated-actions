@@ -15,7 +15,7 @@ dependencies = [
     "pytest==9.2.0",
     "pytest-order==1.5.0",
     "pytest-rerunfailures==16.7",
-    "pyyaml==6.0.3",
+    "pyyaml==6.0.4",
 ]
 
 [project.urls]
@@ -28,7 +28,7 @@ dev = [
     # Development dependencies
     "mypy==2.4.1",
     "ruff==0.17.6",
-    "types-pyyaml==6.0.12.20261113",
+    "types-pyyaml==6.0.12.20261122",
 ]
 
 [build-system]
